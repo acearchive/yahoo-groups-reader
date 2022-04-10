@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/acearchive/yg-render/logger"
+	"github.com/acearchive/yg-render/parse"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
@@ -30,6 +32,13 @@ var rootCmd = &cobra.Command{
 		if !flagVerbose {
 			logger.Verbose.SetOutput(ioutil.Discard)
 		}
+
+		thread, err := parse.Directory(args[0])
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(len(thread))
 
 		return nil
 	},

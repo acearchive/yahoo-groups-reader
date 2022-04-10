@@ -23,6 +23,37 @@ const (
 
 var ErrMalformedEmail = errors.New("malformed email")
 
+func userFromEmail(email *mail.Message) (string, error) {
+	if profileName := email.Header.Get(MailHeaderProfile); profileName != "" {
+		return profileName, nil
+	}
+
+	if aliasName := email.Header.Get(MailHeaderAlias); aliasName != "" {
+		return aliasName, nil
+	}
+
+	return "", fmt.Errorf("%w: missing `%s` or `%s`", ErrMalformedEmail, MailHeaderProfData, MailHeaderAlias)
+}
+
+func flairFromEmail(email *mail.Message) (string, error) {
+	if profData := email.Header.Get(MailHeaderProfData); profData != "" {
+		return profData, nil
+	}
+
+	fromAddress, err := mail.ParseAddress(email.Header.Get(MailHeaderFrom))
+	if err != nil {
+		return "", fmt.Errorf("%w: %v", ErrMalformedEmail, err)
+	} else if fromAddress == nil {
+		return "", fmt.Errorf("%w: missing `%s`", ErrMalformedEmail, MailHeaderFrom)
+	}
+
+	if fromAddress.Name != "" {
+		return fromAddress.Name, nil
+	} else {
+		return fromAddress.Address, nil
+	}
+}
+
 func Email(contents io.Reader) (Message, error) {
 	rawMessage, err := mail.ReadMessage(contents)
 	if err != nil {
@@ -39,35 +70,23 @@ func Email(contents io.Reader) (Message, error) {
 		message.Parent = &parentID
 	}
 
-	if profileName := rawMessage.Header.Get(MailHeaderProfile); profileName != "" {
-		message.User = profileName
-	} else if aliasName := rawMessage.Header.Get(MailHeaderAlias); aliasName != "" {
-		message.User = aliasName
-	} else {
-		return Message{}, fmt.Errorf("%w: missing `%s` or `%s`", ErrMalformedEmail, MailHeaderProfData, MailHeaderAlias)
+	message.User, err = userFromEmail(rawMessage)
+	if err != nil {
+		return Message{}, err
 	}
 
-	if profData := rawMessage.Header.Get(MailHeaderProfData); profData != "" {
-		message.Flair = profData
-	} else {
-		fromAddress, err := mail.ParseAddress(rawMessage.Header.Get(MailHeaderFrom))
-		if err != nil {
-			logger.Verbose.Printf("%v: %v", ErrMalformedEmail, err)
-		}
-
-		if fromAddress.Name != "" {
-			message.Flair = fromAddress.Name
-		} else {
-			message.Flair = fromAddress.Address
-		}
+	message.Flair, err = flairFromEmail(rawMessage)
+	if err != nil {
+		logger.Verbose.Println(err)
+		message.Flair = ""
 	}
 
 	if message.Date, err = rawMessage.Header.Date(); err != nil {
-		return Message{}, fmt.Errorf("%w, %v", ErrMalformedEmail, err)
+		return Message{}, fmt.Errorf("%w: %v", ErrMalformedEmail, err)
 	}
 
 	if message.Title = rawMessage.Header.Get(MailHeaderSubject); message.Title == "" {
-		return Message{}, fmt.Errorf("%w, missing `%s`", ErrMalformedEmail, MailHeaderSubject)
+		return Message{}, fmt.Errorf("%w: missing `%s`", ErrMalformedEmail, MailHeaderSubject)
 	}
 
 	bodyBuffer := new(strings.Builder)
