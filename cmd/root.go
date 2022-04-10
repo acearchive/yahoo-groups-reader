@@ -1,13 +1,22 @@
 package cmd
 
 import (
+	"github.com/acearchive/yg-render/logger"
 	"github.com/spf13/cobra"
+	"io/ioutil"
 	"os"
 )
 
+var (
+	flagOutput  string
+	flagTitle   string
+	flagVerbose bool
+)
+
 func init() {
-	rootCmd.Flags().StringP("output", "o", ".", "The directory to write the rendered output to")
-	rootCmd.Flags().StringP("title", "t", "Yahoo Group", "The title of the group")
+	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", ".", "The directory to write the rendered output to")
+	rootCmd.Flags().StringVarP(&flagTitle, "title", "t", "Yahoo Group", "The title of the group")
+	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
 }
 
 var rootCmd = &cobra.Command{
@@ -18,6 +27,10 @@ var rootCmd = &cobra.Command{
 	Version:               "0.1.0",
 	DisableFlagsInUseLine: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if !flagVerbose {
+			logger.Verbose.SetOutput(ioutil.Discard)
+		}
+
 		return nil
 	},
 }
