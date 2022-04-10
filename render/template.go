@@ -42,7 +42,7 @@ const outputTemplate = `
                 </svg>
               </div>
               <div class="flex-grow-1 align-items-baseline d-none d-sm-flex">
-                <span class="message-author">{{ $message.user }}</span>
+                <span class="message-author">{{ $message.User }}</span>
                 <span class="message-flair ms-1">{{ $message.Flair }}</span>
               </div>
               <div class="flex-grow-1 d-sm-none">
@@ -64,14 +64,16 @@ const outputTemplate = `
               <h2 class="card-title message-title">{{ $message.Title }}</h2>
 			  {{- end }}
               <div class="card-text">
+				{{ if $message.Parent -}}
                 <div class="parent-ref">
-                  <a href="#{{ $message.ParentID }}" class="parent-name">
-					On {{ $message.FormattedDate }} at {{ $message.FormattedTime }}, {{ $message.ParentUser }} said:
+                  <a href="#{{ $message.Parent.ID }}" class="parent-name">
+					On {{ $message.Parent.FormattedDate }} at {{ $message.Parent.FormattedTime }}, {{ $message.Parent.User }} said:
 				  </a>
                   <blockquote class="parent-quote">
-					{{ $message.ParentBody }}
+					{{ $message.Parent.Body }}
                   </blockquote>
                 </div>
+				{{- end }}
                 <p class="message-body">
                   {{ $message.Body }}
                 </p>
