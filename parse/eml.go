@@ -6,6 +6,7 @@ import (
 	"github.com/acearchive/yg-render/logger"
 	"io"
 	"net/mail"
+	"regexp"
 	"strings"
 )
 
@@ -21,27 +22,17 @@ const (
 	MailHeaderProfData  = "X-Yahoo-ProfData"
 )
 
-var ErrMalformedEmail = errors.New("malformed email")
+var (
+	ErrMalformedEmail = errors.New("malformed email")
+	// The "correct" way to do this would be to use `ParseAddress` in
+	// `net/mail`, however in the email address in the `From` field, the domain
+	// name is sometimes redacted and replaced with '...', which is not a valid
+	// email address and will cause the function to return an error. Instead,
+	// we need to take a dumber approach that's more tolerant of invalid data.
+	addressRegex = regexp.MustCompile(`^"?([\w\s]*\w)"? <[^<>]+>$`)
+)
 
-func nameFromAddress(email *mail.Message) string {
-	rawAddress := email.Header.Get(MailHeaderFrom)
-	if rawAddress == "" {
-		logger.Verbose.Printf("%v: missing `%s`", ErrMalformedEmail, MailHeaderFrom)
-
-		return ""
-	}
-
-	fromAddress, err := mail.ParseAddress(rawAddress)
-	if err != nil || fromAddress == nil {
-		return rawAddress
-	}
-
-	if fromAddress.Name != "" {
-		return fromAddress.Name
-	}
-
-	return fromAddress.Address
-}
+const addressRegexNameIndex = 1
 
 func userFromEmail(email *mail.Message) string {
 	if profileName := email.Header.Get(MailHeaderProfile); profileName != "" {
@@ -52,7 +43,18 @@ func userFromEmail(email *mail.Message) string {
 		return aliasName
 	}
 
-	return nameFromAddress(email)
+	rawAddress := email.Header.Get(MailHeaderFrom)
+	if rawAddress == "" {
+		logger.Verbose.Printf("%v: missing `%s`", ErrMalformedEmail, MailHeaderFrom)
+		return ""
+	}
+
+	matches := addressRegex.FindStringSubmatch(rawAddress)
+	if matches != nil {
+		return matches[addressRegexNameIndex]
+	}
+
+	return rawAddress
 }
 
 func flairFromEmail(email *mail.Message) string {
@@ -60,7 +62,18 @@ func flairFromEmail(email *mail.Message) string {
 		return profData
 	}
 
-	return nameFromAddress(email)
+	rawAddress := email.Header.Get(MailHeaderFrom)
+	if rawAddress == "" {
+		logger.Verbose.Printf("%v: missing `%s`", ErrMalformedEmail, MailHeaderFrom)
+		return ""
+	}
+
+	matches := addressRegex.FindStringSubmatch(rawAddress)
+	if matches != nil {
+		return matches[addressRegexNameIndex]
+	}
+
+	return ""
 }
 
 func Email(contents io.Reader) (Message, error) {
