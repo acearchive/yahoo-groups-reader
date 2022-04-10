@@ -22,6 +22,11 @@
     }
 }
 
+.message-thread {
+    --message-link-icon-size: 30px;
+    --message-link-margin: 0.5em;
+}
+
 @media (prefers-color-scheme: dark) {
     body {
         background-color: #0d1117;
@@ -45,7 +50,7 @@ a {
 
 .message-thread {
     min-width: 200px;
-    max-width: 980px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 45px;
     color: var(--color-fg-default);
@@ -61,6 +66,17 @@ a {
 
 .message-thread .message {
     margin-bottom: 1.4em;
+    margin-right: calc(var(--message-link-icon-size) + var(--message-link-margin));
+}
+
+.message-thread .message .message-link {
+    margin-right: var(--message-link-margin);
+    display: inline-block;
+    color: var(--color-fg-muted);
+}
+
+.message-thread .message .message-link:hover {
+    color: var(--color-fg);
 }
 
 .message-thread .message .message-header {
@@ -68,6 +84,7 @@ a {
     display: flex;
     font-size: 0.9em;
     justify-content: space-between;
+    margin-left: calc(var(--message-link-icon-size) + var(--message-link-margin));
 }
 
 .message-thread .message .message-author {
