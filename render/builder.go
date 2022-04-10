@@ -1,7 +1,6 @@
 package render
 
 import (
-	"errors"
 	"fmt"
 	"github.com/acearchive/yg-render/parse"
 	"golang.org/x/text/language"
@@ -10,7 +9,10 @@ import (
 	"time"
 )
 
-var ErrInvalidParentRef = errors.New("invalid parent ID")
+const (
+	MaxParentBodySize    = 500
+	StringTruncateSymbol = "…"
+)
 
 type ParentArgs struct {
 	ID            string
@@ -64,7 +66,12 @@ func formatHumanReadableNumber(number int) string {
 }
 
 func formatBody(body string) string {
-	return strings.TrimSpace(body)
+	trimmedBody := []rune(strings.TrimSpace(body))
+	if len(trimmedBody) > MaxParentBodySize {
+		return string(trimmedBody[:MaxParentBodySize]) + StringTruncateSymbol
+	}
+
+	return string(trimmedBody)
 }
 
 func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {

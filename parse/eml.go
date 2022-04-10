@@ -82,6 +82,10 @@ func Email(contents io.Reader) (Message, error) {
 	message.User = userFromEmail(rawMessage)
 	message.Flair = flairFromEmail(rawMessage)
 
+	if message.Flair == message.User {
+		message.Flair = ""
+	}
+
 	if message.Date, err = rawMessage.Header.Date(); err != nil {
 		return Message{}, fmt.Errorf("%w: %v", ErrMalformedEmail, err)
 	}
