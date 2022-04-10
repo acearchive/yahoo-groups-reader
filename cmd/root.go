@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/acearchive/yg-render/logger"
 	"github.com/acearchive/yg-render/parse"
+	"github.com/acearchive/yg-render/render"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
@@ -38,7 +38,9 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		fmt.Println(len(thread))
+		if err := render.Execute(flagTitle, "test.html", thread); err != nil {
+			return err
+		}
 
 		return nil
 	},

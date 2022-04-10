@@ -1,6 +1,8 @@
 package render
 
-const outputTemplate = `
+import "html/template"
+
+const templateString = `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -17,7 +19,7 @@ const outputTemplate = `
   <body>
     <main class="message-thread">
       <h1 class="thread-title">{{ .Title }}</h1>
-      {{ $message := range .Messages -}}
+      {{ range $message := .Messages -}}
       <div id="{{ $message.ID }}" class="message">
         <div class="message-header">
           <time class="message-date" datetime="{{ $message.Timestamp }}">{{ $message.FormattedDatetime }}</time>
@@ -73,7 +75,7 @@ const outputTemplate = `
 					{{ $message.Parent.Body }}
                   </blockquote>
                 </div>
-				{{- end }}
+				{{ end -}}
                 <p class="message-body">
                   {{ $message.Body }}
                 </p>
@@ -82,8 +84,10 @@ const outputTemplate = `
           </div>
         </div>
       </div>
-	  {{- end }}
+	  {{ end }}
     </main>
   </body>
 </html>
 `
+
+var Template = template.Must(template.New("yg-render").Parse(templateString))

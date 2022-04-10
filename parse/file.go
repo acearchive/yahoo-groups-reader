@@ -36,15 +36,17 @@ func Directory(path string) (MessageThread, error) {
 			return nil, err
 		}
 
-		message, err := Email(file)
-		if errors.Is(err, ErrMalformedEmail) {
-			logger.Verbose.Printf("%v: '%s'", err, emailPath)
-		} else if err != nil {
-			return nil, fmt.Errorf("%w: '%s'", err, emailPath)
-		}
+		message, parseErr := Email(file)
 
 		if err := file.Close(); err != nil {
 			return nil, err
+		}
+
+		if errors.Is(parseErr, ErrMalformedEmail) {
+			logger.Verbose.Printf("%v: '%s'", err, emailPath)
+			continue
+		} else if parseErr != nil {
+			return nil, fmt.Errorf("%w: '%s'", err, emailPath)
 		}
 
 		thread[message.ID] = message
