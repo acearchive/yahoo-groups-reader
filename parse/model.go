@@ -1,19 +1,15 @@
 package parse
 
 import (
+	"sort"
 	"time"
 )
 
-const (
-	FirstMessage MessageNumber = 1
-	NullParent   MessageNumber = -1
-)
-
-type MessageNumber int
+type MessageID string
 
 type Message struct {
-	Number MessageNumber
-	Parent MessageNumber
+	ID     MessageID
+	Parent *MessageID
 	User   string
 	Flair  string
 	Date   time.Time
@@ -21,14 +17,18 @@ type Message struct {
 	Body   string
 }
 
-type MessageThread map[MessageNumber]Message
+type MessageThread map[MessageID]Message
 
-func (t MessageThread) Messages() []Message {
+func (t MessageThread) SortedByDate() []Message {
 	messages := make([]Message, 0, len(t))
 
-	for number := FirstMessage; int(number) <= len(t); number++ {
-		messages = append(messages, t[number])
+	for _, message := range t {
+		messages = append(messages, message)
 	}
+
+	sort.Slice(messages, func(i, j int) bool {
+		return messages[i].Date.Before(messages[j].Date)
+	})
 
 	return messages
 }
