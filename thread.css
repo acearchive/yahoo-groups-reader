@@ -102,7 +102,6 @@ a {
 .message-thread .message .message-flair {
     font-size: 0.8em;
     color: var(--color-fg-muted);
-    margin-left: 0.2em;
 }
 
 .message-thread .message .message-title {
