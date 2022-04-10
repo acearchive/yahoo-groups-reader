@@ -1,6 +1,8 @@
 package parse
 
 import (
+	"errors"
+	"fmt"
 	"github.com/acearchive/yg-render/logger"
 	"os"
 	"path/filepath"
@@ -35,8 +37,10 @@ func Directory(path string) (MessageThread, error) {
 		}
 
 		message, err := Email(file)
-		if err != nil {
-			return nil, err
+		if errors.Is(err, ErrMalformedEmail) {
+			logger.Verbose.Printf("%v: '%s'", err, emailPath)
+		} else if err != nil {
+			return nil, fmt.Errorf("%w: '%s'", err, emailPath)
 		}
 
 		if err := file.Close(); err != nil {

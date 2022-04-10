@@ -13,7 +13,7 @@ type Message struct {
 	User   string
 	Flair  string
 	Date   time.Time
-	Title  string
+	Title  *string
 	Body   string
 }
 
