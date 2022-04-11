@@ -176,12 +176,13 @@ func Tokenize(lines []Line) []Token {
 				tokens = append(tokens, TokenEndParagraph)
 			}
 		case line.QuoteDepth < previousQuoteDepth:
-			// In a properly formatted message, quote blocks will always end in a
-			// fixed line. However, we don't verify that the final line is a
-			// fixed line because the RFC allows for handling improperly formatted
-			// messages by always ending a paragraph on a change in quote depth,
-			// whether the final line is fixed or flowed.
-			tokens = append(tokens, TokenEndParagraph)
+			// In a properly formatted message, quote blocks will always end in
+			// a fixed line. However, the RFC allows for handling improperly
+			// formatted messages by always ending a paragraph on a change in
+			// quote depth, whether the final line is fixed or flowed.
+			if previousLineType == LineTypeFlowed {
+				tokens = append(tokens, TokenEndParagraph)
+			}
 
 			for quoteIndex := previousQuoteDepth; quoteIndex > line.QuoteDepth; quoteIndex-- {
 				tokens = append(tokens, TokenEndQuote)
