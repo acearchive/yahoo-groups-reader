@@ -172,6 +172,9 @@ func Tokenize(lines []Line) []Token {
 
 		switch {
 		case line.Kind == LineTypeSignature:
+			if previousLineType == LineTypeFlowed {
+				tokens = append(tokens, TokenEndParagraph)
+			}
 			tokens = append(tokens, TokenSignatureLine)
 		case line.QuoteDepth > previousQuoteDepth:
 			for quoteIndex := previousQuoteDepth; quoteIndex < line.QuoteDepth; quoteIndex++ {
@@ -203,7 +206,7 @@ func Tokenize(lines []Line) []Token {
 			}
 		case previousLineType == LineTypeFlowed && line.Kind == LineTypeFixed:
 			tokens = append(tokens, textToken, TokenEndParagraph)
-		case previousLineType == LineTypeFixed:
+		case previousLineType == LineTypeFixed || previousLineType == LineTypeSignature:
 			tokens = append(tokens, TokenStartParagraph, textToken)
 
 			if line.Kind == LineTypeFixed {
@@ -214,12 +217,7 @@ func Tokenize(lines []Line) []Token {
 		}
 
 		previousQuoteDepth = line.QuoteDepth
-
-		if line.Kind != LineTypeSignature {
-			// The next line only cares about whether the most recent
-			// non-signature line was fixed or flowed.
-			previousLineType = line.Kind
-		}
+		previousLineType = line.Kind
 	}
 
 	if previousLineType == LineTypeFlowed {

@@ -68,7 +68,7 @@ var _ = Describe("Tokenize", func() {
 		}))
 	})
 
-	Specify("signature lines do not break paragraphs", func() {
+	Specify("signature lines break paragraphs", func() {
 		lines := []flowed.Line{
 			{Kind: flowed.LineTypeFlowed, Content: "flowed line 1"},
 			{Kind: flowed.LineTypeSignature},
@@ -78,14 +78,16 @@ var _ = Describe("Tokenize", func() {
 		Expect(flowed.Tokenize(lines)).To(Equal([]flowed.Token{
 			flowed.TokenStartParagraph,
 			flowed.NewTextToken("flowed line 1"),
+			flowed.TokenEndParagraph,
 			flowed.TokenSignatureLine,
+			flowed.TokenStartParagraph,
 			flowed.NewTextToken("flowed line 2"),
 			flowed.NewTextToken("fixed line 1"),
 			flowed.TokenEndParagraph,
 		}))
 	})
 
-	Specify("adjacent signature lines do not break paragraphs", func() {
+	Specify("adjacent signature lines break paragraphs", func() {
 		lines := []flowed.Line{
 			{Kind: flowed.LineTypeFlowed, Content: "flowed line 1"},
 			{Kind: flowed.LineTypeSignature},
@@ -96,8 +98,10 @@ var _ = Describe("Tokenize", func() {
 		Expect(flowed.Tokenize(lines)).To(Equal([]flowed.Token{
 			flowed.TokenStartParagraph,
 			flowed.NewTextToken("flowed line 1"),
+			flowed.TokenEndParagraph,
 			flowed.TokenSignatureLine,
 			flowed.TokenSignatureLine,
+			flowed.TokenStartParagraph,
 			flowed.NewTextToken("flowed line 2"),
 			flowed.NewTextToken("fixed line 1"),
 			flowed.TokenEndParagraph,
@@ -114,8 +118,8 @@ var _ = Describe("Tokenize", func() {
 		Expect(flowed.Tokenize(lines)).To(Equal([]flowed.Token{
 			flowed.TokenStartParagraph,
 			flowed.NewTextToken("flowed line"),
-			flowed.TokenSignatureLine,
 			flowed.TokenEndParagraph,
+			flowed.TokenSignatureLine,
 		}))
 	})
 
@@ -267,7 +271,7 @@ var _ = Describe("Tokenize", func() {
 		}))
 	})
 
-	Specify("a signature line in a quote block", func() {
+	Specify("a signature line breaks paragraphs in a quote block", func() {
 		lines := []flowed.Line{
 			{Kind: flowed.LineTypeFlowed, QuoteDepth: 1, Content: "quoted flowed line"},
 			{Kind: flowed.LineTypeSignature, QuoteDepth: 1},
@@ -278,7 +282,9 @@ var _ = Describe("Tokenize", func() {
 			flowed.TokenStartQuote,
 			flowed.TokenStartParagraph,
 			flowed.NewTextToken("quoted flowed line"),
+			flowed.TokenEndParagraph,
 			flowed.TokenSignatureLine,
+			flowed.TokenStartParagraph,
 			flowed.NewTextToken("quoted fixed line"),
 			flowed.TokenEndParagraph,
 			flowed.TokenEndQuote,
