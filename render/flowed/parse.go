@@ -7,23 +7,23 @@ import (
 	"io"
 )
 
-type LineType int
+type LineType string
 
 const (
-	LineTypeFlowed LineType = iota
-	LineTypeFixed
-	LineTypeSignature
+	LineTypeFlowed    LineType = "Flowed"
+	LineTypeFixed     LineType = "Fixed"
+	LineTypeSignature LineType = "Signature"
 )
 
-type TokenType int
+type TokenType string
 
 const (
-	TokenTypeStartParagraph TokenType = iota
-	TokenTypeEndParagraph
-	TokenTypeStartQuote
-	TokenTypeEndQuote
-	TokenTypeSignatureLine
-	TokenTypeText
+	TokenTypeStartParagraph TokenType = "StartParagraph"
+	TokenTypeEndParagraph   TokenType = "EndParagraph"
+	TokenTypeStartQuote     TokenType = "StartQuote"
+	TokenTypeEndQuote       TokenType = "EndQuote"
+	TokenTypeSignatureLine  TokenType = "SignatureLine"
+	TokenTypeText           TokenType = "Text"
 )
 
 var (
