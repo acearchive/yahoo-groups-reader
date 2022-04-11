@@ -103,6 +103,7 @@ func ParseLine(line string) Line {
 		currentIndex := 1
 		quoteDepth++
 
+	quoteDepthLoop:
 		for {
 			switch {
 			case currentContent[currentIndex] == quoteChar:
@@ -112,9 +113,11 @@ func ParseLine(line string) Line {
 				currentIndex += 2
 				quoteDepth++
 			default:
-				break
+				break quoteDepthLoop
 			}
 		}
+
+		currentContent = currentContent[currentIndex:]
 	}
 
 	if currentContent[0] == stuffChar {
