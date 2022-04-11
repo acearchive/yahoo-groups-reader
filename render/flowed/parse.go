@@ -27,11 +27,11 @@ const (
 )
 
 var (
-	TokenStartParagraph = Token{Kind: TokenTypeStartParagraph}
-	TokenEndParagraph   = Token{Kind: TokenTypeEndParagraph}
-	TokenStartQuote     = Token{Kind: TokenTypeStartQuote}
-	TokenEndQuote       = Token{Kind: TokenTypeEndQuote}
-	TokenSignatureLine  = Token{Kind: TokenTypeSignatureLine}
+	TokenStartParagraph = Token{kind: TokenTypeStartParagraph}
+	TokenEndParagraph   = Token{kind: TokenTypeEndParagraph}
+	TokenStartQuote     = Token{kind: TokenTypeStartQuote}
+	TokenEndQuote       = Token{kind: TokenTypeEndQuote}
+	TokenSignatureLine  = Token{kind: TokenTypeSignatureLine}
 )
 
 const (
@@ -48,12 +48,20 @@ type Line struct {
 }
 
 type Token struct {
-	Kind TokenType
-	Text string
+	kind TokenType
+	text string
+}
+
+func (t Token) Kind() TokenType {
+	return t.kind
+}
+
+func (t Token) Text() string {
+	return t.text
 }
 
 func NewTextToken(text string) Token {
-	return Token{Kind: TokenTypeText, Text: text + "\n"}
+	return Token{kind: TokenTypeText, text: text + "\n"}
 }
 
 func trimLineEnding(line []rune) []rune {
@@ -206,10 +214,15 @@ func Tokenize(lines []Line) []Token {
 		}
 
 		previousQuoteDepth = line.QuoteDepth
-		previousLineType = line.Kind
+
+		if line.Kind != LineTypeSignature {
+			// The next line only cares about whether the most recent
+			// non-signature line was fixed or flowed.
+			previousLineType = line.Kind
+		}
 	}
 
-	if previousLineType == LineTypeFlowed || previousLineType == LineTypeSignature {
+	if previousLineType == LineTypeFlowed {
 		// Close the open paragraph.
 		tokens = append(tokens, TokenEndParagraph)
 	}
