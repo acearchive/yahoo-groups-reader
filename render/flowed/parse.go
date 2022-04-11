@@ -208,7 +208,7 @@ func Tokenize(lines []Line) []Token {
 		previousLineType = line.Kind
 	}
 
-	if previousLineType == LineTypeFlowed {
+	if previousLineType == LineTypeFlowed || previousLineType == LineTypeSignature {
 		// Close the open paragraph.
 		tokens = append(tokens, TokenEndParagraph)
 	}
