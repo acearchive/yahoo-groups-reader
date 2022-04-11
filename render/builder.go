@@ -5,19 +5,14 @@ import (
 	"github.com/acearchive/yg-render/parse"
 	"golang.org/x/text/language"
 	textmessage "golang.org/x/text/message"
-	"strings"
+	"html/template"
 	"time"
-)
-
-const (
-	MaxParentBodySize    = 500
-	StringTruncateSymbol = "…"
 )
 
 type ParentArgs struct {
 	ID            string
 	User          string
-	Body          string
+	Body          template.HTML
 	FormattedDate string
 	FormattedTime string
 }
@@ -32,7 +27,7 @@ type MessageArgs struct {
 	User              string
 	Flair             string
 	Title             string
-	Body              string
+	Body              template.HTML
 }
 
 type TemplateArgs struct {
@@ -65,13 +60,9 @@ func formatHumanReadableNumber(number int) string {
 	return localizedPrinter.Sprintf("%d", number)
 }
 
-func formatBody(body string) string {
-	trimmedBody := []rune(strings.TrimSpace(body))
-	if len(trimmedBody) > MaxParentBodySize {
-		return string(trimmedBody[:MaxParentBodySize]) + StringTruncateSymbol
-	}
-
-	return string(trimmedBody)
+func formatParentBody(body string) string {
+	// TODO: Truncate parent message bodies.
+	return body
 }
 
 func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
@@ -96,7 +87,7 @@ func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 				parentArgs = &ParentArgs{
 					ID:            formatID(parentIndex + 1),
 					User:          parent.User,
-					Body:          formatBody(parent.Body),
+					Body:          template.HTML(formatParentBody(parent.Body)),
 					FormattedDate: formatDate(parent.Date),
 					FormattedTime: formatTime(parent.Date),
 				}
@@ -113,7 +104,7 @@ func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 			User:              message.User,
 			Flair:             message.Flair,
 			Title:             messageTitle,
-			Body:              formatBody(message.Body),
+			Body:              template.HTML(message.Body),
 		}
 	}
 

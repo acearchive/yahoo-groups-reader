@@ -1,7 +1,6 @@
 package render
 
 import (
-	"github.com/Masterminds/sprig/v3"
 	"github.com/acearchive/yg-render/parse"
 	"os"
 )
@@ -25,7 +24,7 @@ func Execute(title, path string, thread parse.MessageThread) error {
 		Messages: MessageThreadToArgs(thread),
 	}
 
-	err = Template.Funcs(sprig.FuncMap()).Execute(file, args)
+	err = Template.Execute(file, args)
 
 	return err
 }

@@ -1,25 +1,17 @@
 package flowed
 
 import (
+	"html"
 	"io"
 	"strings"
 )
 
 const IndentPrefix = "  "
 
-type IndentMode int
-
-const (
-	IndentModeIndent IndentMode = iota
-	IndentModeDedent
-	IndentModeSame
-)
-
 func Render(tokens []Token) string {
 	var output strings.Builder
 
 	indentLevel := 0
-	mode := IndentModeSame
 	node := ""
 
 	writeToken := func() {
@@ -33,32 +25,26 @@ func Render(tokens []Token) string {
 		switch token.Kind() {
 		case TokenTypeStartParagraph:
 			node = "<p>\n"
-			mode = IndentModeIndent
 		case TokenTypeEndParagraph:
 			node = "</p>\n"
-			mode = IndentModeDedent
 		case TokenTypeStartQuote:
 			node = "<blockquote>\n"
-			mode = IndentModeIndent
 		case TokenTypeEndQuote:
 			node = "</blockquote>\n"
-			mode = IndentModeDedent
 		case TokenTypeSignatureLine:
 			node = "<hr>\n"
-			mode = IndentModeSame
 		case TokenTypeText:
-			node = token.Text()
-			mode = IndentModeSame
+			node = html.EscapeString(token.Text())
 		}
 
-		switch mode {
-		case IndentModeIndent:
+		switch token.Kind().TagType() {
+		case TagTypeOpen:
 			writeToken()
 			indentLevel++
-		case IndentModeDedent:
+		case TagTypeClose:
 			indentLevel--
 			writeToken()
-		case IndentModeSame:
+		case TagTypeSelfClose:
 			writeToken()
 		}
 	}

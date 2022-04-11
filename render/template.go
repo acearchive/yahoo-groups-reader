@@ -1,6 +1,8 @@
 package render
 
-import "html/template"
+import (
+	"html/template"
+)
 
 const templateString = `
 <!DOCTYPE html>

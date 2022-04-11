@@ -6,6 +6,7 @@ package flowed
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 )
 
@@ -26,6 +27,33 @@ const (
 	TokenTypeEndQuote       TokenType = "EndQuote"
 	TokenTypeSignatureLine  TokenType = "SignatureLine"
 	TokenTypeText           TokenType = "Text"
+)
+
+func (t TokenType) TagType() TagType {
+	switch t {
+	case TokenTypeStartParagraph:
+		return TagTypeOpen
+	case TokenTypeEndParagraph:
+		return TagTypeClose
+	case TokenTypeStartQuote:
+		return TagTypeOpen
+	case TokenTypeEndQuote:
+		return TagTypeClose
+	case TokenTypeSignatureLine:
+		return TagTypeSelfClose
+	case TokenTypeText:
+		return TagTypeSelfClose
+	default:
+		panic(fmt.Errorf("invalid TokenType: %v", t))
+	}
+}
+
+type TagType string
+
+const (
+	TagTypeOpen      TagType = "Open"
+	TagTypeClose     TagType = "Close"
+	TagTypeSelfClose TagType = "SelfClose"
 )
 
 var (
