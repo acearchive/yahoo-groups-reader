@@ -159,16 +159,20 @@ func ParseLine(line string) Line {
 	}
 }
 
-func parseLines(text io.Reader) []Line {
-	var classified []Line
+func ParseLines(text io.Reader) ([]Line, error) {
+	var lines []Line
 
 	scanner := bufio.NewScanner(text)
 
 	for scanner.Scan() {
-		classified = append(classified, ParseLine(scanner.Text()))
+		lines = append(lines, ParseLine(scanner.Text()))
 	}
 
-	return classified
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return lines, nil
 }
 
 func Tokenize(lines []Line) []Token {
@@ -241,8 +245,4 @@ func Tokenize(lines []Line) []Token {
 	}
 
 	return tokens
-}
-
-func ToHtml() (string, error) {
-	return "", nil
 }

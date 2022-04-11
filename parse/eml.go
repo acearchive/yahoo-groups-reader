@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/acearchive/yg-render/logger"
+	"github.com/acearchive/yg-render/parse/flowed"
 	"io"
 	"net/mail"
 	"regexp"
@@ -73,6 +74,15 @@ func flairFromEmail(email *mail.Message) string {
 	}
 
 	return ""
+}
+
+func bodyFromEmail(email *mail.Message) (string, error) {
+	rawTextBody, err := MultipartMessageBody(email)
+	if err != nil {
+		return "", err
+	}
+
+	return flowed.ToHtml(rawTextBody)
 }
 
 func Email(contents io.Reader) (Message, error) {

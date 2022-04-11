@@ -1,7 +1,7 @@
 package flowed_test
 
 import (
-	"github.com/acearchive/yg-render/render/flowed"
+	"github.com/acearchive/yg-render/parse/flowed"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
