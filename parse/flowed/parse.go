@@ -69,11 +69,11 @@ func NewTextToken(text string) Token {
 func trimLineEnding(line []rune) []rune {
 	// RFC 3676 assumes lines are CRLF-delimited, but we are supporting
 	// Unix-style line-endings as well.
-	if line[len(line)-1] == '\n' {
+	if len(line) >= 1 && line[len(line)-1] == '\n' {
 		return line[:len(line)-1]
 	}
 
-	if line[len(line)-2] == '\r' && line[len(line)-1] == '\n' {
+	if len(line) >= 2 && line[len(line)-2] == '\r' && line[len(line)-1] == '\n' {
 		return line[:len(line)-2]
 	}
 
@@ -108,10 +108,10 @@ func ParseLine(line string) Line {
 	quoteDepthLoop:
 		for {
 			switch {
-			case currentContent[currentIndex] == quoteChar:
+			case len(currentContent) > currentIndex && currentContent[currentIndex] == quoteChar:
 				currentIndex += 1
 				quoteDepth++
-			case currentContent[currentIndex] == ' ' && currentContent[currentIndex+1] == quoteChar:
+			case len(currentContent) > currentIndex+1 && currentContent[currentIndex] == ' ' && currentContent[currentIndex+1] == quoteChar:
 				// According to the RFC, this should not be interpreted as a
 				// nested quote, and should actually be interpreted as a leading
 				// literal '> ' in the outer quote. However, we are diverging
@@ -127,7 +127,7 @@ func ParseLine(line string) Line {
 		currentContent = currentContent[currentIndex:]
 	}
 
-	if currentContent[0] == stuffChar {
+	if len(currentContent) > 0 && currentContent[0] == stuffChar {
 		// The line is stuffed.
 		currentContent = currentContent[1:]
 	}
@@ -142,7 +142,7 @@ func ParseLine(line string) Line {
 		}
 	}
 
-	if currentContent[len(currentContent)-1] == flowChar {
+	if len(currentContent) > 0 && currentContent[len(currentContent)-1] == flowChar {
 		// The line is flowed.
 		return Line{
 			Kind:       LineTypeFlowed,
