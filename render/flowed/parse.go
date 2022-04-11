@@ -7,31 +7,31 @@ import (
 	"io"
 )
 
-type lineType int
+type LineType int
 
 const (
-	lineTypeFlowed lineType = iota
-	lineTypeFixed
-	lineTypeSignature
+	LineTypeFlowed LineType = iota
+	LineTypeFixed
+	LineTypeSignature
 )
 
-type tokenType int
+type TokenType int
 
 const (
-	tokenTypeStartParagraph tokenType = iota
-	tokenTypeEndParagraph
-	tokenTypeStartQuote
-	tokenTypeEndQuote
-	tokenTypeSignatureLine
-	tokenTypeText
+	TokenTypeStartParagraph TokenType = iota
+	TokenTypeEndParagraph
+	TokenTypeStartQuote
+	TokenTypeEndQuote
+	TokenTypeSignatureLine
+	TokenTypeText
 )
 
 var (
-	tokenStartParagraph = token{kind: tokenTypeStartParagraph}
-	tokenEndParagraph   = token{kind: tokenTypeEndParagraph}
-	tokenStartQuote     = token{kind: tokenTypeStartQuote}
-	tokenEndQuote       = token{kind: tokenTypeEndQuote}
-	tokenSignatureLine  = token{kind: tokenTypeSignatureLine}
+	TokenStartParagraph = Token{Kind: TokenTypeStartParagraph}
+	TokenEndParagraph   = Token{Kind: TokenTypeEndParagraph}
+	TokenStartQuote     = Token{Kind: TokenTypeStartQuote}
+	TokenEndQuote       = Token{Kind: TokenTypeEndQuote}
+	TokenSignatureLine  = Token{Kind: TokenTypeSignatureLine}
 )
 
 const (
@@ -41,15 +41,19 @@ const (
 	signatureLine = "-- "
 )
 
-type classifiedLine struct {
-	kind       lineType
-	quoteDepth int
-	content    string
+type Line struct {
+	Kind       LineType
+	QuoteDepth int
+	Content    string
 }
 
-type token struct {
-	kind tokenType
-	text string
+type Token struct {
+	Kind TokenType
+	Text string
+}
+
+func NewTextToken(text string) Token {
+	return Token{Kind: TokenTypeText, Text: text + "\n"}
 }
 
 func trimLineEnding(line []rune) []rune {
@@ -66,20 +70,20 @@ func trimLineEnding(line []rune) []rune {
 	return line
 }
 
-func classifyLine(line string) classifiedLine {
+func ParseLine(line string) Line {
 	currentContent := trimLineEnding([]rune(line))
 
 	switch {
 	case len(currentContent) == 0:
 		// Empty lines are considered fixed.
-		return classifiedLine{
-			kind:    lineTypeFixed,
-			content: "",
+		return Line{
+			Kind:    LineTypeFixed,
+			Content: "",
 		}
 	case string(currentContent) == signatureLine:
-		return classifiedLine{
-			kind:    lineTypeSignature,
-			content: string(currentContent),
+		return Line{
+			Kind:    LineTypeSignature,
+			Content: string(currentContent),
 		}
 	}
 
@@ -114,104 +118,104 @@ func classifyLine(line string) classifiedLine {
 	// marks and stuffing. Note that a line that is space-stuffed but NOT quoted
 	// cannot be a signature line.
 	if quoteDepth > 0 && string(currentContent) == signatureLine {
-		return classifiedLine{
-			kind:    lineTypeSignature,
-			content: string(currentContent),
+		return Line{
+			Kind:    LineTypeSignature,
+			Content: string(currentContent),
 		}
 	}
 
 	if currentContent[len(currentContent)-1] == flowChar {
 		// The line is flowed.
-		return classifiedLine{
-			kind:       lineTypeFlowed,
-			quoteDepth: quoteDepth,
-			content:    string(currentContent[:len(currentContent)-1]),
+		return Line{
+			Kind:       LineTypeFlowed,
+			QuoteDepth: quoteDepth,
+			Content:    string(currentContent[:len(currentContent)-1]),
 		}
 	}
 
 	// The line is fixed.
-	return classifiedLine{
-		kind:       lineTypeFixed,
-		quoteDepth: quoteDepth,
-		content:    string(currentContent),
+	return Line{
+		Kind:       LineTypeFixed,
+		QuoteDepth: quoteDepth,
+		Content:    string(currentContent),
 	}
 }
 
-func classifyLines(text io.Reader) []classifiedLine {
-	var classified []classifiedLine
+func parseLines(text io.Reader) []Line {
+	var classified []Line
 
 	scanner := bufio.NewScanner(text)
 
 	for scanner.Scan() {
-		classified = append(classified, classifyLine(scanner.Text()))
+		classified = append(classified, ParseLine(scanner.Text()))
 	}
 
 	return classified
 }
 
-func tokenize(lines []classifiedLine) []token {
-	var tokens []token
+func Tokenize(lines []Line) []Token {
+	var tokens []Token
 
 	previousQuoteDepth := 0
-	previousLineType := lineTypeFixed
+	previousLineType := LineTypeFixed
 
 	for _, line := range lines {
-		textToken := token{kind: tokenTypeText, text: line.content + "\n"}
+		textToken := NewTextToken(line.Content)
 
 		switch {
-		case line.kind == lineTypeSignature:
-			tokens = append(tokens, tokenSignatureLine)
-		case line.quoteDepth > previousQuoteDepth:
-			for quoteIndex := previousQuoteDepth; quoteIndex < line.quoteDepth; quoteIndex++ {
-				tokens = append(tokens, tokenStartQuote)
+		case line.Kind == LineTypeSignature:
+			tokens = append(tokens, TokenSignatureLine)
+		case line.QuoteDepth > previousQuoteDepth:
+			for quoteIndex := previousQuoteDepth; quoteIndex < line.QuoteDepth; quoteIndex++ {
+				tokens = append(tokens, TokenStartQuote)
 			}
 
-			tokens = append(tokens, tokenStartParagraph, textToken)
+			tokens = append(tokens, TokenStartParagraph, textToken)
 
-			if line.kind == lineTypeFixed {
-				tokens = append(tokens, tokenEndParagraph)
+			if line.Kind == LineTypeFixed {
+				tokens = append(tokens, TokenEndParagraph)
 			}
-		case line.quoteDepth < previousQuoteDepth:
+		case line.QuoteDepth < previousQuoteDepth:
 			// In a properly formatted message, quote blocks will always end in a
 			// fixed line. However, we don't verify that the final line is a
 			// fixed line because the RFC allows for handling improperly formatted
 			// messages by always ending a paragraph on a change in quote depth,
 			// whether the final line is fixed or flowed.
-			tokens = append(tokens, tokenEndParagraph)
+			tokens = append(tokens, TokenEndParagraph)
 
-			for quoteIndex := previousQuoteDepth; quoteIndex > line.quoteDepth; quoteIndex-- {
-				tokens = append(tokens, tokenEndQuote)
+			for quoteIndex := previousQuoteDepth; quoteIndex > line.QuoteDepth; quoteIndex-- {
+				tokens = append(tokens, TokenEndQuote)
 			}
 
-			tokens = append(tokens, tokenStartParagraph, textToken)
+			tokens = append(tokens, TokenStartParagraph, textToken)
 
-			if line.kind == lineTypeFixed {
-				tokens = append(tokens, tokenEndParagraph)
+			if line.Kind == LineTypeFixed {
+				tokens = append(tokens, TokenEndParagraph)
 			}
-		case previousLineType == lineTypeFlowed && line.kind == lineTypeFixed:
-			tokens = append(tokens, textToken, tokenEndParagraph)
-		case previousLineType == lineTypeFixed:
-			tokens = append(tokens, tokenStartParagraph, textToken)
+		case previousLineType == LineTypeFlowed && line.Kind == LineTypeFixed:
+			tokens = append(tokens, textToken, TokenEndParagraph)
+		case previousLineType == LineTypeFixed:
+			tokens = append(tokens, TokenStartParagraph, textToken)
 
-			if line.kind == lineTypeFixed {
-				tokens = append(tokens, tokenEndParagraph)
+			if line.Kind == LineTypeFixed {
+				tokens = append(tokens, TokenEndParagraph)
 			}
 		default:
 			tokens = append(tokens, textToken)
 		}
 
-		previousQuoteDepth = line.quoteDepth
-		previousLineType = line.kind
+		previousQuoteDepth = line.QuoteDepth
+		previousLineType = line.Kind
 	}
 
-	if previousLineType == lineTypeFlowed {
+	if previousLineType == LineTypeFlowed {
 		// Close the open paragraph.
-		tokens = append(tokens, tokenEndParagraph)
+		tokens = append(tokens, TokenEndParagraph)
 	}
 
 	// Close any open quote blocks.
 	for quoteIndex := previousQuoteDepth; quoteIndex > 0; quoteIndex-- {
-		tokens = append(tokens, tokenEndQuote)
+		tokens = append(tokens, TokenEndQuote)
 	}
 
 	return tokens
