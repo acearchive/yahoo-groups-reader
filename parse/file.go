@@ -43,10 +43,10 @@ func Directory(path string) (MessageThread, error) {
 		}
 
 		if errors.Is(parseErr, ErrMalformedEmail) {
-			logger.Verbose.Printf("%v: '%s'", err, emailPath)
+			logger.Verbose.Printf("%v: '%s'", parseErr, emailPath)
 			continue
 		} else if parseErr != nil {
-			return nil, fmt.Errorf("%w: '%s'", err, emailPath)
+			return nil, fmt.Errorf("%w: '%s'", parseErr, emailPath)
 		}
 
 		thread[message.ID] = message

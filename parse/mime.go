@@ -17,14 +17,11 @@ const (
 )
 
 func bodyFromEmail(email *mail.Message) (string, error) {
-	mediaType, contentTypeParams, err := mime.ParseMediaType(email.Header.Get(MimeHeaderContentType))
-	if err != nil {
-		return "", err
-	}
-
 	var bodyReader io.Reader
 
-	if strings.HasPrefix(mediaType, contentTypePrefixMultipart) {
+	mediaType, contentTypeParams, err := mime.ParseMediaType(email.Header.Get(MimeHeaderContentType))
+
+	if err != nil && strings.HasPrefix(mediaType, contentTypePrefixMultipart) {
 		multipartReader := multipart.NewReader(email.Body, contentTypeParams[contentTypeParamBoundary])
 		for {
 			part, err := multipartReader.NextPart()
