@@ -123,6 +123,6 @@ a {
     border-left: .25em solid var(--color-border-default);
 }
 
-.message-thread .message .message-body {
+.message-thread .message .message-body p:last-child {
     margin-bottom: 0;
 }
