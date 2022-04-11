@@ -243,6 +243,6 @@ func Tokenize(lines []Line) []Token {
 	return tokens
 }
 
-func FlowedTextToHtml() (string, error) {
+func ToHtml() (string, error) {
 	return "", nil
 }
