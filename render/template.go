@@ -78,9 +78,9 @@ const templateString = `
                   </blockquote>
                 </div>
 				{{ end -}}
-                <p class="message-body">
+                <div class="message-body">
                   {{ $message.Body }}
-                </p>
+                </div>
               </div>
             </div>
           </div>
