@@ -8,6 +8,25 @@ import (
 
 const IndentPrefix = "  "
 
+func stripEmptyTags(tokens []Token) []Token {
+	strippedTokens := make([]Token, 0, len(tokens))
+
+	for i := 0; i < len(tokens); i++ {
+		switch {
+		case i+1 < len(tokens) && tokens[i].Kind().TagType() == TagTypeOpen && tokens[i+1].Kind().TagType() == TagTypeClose:
+			// An open tag immediately followed by a close tag.
+			i += 1
+		case i+2 < len(tokens) && tokens[i].Kind().TagType() == TagTypeOpen && tokens[i+1].Kind() == TokenTypeText && strings.TrimSpace(tokens[i+1].Text()) == "" && tokens[i+2].Kind().TagType() == TagTypeClose:
+			// An open tag followed by text that's just whitespace and then close tag.
+			i += 2
+		default:
+			strippedTokens = append(strippedTokens, tokens[i])
+		}
+	}
+
+	return strippedTokens
+}
+
 func Render(tokens []Token) string {
 	var output strings.Builder
 
@@ -21,7 +40,7 @@ func Render(tokens []Token) string {
 		output.WriteString(node)
 	}
 
-	for _, token := range tokens {
+	for _, token := range stripEmptyTags(tokens) {
 		switch token.Kind() {
 		case TokenTypeStartParagraph:
 			node = "<p>\n"

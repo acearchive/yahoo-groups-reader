@@ -76,6 +76,11 @@ a {
     margin-right: var(--message-link-size);
 }
 
+.message-thread .message blockquote {
+    border-left: .25em solid var(--color-border-default);
+    padding-left: 1em;
+}
+
 .message-thread .message .message-link {
     margin-right: var(--message-link-margin);
     display: inline-block;
@@ -119,8 +124,6 @@ a {
 
 .message-thread .message .parent-ref > .parent-quote {
     font-size: 0.8em;
-    padding-left: 1em;
-    border-left: .25em solid var(--color-border-default);
 }
 
 .message-thread .message .message-body p:last-child {
