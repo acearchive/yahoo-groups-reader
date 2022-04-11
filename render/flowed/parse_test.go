@@ -4,9 +4,158 @@ import (
 	"github.com/acearchive/yg-render/render/flowed"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 )
 
 var _ = Describe("ParseLine", func() {
+	Specify("empty lines are considered fixed", func() {
+		Expect(flowed.ParseLine("\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(0),
+			"Content":    BeEmpty(),
+		}))
+	})
+
+	Specify("whitespace lines are considered flowed", func() {
+		Expect(flowed.ParseLine("  \n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFlowed),
+			"QuoteDepth": Equal(0),
+			"Content":    BeEmpty(),
+		}))
+	})
+
+	Specify("signature lines are recognized", func() {
+		Expect(flowed.ParseLine("-- \n")).To(MatchFields(IgnoreExtras, Fields{
+			"Kind":       Equal(flowed.LineTypeSignature),
+			"QuoteDepth": Equal(0),
+		}))
+	})
+
+	Specify("signature lines must have a trailing space", func() {
+		Expect(flowed.ParseLine("--\n")).To(MatchFields(IgnoreExtras, Fields{
+			"Kind": Not(Equal(flowed.LineTypeSignature)),
+		}))
+	})
+
+	Specify("signature lines cannot be stuffed unless they are quoted", func() {
+		Expect(flowed.ParseLine(" --\n")).To(MatchFields(IgnoreExtras, Fields{
+			"Kind": Not(Equal(flowed.LineTypeSignature)),
+		}))
+	})
+
+	Specify("flowed lines are detected", func() {
+		Expect(flowed.ParseLine("foo \n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFlowed),
+			"QuoteDepth": Equal(0),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("fixed lines are detected", func() {
+		Expect(flowed.ParseLine("foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(0),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("flowed stuffed lines are detected", func() {
+		Expect(flowed.ParseLine(" foo \n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFlowed),
+			"QuoteDepth": Equal(0),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("fixed stuffed lines are detected", func() {
+		Expect(flowed.ParseLine(" foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(0),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("extra stuffing is literal space", func() {
+		Expect(flowed.ParseLine("  foo\n")).To(MatchFields(IgnoreExtras, Fields{
+			"Content": Equal(" foo"),
+		}))
+	})
+
+	Specify("quoted flowed lines are detected", func() {
+		Expect(flowed.ParseLine(">foo \n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFlowed),
+			"QuoteDepth": Equal(1),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("quoted fixed lines are detected", func() {
+		Expect(flowed.ParseLine(">foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(1),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("quoted flowed stuffed lines are detected", func() {
+		Expect(flowed.ParseLine("> foo \n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFlowed),
+			"QuoteDepth": Equal(1),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("quoted fixed stuffed lines are detected", func() {
+		Expect(flowed.ParseLine("> foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(1),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("extra stuffing in quoted lines is literal space", func() {
+		Expect(flowed.ParseLine(">  foo\n")).To(MatchFields(IgnoreExtras, Fields{
+			"Content": Equal(" foo"),
+		}))
+	})
+
+	Specify("nested quotes are recognized", func() {
+		Expect(flowed.ParseLine(">>foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(2),
+			"Content":    Equal("foo"),
+		}))
+
+		Expect(flowed.ParseLine(">> foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(2),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("nested quotes with internal spaces are recognized", func() {
+		// This is technically not RFC 3676 compliant, but Yahoo Groups seems
+		// to use this syntax for nested quotes.
+		Expect(flowed.ParseLine("> >foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(2),
+			"Content":    Equal("foo"),
+		}))
+
+		Expect(flowed.ParseLine("> > foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(2),
+			"Content":    Equal("foo"),
+		}))
+	})
+
+	Specify("only a single internal space is allowed for nested quotes", func() {
+		Expect(flowed.ParseLine(">  > foo\n")).To(MatchAllFields(Fields{
+			"Kind":       Equal(flowed.LineTypeFixed),
+			"QuoteDepth": Equal(1),
+			"Content":    Equal(" > foo"),
+		}))
+	})
 })
 
 var _ = Describe("Tokenize", func() {

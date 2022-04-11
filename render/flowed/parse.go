@@ -1,5 +1,7 @@
 // Package flowed parses RFC 3676 text and renders it as HTML. The language used
-// in comments in this package mirror language used in the RFC.
+// in comments in this package mirror language used in the RFC. There are a few
+// places where we deliberately diverge from the spec to account for the fact
+// that Yahoo Groups actually predates the RFC by several years.
 package flowed
 
 import (
@@ -110,6 +112,11 @@ func ParseLine(line string) Line {
 				currentIndex += 1
 				quoteDepth++
 			case currentContent[currentIndex] == ' ' && currentContent[currentIndex+1] == quoteChar:
+				// According to the RFC, this should not be interpreted as a
+				// nested quote, and should actually be interpreted as a leading
+				// literal '> ' in the outer quote. However, we are diverging
+				// from the spec here because Yahoo Groups seems to use this
+				// syntax.
 				currentIndex += 2
 				quoteDepth++
 			default:
@@ -236,9 +243,6 @@ func Tokenize(lines []Line) []Token {
 	return tokens
 }
 
-// FlowedTextToHtml converts plain text as it appears in message bodies into
-// HTML. This process largely follows RFC 3676, with some allowances for the
-// fact that Yahoo Groups actually predates that spec.
 func FlowedTextToHtml() (string, error) {
 	return "", nil
 }
