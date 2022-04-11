@@ -7,19 +7,18 @@ import (
 	"io"
 	"net/mail"
 	"regexp"
-	"strings"
 )
 
-type MailHeader string
+type MimeHeader string
 
 const (
-	MailHeaderFrom      = "From"
-	MailHeaderSubject   = "Subject"
-	MailHeaderMessageID = "Message-ID"
-	MailHeaderInReplyTo = "In-Reply-To"
-	MailHeaderProfile   = "X-Yahoo-Profile"
-	MailHeaderAlias     = "X-Yahoo-Alias"
-	MailHeaderProfData  = "X-Yahoo-ProfData"
+	MimeHeaderFrom      = "From"
+	MimeHeaderSubject   = "Subject"
+	MimeHeaderMessageID = "Message-ID"
+	MimeHeaderInReplyTo = "In-Reply-To"
+	MimeHeaderProfile   = "X-Yahoo-Profile"
+	MimeHeaderAlias     = "X-Yahoo-Alias"
+	MimeHeaderProfData  = "X-Yahoo-ProfData"
 )
 
 var (
@@ -35,17 +34,17 @@ var (
 const addressRegexNameIndex = 1
 
 func userFromEmail(email *mail.Message) string {
-	if profileName := email.Header.Get(MailHeaderProfile); profileName != "" {
+	if profileName := email.Header.Get(MimeHeaderProfile); profileName != "" {
 		return profileName
 	}
 
-	if aliasName := email.Header.Get(MailHeaderAlias); aliasName != "" {
+	if aliasName := email.Header.Get(MimeHeaderAlias); aliasName != "" {
 		return aliasName
 	}
 
-	rawAddress := email.Header.Get(MailHeaderFrom)
+	rawAddress := email.Header.Get(MimeHeaderFrom)
 	if rawAddress == "" {
-		logger.Verbose.Printf("%v: missing `%s`", ErrMalformedEmail, MailHeaderFrom)
+		logger.Verbose.Printf("%v: missing `%s`", ErrMalformedEmail, MimeHeaderFrom)
 		return ""
 	}
 
@@ -58,13 +57,13 @@ func userFromEmail(email *mail.Message) string {
 }
 
 func flairFromEmail(email *mail.Message) string {
-	if profData := email.Header.Get(MailHeaderProfData); profData != "" {
+	if profData := email.Header.Get(MimeHeaderProfData); profData != "" {
 		return profData
 	}
 
-	rawAddress := email.Header.Get(MailHeaderFrom)
+	rawAddress := email.Header.Get(MimeHeaderFrom)
 	if rawAddress == "" {
-		logger.Verbose.Printf("%v: missing `%s`", ErrMalformedEmail, MailHeaderFrom)
+		logger.Verbose.Printf("%v: missing `%s`", ErrMalformedEmail, MimeHeaderFrom)
 		return ""
 	}
 
@@ -84,11 +83,11 @@ func Email(contents io.Reader) (Message, error) {
 
 	message := Message{}
 
-	if message.ID = MessageID(rawMessage.Header.Get(MailHeaderMessageID)); message.ID == "" {
-		return Message{}, fmt.Errorf("%w: missing `%s`", ErrMalformedEmail, MailHeaderMessageID)
+	if message.ID = MessageID(rawMessage.Header.Get(MimeHeaderMessageID)); message.ID == "" {
+		return Message{}, fmt.Errorf("%w: missing `%s`", ErrMalformedEmail, MimeHeaderMessageID)
 	}
 
-	if parentID := MessageID(rawMessage.Header.Get(MailHeaderInReplyTo)); parentID != "" {
+	if parentID := MessageID(rawMessage.Header.Get(MimeHeaderInReplyTo)); parentID != "" {
 		message.Parent = &parentID
 	}
 
@@ -103,17 +102,14 @@ func Email(contents io.Reader) (Message, error) {
 		return Message{}, fmt.Errorf("%w: %v", ErrMalformedEmail, err)
 	}
 
-	if messageTitle := rawMessage.Header.Get(MailHeaderSubject); messageTitle != "" {
+	if messageTitle := rawMessage.Header.Get(MimeHeaderSubject); messageTitle != "" {
 		message.Title = &messageTitle
 	}
 
-	bodyBuffer := new(strings.Builder)
-
-	if _, err := io.Copy(bodyBuffer, rawMessage.Body); err != nil {
+	message.Body, err = bodyFromEmail(rawMessage)
+	if err != nil {
 		return Message{}, fmt.Errorf("%w: %v", ErrMalformedEmail, err)
 	}
-
-	message.Body = bodyBuffer.String()
 
 	return message, nil
 }
