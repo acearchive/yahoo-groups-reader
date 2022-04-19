@@ -229,23 +229,12 @@ func Tokenize(lines []Line) []Token {
 				tokens = append(tokens, TokenEndParagraph)
 			}
 		case line.QuoteDepth < previousQuoteDepth:
-			// In a properly formatted message, a quote block always ends when
-			// there is a decrease in the quote depth, and the final line of the
-			// quote block should always be fixed. The RFC suggests handling
-			// improperly formatted quote blocks that do not end with a fixed
-			// line by ending the quote block whenever there is a change in the
-			// quote depth. However, Yahoo Groups seems to use the convention
-			// that a flowed line at the end of the quote block indicates that
-			// the quote block continues on the next line, EVEN IF THAT LINE HAS
-			// A QUOTE DEPTH OF ZERO. So, if there's a decrease in the quote
-			// depth and the final line of the quote block is flowed, we assume
-			// the quote block continues.
+			// In a properly formatted message, quote blocks will always end in
+			// a fixed line. However, the RFC allows for handling improperly
+			// formatted messages by always ending a paragraph on a change in
+			// quote depth, whether the final line is fixed or flowed.
 			if previousLineType == LineTypeFlowed {
-				// We do not update `previousQuoteDepth`, because even though
-				// this line has a different quote depth, we're logically still
-				// in the same quote block.
-				previousLineType = line.Kind
-				continue
+				tokens = append(tokens, TokenEndParagraph)
 			}
 
 			for quoteIndex := previousQuoteDepth; quoteIndex > line.QuoteDepth; quoteIndex-- {
