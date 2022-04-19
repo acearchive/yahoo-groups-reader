@@ -55,6 +55,47 @@ a {
     text-decoration: none;
 }
 
+.btn-toggle .collapse-arrow > * {
+    transition: transform 0.25s ease;
+    transform: rotate(0deg);
+}
+
+.btn-toggle[aria-expanded="true"] .collapse-arrow > * {
+    transform: rotate(90deg);
+}
+
+dl.field-list {
+    display: grid;
+    grid-template-columns: max-content auto;
+    overflow-wrap: anywhere;
+}
+
+dl.field-list > * {
+    margin: 0;
+}
+
+dl.field-list > dt {
+    grid-column-start: 1;
+    margin-right: 1em;
+    text-align: right;
+}
+
+dl.field-list > dt::after {
+    content: ":";
+}
+
+dl.field-list > dd {
+    grid-column-start: 2;
+}
+
+.inline-icon {
+    display: inline-block;
+}
+
+.inline-icon > * {
+    vertical-align: middle;
+}
+
 .message-thread {
     min-width: 200px;
     max-width: 1000px;
@@ -114,19 +155,34 @@ a {
     font-weight: 300;
 }
 
-.message-thread .message .parent-ref {
+.message-thread .message .parent-message {
     padding-left: 1em;
 }
 
-.message-thread .message .parent-ref > .parent-name {
-    font-size: 0.9em;
+.message-thread .message .parent-message .parent-banner {
+    margin-bottom: 0.4em;
 }
 
-.message-thread .message .parent-ref > .parent-quote {
+.message-thread .message .parent-message .parent-name {
+    font-size: 0.9em;
+    color: var(--color-fg);
+    padding: 0;
+    margin-right: 0.4em;
+}
+
+.message-thread .message .parent-message .parent-link {
+    color: var(--color-fg-muted);
+}
+
+.message-thread .message .parent-message .parent-link:hover {
+    color: var(--color-fg);
+}
+
+.message-thread .message .parent-message .parent-quote {
     font-size: 0.8em;
 }
 
-.message-thread .message .message-body p:last-child {
+.message-thread .message .message-body *:last-child {
     margin-bottom: 0;
 }
 
@@ -136,28 +192,4 @@ a {
 
 .message-thread .message .inline-message-header dl.field-list > dd {
     color: var(--color-fg-muted);
-}
-
-dl.field-list {
-    display: grid;
-    grid-template-columns: max-content auto;
-    overflow-wrap: anywhere;
-}
-
-dl.field-list > * {
-    margin: 0;
-}
-
-dl.field-list > dt {
-    grid-column-start: 1;
-    margin-right: 1em;
-    text-align: right;
-}
-
-dl.field-list > dt::after {
-    content: ":";
-}
-
-dl.field-list > dd {
-    grid-column-start: 2;
 }
