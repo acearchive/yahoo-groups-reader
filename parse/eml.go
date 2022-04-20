@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/acearchive/yg-render/logger"
-	"github.com/acearchive/yg-render/parse/flowed"
+	"github.com/acearchive/yg-render/parse/body"
 	"io"
 	"net/mail"
 	"regexp"
@@ -82,7 +82,7 @@ func bodyFromEmail(email *mail.Message) (string, error) {
 		return "", err
 	}
 
-	return flowed.ToHtml(rawTextBody)
+	return body.ToHtml(rawTextBody)
 }
 
 func Email(contents io.Reader) (Message, error) {
