@@ -5,7 +5,6 @@ linters:
     - dupl
     - errname
     - errorlint
-    - exhaustive
     - exportloopref
     - forcetypeassert
     - goconst
@@ -28,7 +27,3 @@ linters:
     - unparam
     - varnamelen
     - whitespace
-
-linters-settings:
-  exhaustive:
-    default-signifies-exhaustive: true
