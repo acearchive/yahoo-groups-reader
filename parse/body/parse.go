@@ -156,17 +156,17 @@ func ParseLines(text io.Reader) ([]Line, error) {
 func Tokenize(lines []Line) []Token {
 	var tokens []Token
 
-	previousQuoteDepth := 0
+	currentQuoteDepth := 0
 	previousLineType := LineTypeEmpty
 
 	for _, line := range lines {
 		switch {
-		case line.QuoteDepth() > previousQuoteDepth:
+		case line.QuoteDepth() > currentQuoteDepth:
 			if previousLineType == LineTypeContent {
 				tokens = append(tokens, TokenEndParagraph)
 			}
 
-			for quoteIndex := previousQuoteDepth; quoteIndex < line.QuoteDepth(); quoteIndex++ {
+			for quoteIndex := currentQuoteDepth; quoteIndex < line.QuoteDepth(); quoteIndex++ {
 				tokens = append(tokens, TokenStartQuote)
 			}
 
@@ -176,21 +176,18 @@ func Tokenize(lines []Line) []Token {
 			case LineTypeContent:
 				tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
 			}
-		case line.QuoteDepth() < previousQuoteDepth:
+
+			currentQuoteDepth = line.QuoteDepth()
+		case line.QuoteDepth() < currentQuoteDepth && line.Kind() == LineTypeEmpty:
 			if previousLineType == LineTypeContent {
 				tokens = append(tokens, TokenEndParagraph)
 			}
 
-			for quoteIndex := previousQuoteDepth; quoteIndex > line.QuoteDepth(); quoteIndex-- {
+			for quoteIndex := currentQuoteDepth; quoteIndex > line.QuoteDepth(); quoteIndex-- {
 				tokens = append(tokens, TokenEndQuote)
 			}
 
-			switch line.Kind() {
-			case LineTypeSignature:
-				tokens = append(tokens, TokenSignatureLine)
-			case LineTypeContent:
-				tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
-			}
+			currentQuoteDepth = line.QuoteDepth()
 		case line.Kind() == LineTypeSignature:
 			if previousLineType == LineTypeContent {
 				tokens = append(tokens, TokenEndParagraph)
@@ -207,7 +204,6 @@ func Tokenize(lines []Line) []Token {
 			tokens = append(tokens, NewTextToken(line.Content()))
 		}
 
-		previousQuoteDepth = line.QuoteDepth()
 		previousLineType = line.Kind()
 	}
 
