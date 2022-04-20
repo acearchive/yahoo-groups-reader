@@ -5,15 +5,18 @@ import (
 	"io"
 	"mime"
 	"mime/multipart"
+	"mime/quotedprintable"
 	"net/mail"
 	"strings"
 )
 
 const (
-	MimeHeaderContentType      = "Content-Type"
-	contentTypePrefixMultipart = "multipart/"
-	contentTypePlainText       = "text/plain"
-	contentTypeParamBoundary   = "boundary"
+	MimeHeaderContentType             = "Content-Type"
+	MimeHeaderContentTransferEncoding = "Content-Transfer-Encoding"
+	contentTypePrefixMultipart        = "multipart/"
+	contentTypePlainText              = "text/plain"
+	contentTypeParamBoundary          = "boundary"
+	quotedPrintable                   = "quoted-printable"
 )
 
 func MultipartMessageBody(email *mail.Message) (io.Reader, error) {
@@ -40,7 +43,9 @@ func MultipartMessageBody(email *mail.Message) (io.Reader, error) {
 		}
 	}
 
-	// The email is not a MIME multipart message or no plain text part was
-	// found.
+	if email.Header.Get(MimeHeaderContentTransferEncoding) == quotedPrintable {
+		return quotedprintable.NewReader(email.Body), nil
+	}
+
 	return email.Body, nil
 }
