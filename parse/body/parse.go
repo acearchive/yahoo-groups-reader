@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+const (
+	whitespaceChars = " \t"
+)
+
 var ErrInvalidTokenType = errors.New("invalid TokenType")
 
 type TokenType string
@@ -106,12 +110,12 @@ const (
 
 func ParseLine(line string) Line {
 	quoteDepth := 0
-	content := line
+	content := strings.TrimLeft(line, whitespaceChars)
 
 	for strings.HasPrefix(content, quoteChar) {
 		quoteDepth++
 		content = strings.TrimPrefix(content, quoteChar)
-		content = strings.TrimLeft(content, " ")
+		content = strings.TrimLeft(content, whitespaceChars)
 	}
 
 	if len(strings.TrimSpace(content)) == 0 {
