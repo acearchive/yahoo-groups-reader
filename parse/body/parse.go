@@ -161,8 +161,6 @@ func Tokenize(lines []Line) []Token {
 
 	for _, line := range lines {
 		switch {
-		case line.Kind() == LineTypeSignature:
-			tokens = append(tokens, TokenSignatureLine)
 		case line.QuoteDepth() > previousQuoteDepth:
 			if previousLineType == LineTypeContent {
 				tokens = append(tokens, TokenEndParagraph)
@@ -172,7 +170,12 @@ func Tokenize(lines []Line) []Token {
 				tokens = append(tokens, TokenStartQuote)
 			}
 
-			tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
+			switch line.Kind() {
+			case LineTypeSignature:
+				tokens = append(tokens, TokenSignatureLine)
+			case LineTypeContent:
+				tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
+			}
 		case line.QuoteDepth() < previousQuoteDepth:
 			if previousLineType == LineTypeContent {
 				tokens = append(tokens, TokenEndParagraph)
@@ -182,12 +185,25 @@ func Tokenize(lines []Line) []Token {
 				tokens = append(tokens, TokenEndQuote)
 			}
 
-			tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
+			switch line.Kind() {
+			case LineTypeSignature:
+				tokens = append(tokens, TokenSignatureLine)
+			case LineTypeContent:
+				tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
+			}
+		case line.Kind() == LineTypeSignature:
+			if previousLineType == LineTypeContent {
+				tokens = append(tokens, TokenEndParagraph)
+			}
+
+			tokens = append(tokens, TokenSignatureLine)
 		case line.Kind() == LineTypeEmpty && previousLineType == LineTypeContent:
 			tokens = append(tokens, TokenEndParagraph)
-		case line.Kind() == LineTypeContent && previousLineType == LineTypeEmpty:
-			tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
 		case line.Kind() == LineTypeContent:
+			if previousLineType == LineTypeEmpty || previousLineType == LineTypeSignature {
+				tokens = append(tokens, TokenStartParagraph)
+			}
+
 			tokens = append(tokens, NewTextToken(line.Content()))
 		}
 
