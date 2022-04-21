@@ -129,3 +129,31 @@ a {
 .message-thread .message .message-body p:last-child {
     margin-bottom: 0;
 }
+
+.message-thread .message .message-body .inline-message-header {
+    font-size: 0.8em;
+}
+
+dl.field-list {
+    display: grid;
+    grid-template-columns: max-content auto;
+    overflow-wrap: anywhere;
+}
+
+dl.field-list > * {
+    margin: 0;
+}
+
+dl.field-list > dt {
+    grid-column-start: 1;
+    margin-right: 1em;
+    text-align: right;
+}
+
+dl.field-list > dt::after {
+    content: ":";
+}
+
+dl.field-list > dd {
+    grid-column-start: 2;
+}
