@@ -2,42 +2,78 @@ package body
 
 import (
 	"html"
+	"html/template"
 	"io"
 	"strings"
 )
 
 const IndentPrefix = "  "
 
-func (b MessageHeaderBlock) ToHtml(indent string) string {
-	// TODO: Implement
-	return ""
+const messageHeaderTemplateString = `
+<div class="inline-message-header">
+  <dl class="field-list">
+  {{ range .Fields -}}
+    <dt>{{ .Name }}</dt>
+    <dd>{{ .Value }}</dd>
+  {{ end }}
+  </dl>
+</div>
+`
+
+var messageHeaderTemplate = template.Must(template.New("inline-message-header").Parse(messageHeaderTemplateString))
+
+type messageHeaderTemplateField struct {
+	Name  string
+	Value string
 }
 
-func (b SignatureLineBlock) ToHtml(indent string) string {
+type messageHeaderTemplateParams struct {
+	Fields []messageHeaderTemplateField
+}
+
+func (b MessageHeaderBlock) ToHtml() string {
+	params := messageHeaderTemplateParams{
+		Fields: make([]messageHeaderTemplateField, 0, len(b)),
+	}
+
+	for name, value := range b {
+		params.Fields = append(params.Fields, messageHeaderTemplateField{Name: name, Value: value})
+	}
+
+	var output strings.Builder
+
+	if err := messageHeaderTemplate.Execute(&output, params); err != nil {
+		panic(err)
+	}
+
+	return output.String()
+}
+
+func (b SignatureLineBlock) ToHtml() string {
 	return "<hr>\n"
 }
 
-func (StartParagraphToken) ToHtml(indent string) string {
+func (StartParagraphToken) ToHtml() string {
 	return "<p>\n"
 }
 
-func (EndParagraphToken) ToHtml(indent string) string {
+func (EndParagraphToken) ToHtml() string {
 	return "</p>\n"
 }
 
-func (StartQuoteToken) ToHtml(indent string) string {
+func (StartQuoteToken) ToHtml() string {
 	return "<blockquote>\n"
 }
 
-func (EndQuoteToken) ToHtml(indent string) string {
+func (EndQuoteToken) ToHtml() string {
 	return "</blockquote>\n"
 }
 
-func (b BlockToken) ToHtml(indent string) string {
-	return b.ToHtml(indent)
+func (b BlockToken) ToHtml() string {
+	return b.Block.ToHtml()
 }
 
-func (t TextToken) ToHtml(indent string) string {
+func (t TextToken) ToHtml() string {
 	return html.EscapeString(string(t))
 }
 
@@ -45,27 +81,24 @@ func Render(tokens []Token) string {
 	var output strings.Builder
 
 	indentLevel := 0
-	node := ""
 
-	writeToken := func() {
+	writeToken := func(token Token) {
 		for space := indentLevel; space > 0; space-- {
 			output.WriteString(IndentPrefix)
 		}
-		output.WriteString(node)
+		output.WriteString(token.ToHtml())
 	}
 
 	for _, token := range tokens {
-		node = token.ToHtml(IndentPrefix)
-
 		switch token.TagType() {
 		case TagTypeOpen:
-			writeToken()
+			writeToken(token)
 			indentLevel++
 		case TagTypeClose:
 			indentLevel--
-			writeToken()
+			writeToken(token)
 		case TagTypeSelfClose:
-			writeToken()
+			writeToken(token)
 		}
 	}
 

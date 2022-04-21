@@ -16,7 +16,7 @@ const (
 )
 
 type Block interface {
-	ToHtml(indent string) string
+	ToHtml() string
 }
 
 type MessageHeaderBlock map[string]string
@@ -26,7 +26,7 @@ type SignatureLineBlock struct{}
 type Token interface {
 	IsToken()
 	TagType() TagType
-	ToHtml(indent string) string
+	ToHtml() string
 }
 
 type StartParagraphToken struct{}
