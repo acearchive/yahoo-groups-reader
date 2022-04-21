@@ -172,7 +172,7 @@ func ParseLine(line string) Line {
 		}
 	}
 
-	if messageHeaderRegex.MatchString(content) {
+	if messageHeaderRegex.MatchString(strings.TrimRight(content, whitespaceChars)) {
 		return Line{
 			Content:    MessageHeaderLineContent{},
 			QuoteDepth: quoteDepth,
