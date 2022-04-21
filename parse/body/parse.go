@@ -223,7 +223,17 @@ func Tokenize(lines []Line) []Token {
 	)
 
 	for _, line := range lines {
-		if currentHeader != nil && (!line.IsField() || line.QuoteDepth != currentQuoteDepth) {
+		if currentHeader != nil {
+			if line.QuoteDepth == currentQuoteDepth {
+				switch lineContent := line.Content.(type) {
+				case EmptyLineContent:
+					continue
+				case FieldLineContent:
+					currentHeader[lineContent.Name] = lineContent.Value
+					continue
+				}
+			}
+
 			tokens = append(tokens, BlockToken{currentHeader})
 			currentHeader = nil
 		}
@@ -236,9 +246,6 @@ func Tokenize(lines []Line) []Token {
 		}
 
 		switch {
-		case currentHeader != nil:
-			fieldContent := line.Content.(FieldLineContent)
-			currentHeader[fieldContent.Name] = fieldContent.Value
 		case line.QuoteDepth > currentQuoteDepth:
 			if previousLine.IsText() {
 				tokens = append(tokens, EndParagraphToken{})
