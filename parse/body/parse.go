@@ -145,7 +145,7 @@ const (
 
 var (
 	fieldRegex         = regexp.MustCompile(`^([A-Z](?:-[A-Z]|[A-Za-z])*): (\S.*)$`)
-	messageHeaderRegex = regexp.MustCompile(`^-+ Original Message -+$`)
+	messageHeaderRegex = regexp.MustCompile(`^-+ ?Original Message ?-+$`)
 )
 
 func ParseLine(line string) Line {
