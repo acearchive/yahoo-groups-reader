@@ -215,10 +215,21 @@ func Tokenize(lines []Line) []Token {
 
 	currentQuoteDepth := 0
 
-	var previousLine Line
+	var (
+		previousLine  Line
+		currentHeader MessageHeaderBlock
+	)
 
 	for _, line := range lines {
+		if currentHeader != nil && (!line.IsField() || line.QuoteDepth != currentQuoteDepth) {
+			tokens = append(tokens, BlockToken{currentHeader})
+			currentHeader = nil
+		}
+
 		switch {
+		case currentHeader != nil:
+			fieldContent := line.Content.(FieldLineContent)
+			currentHeader[fieldContent.Name] = fieldContent.Value
 		case line.QuoteDepth > currentQuoteDepth:
 			if previousLine.IsText() {
 				tokens = append(tokens, EndParagraphToken{})
@@ -233,6 +244,8 @@ func Tokenize(lines []Line) []Token {
 				tokens = append(tokens, BlockToken{SignatureLineBlock{}})
 			case TextLineContent:
 				tokens = append(tokens, StartParagraphToken{}, TextToken(content))
+			case MessageHeaderLineContent:
+				currentHeader = make(map[string]string)
 			}
 
 			currentQuoteDepth = line.QuoteDepth
@@ -246,6 +259,12 @@ func Tokenize(lines []Line) []Token {
 			}
 
 			currentQuoteDepth = line.QuoteDepth
+		case line.IsMessageHeader():
+			if previousLine.IsText() {
+				tokens = append(tokens, EndParagraphToken{})
+			}
+
+			currentHeader = make(map[string]string)
 		case line.IsSignature():
 			if previousLine.IsText() {
 				tokens = append(tokens, EndParagraphToken{})
@@ -255,7 +274,7 @@ func Tokenize(lines []Line) []Token {
 		case line.IsEmpty() && previousLine.IsText():
 			tokens = append(tokens, EndParagraphToken{})
 		case line.IsText():
-			if previousLine.IsEmpty() || previousLine.IsSignature() {
+			if !previousLine.IsText() {
 				tokens = append(tokens, StartParagraphToken{})
 			}
 
