@@ -134,7 +134,7 @@ a {
     font-size: 0.8em;
 }
 
-.message-thread .message .message-body .inline-message-header dl.field-list > dd {
+.message-thread .message .inline-message-header dl.field-list > dd {
     color: var(--color-fg-muted);
 }
 
