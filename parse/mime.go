@@ -2,6 +2,7 @@ package parse
 
 import (
 	"errors"
+	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/ianaindex"
 	"io"
 	"mime"
@@ -21,17 +22,19 @@ const (
 	quotedPrintable                   = "quoted-printable"
 )
 
+var DefaultCharset = charmap.Windows1252
+
 func decodeCharset(body io.Reader, contentTypeParams map[string]string) io.Reader {
 	if charset, hasCharset := contentTypeParams[contentTypeParamCharset]; hasCharset {
 		encoding, err := ianaindex.MIME.Encoding(charset)
 		if err != nil {
-			return body
+			return DefaultCharset.NewDecoder().Reader(body)
 		}
 
 		return encoding.NewDecoder().Reader(body)
 	}
 
-	return body
+	return DefaultCharset.NewDecoder().Reader(body)
 }
 
 func DecodeMessageBody(email *mail.Message) (io.Reader, error) {
