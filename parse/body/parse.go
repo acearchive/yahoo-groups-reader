@@ -26,7 +26,7 @@ type Field struct {
 
 type MessageHeaderBlock []Field
 
-type SignatureLineBlock struct{}
+type DividerBlock struct{}
 
 type Token interface {
 	IsToken()
@@ -99,8 +99,8 @@ func (l Line) IsText() bool {
 	return ok
 }
 
-func (l Line) IsSignature() bool {
-	_, ok := l.Content.(SignatureLineContent)
+func (l Line) IsDivider() bool {
+	_, ok := l.Content.(DividerLineContent)
 	return ok
 }
 
@@ -126,9 +126,9 @@ type TextLineContent string
 
 func (TextLineContent) IsLineContent() {}
 
-type SignatureLineContent struct{}
+type DividerLineContent struct{}
 
-func (SignatureLineContent) IsLineContent() {}
+func (DividerLineContent) IsLineContent() {}
 
 type MessageHeaderLineContent struct{}
 
@@ -143,11 +143,11 @@ func (FieldLineContent) IsLineContent() {}
 
 const (
 	whitespaceChars = " \t"
-	signatureLine   = "--"
 	quoteChar       = ">"
 )
 
 var (
+	dividerRegex       = regexp.MustCompile(`^[-_]{2,}$`)
 	fieldRegex         = regexp.MustCompile(`^(From|Reply-To|To|Subject|Date|Sent|Message): (\S.*)$`)
 	messageHeaderRegex = regexp.MustCompile(`^-+ ?Original Message ?-+$`)
 )
@@ -169,9 +169,9 @@ func ParseLine(line string) Line {
 		}
 	}
 
-	if strings.TrimRight(content, whitespaceChars) == signatureLine {
+	if dividerRegex.MatchString(strings.TrimRight(content, whitespaceChars)) {
 		return Line{
-			Content:    SignatureLineContent{},
+			Content:    DividerLineContent{},
 			QuoteDepth: quoteDepth,
 		}
 	}
@@ -272,8 +272,8 @@ func Tokenize(lines []Line) []Token {
 			}
 
 			switch content := line.Content.(type) {
-			case SignatureLineContent:
-				tokens = append(tokens, BlockToken{SignatureLineBlock{}})
+			case DividerLineContent:
+				tokens = append(tokens, BlockToken{DividerBlock{}})
 			case TextLineContent:
 				tokens = append(tokens, StartParagraphToken{}, TextToken(content))
 			case FieldLineContent:
@@ -291,12 +291,12 @@ func Tokenize(lines []Line) []Token {
 			}
 
 			currentQuoteDepth = line.QuoteDepth
-		case line.IsSignature():
+		case line.IsDivider():
 			if previousLine.IsText() {
 				tokens = append(tokens, EndParagraphToken{})
 			}
 
-			tokens = append(tokens, BlockToken{SignatureLineBlock{}})
+			tokens = append(tokens, BlockToken{DividerBlock{}})
 		case (line.IsEmpty() || line.IsMessageHeader()) && previousLine.IsText():
 			tokens = append(tokens, EndParagraphToken{})
 		case line.IsText():

@@ -38,7 +38,7 @@ func (b MessageHeaderBlock) ToHtml() string {
 	return output.String()
 }
 
-func (b SignatureLineBlock) ToHtml() string {
+func (b DividerBlock) ToHtml() string {
 	return "<hr>\n"
 }
 

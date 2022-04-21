@@ -188,6 +188,7 @@ dl.field-list > dd {
 
 .message-thread .message .message-body .inline-message-header {
     font-size: 0.8em;
+    margin-bottom: 0.5em;
 }
 
 .message-thread .message .inline-message-header dl.field-list > dd {
