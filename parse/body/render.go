@@ -22,23 +22,12 @@ const messageHeaderTemplateString = `
 
 var messageHeaderTemplate = template.Must(template.New("inline-message-header").Parse(messageHeaderTemplateString))
 
-type messageHeaderTemplateField struct {
-	Name  string
-	Value string
-}
-
 type messageHeaderTemplateParams struct {
-	Fields []messageHeaderTemplateField
+	Fields []Field
 }
 
 func (b MessageHeaderBlock) ToHtml() string {
-	params := messageHeaderTemplateParams{
-		Fields: make([]messageHeaderTemplateField, 0, len(b)),
-	}
-
-	for name, value := range b {
-		params.Fields = append(params.Fields, messageHeaderTemplateField{Name: name, Value: value})
-	}
+	params := messageHeaderTemplateParams{Fields: b}
 
 	var output strings.Builder
 

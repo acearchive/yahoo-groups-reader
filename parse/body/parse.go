@@ -19,7 +19,12 @@ type Block interface {
 	ToHtml() string
 }
 
-type MessageHeaderBlock map[string]string
+type Field struct {
+	Name  string
+	Value string
+}
+
+type MessageHeaderBlock []Field
 
 type SignatureLineBlock struct{}
 
@@ -130,9 +135,8 @@ type MessageHeaderLineContent struct{}
 func (MessageHeaderLineContent) IsLineContent() {}
 
 type FieldLineContent struct {
-	Name  string
-	Value string
-	Text  string
+	Field
+	Text string
 }
 
 func (FieldLineContent) IsLineContent() {}
@@ -144,7 +148,7 @@ const (
 )
 
 var (
-	fieldRegex         = regexp.MustCompile(`^([A-Z](?:-[A-Z]|[A-Za-z])*): (\S.*)$`)
+	fieldRegex         = regexp.MustCompile(`^(From|Reply-To|To|Subject|Date|Sent|Message): (\S.*)$`)
 	messageHeaderRegex = regexp.MustCompile(`^-+ ?Original Message ?-+$`)
 )
 
@@ -182,9 +186,11 @@ func ParseLine(line string) Line {
 	if matches := fieldRegex.FindStringSubmatch(content); matches != nil {
 		return Line{
 			Content: FieldLineContent{
-				Name:  matches[1],
-				Value: matches[2],
-				Text:  matches[0],
+				Field: Field{
+					Name:  matches[1],
+					Value: matches[2],
+				},
+				Text: content,
 			},
 			QuoteDepth: quoteDepth,
 		}
@@ -223,13 +229,17 @@ func Tokenize(lines []Line) []Token {
 	)
 
 	for _, line := range lines {
-		if currentHeader != nil {
+		if len(currentHeader) > 0 {
 			if line.QuoteDepth == currentQuoteDepth {
 				switch lineContent := line.Content.(type) {
-				case EmptyLineContent:
-					continue
 				case FieldLineContent:
-					currentHeader[lineContent.Name] = lineContent.Value
+					currentHeader = append(currentHeader, lineContent.Field)
+					previousLine = line
+					continue
+				case TextLineContent:
+					// This is a continuation line for the previous field.
+					currentHeader[len(currentHeader)-1].Value += string(lineContent)
+					previousLine = line
 					continue
 				}
 			}
@@ -238,7 +248,13 @@ func Tokenize(lines []Line) []Token {
 			currentHeader = nil
 		}
 
-		if fieldContent, isField := line.Content.(FieldLineContent); currentHeader == nil && isField {
+		if fieldContent, isField := line.Content.(FieldLineContent); isField {
+			if line.QuoteDepth == currentQuoteDepth && (previousLine.IsEmpty() || previousLine.IsMessageHeader()) {
+				currentHeader = append(currentHeader, fieldContent.Field)
+				previousLine = line
+				continue
+			}
+
 			line = Line{
 				Content:    TextLineContent(fieldContent.Text),
 				QuoteDepth: line.QuoteDepth,
@@ -260,8 +276,8 @@ func Tokenize(lines []Line) []Token {
 				tokens = append(tokens, BlockToken{SignatureLineBlock{}})
 			case TextLineContent:
 				tokens = append(tokens, StartParagraphToken{}, TextToken(content))
-			case MessageHeaderLineContent:
-				currentHeader = make(map[string]string)
+			case FieldLineContent:
+				currentHeader = append(currentHeader, content.Field)
 			}
 
 			currentQuoteDepth = line.QuoteDepth
@@ -275,19 +291,13 @@ func Tokenize(lines []Line) []Token {
 			}
 
 			currentQuoteDepth = line.QuoteDepth
-		case line.IsMessageHeader():
-			if previousLine.IsText() {
-				tokens = append(tokens, EndParagraphToken{})
-			}
-
-			currentHeader = make(map[string]string)
 		case line.IsSignature():
 			if previousLine.IsText() {
 				tokens = append(tokens, EndParagraphToken{})
 			}
 
 			tokens = append(tokens, BlockToken{SignatureLineBlock{}})
-		case line.IsEmpty() && previousLine.IsText():
+		case (line.IsEmpty() || line.IsMessageHeader()) && previousLine.IsText():
 			tokens = append(tokens, EndParagraphToken{})
 		case line.IsText():
 			if !previousLine.IsText() {
