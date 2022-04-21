@@ -138,13 +138,15 @@ type FieldLineContent struct {
 func (FieldLineContent) IsLineContent() {}
 
 const (
-	whitespaceChars   = " \t"
-	signatureLine     = "--"
-	quoteChar         = ">"
-	messageHeaderLine = "----- Original Message -----"
+	whitespaceChars = " \t"
+	signatureLine   = "--"
+	quoteChar       = ">"
 )
 
-var fieldRegex = regexp.MustCompile(`^([A-Z](?:-[A-Z]|[A-Za-z])*): (\S.*)$`)
+var (
+	fieldRegex         = regexp.MustCompile(`^([A-Z](?:-[A-Z]|[A-Za-z])*): (\S.*)$`)
+	messageHeaderRegex = regexp.MustCompile(`^-+ Original Message -+$`)
+)
 
 func ParseLine(line string) Line {
 	quoteDepth := 0
@@ -170,7 +172,7 @@ func ParseLine(line string) Line {
 		}
 	}
 
-	if content == messageHeaderLine {
+	if messageHeaderRegex.MatchString(content) {
 		return Line{
 			Content:    MessageHeaderLineContent{},
 			QuoteDepth: quoteDepth,
@@ -224,6 +226,13 @@ func Tokenize(lines []Line) []Token {
 		if currentHeader != nil && (!line.IsField() || line.QuoteDepth != currentQuoteDepth) {
 			tokens = append(tokens, BlockToken{currentHeader})
 			currentHeader = nil
+		}
+
+		if fieldContent, isField := line.Content.(FieldLineContent); currentHeader == nil && isField {
+			line = Line{
+				Content:    TextLineContent(fieldContent.Text),
+				QuoteDepth: line.QuoteDepth,
+			}
 		}
 
 		switch {
