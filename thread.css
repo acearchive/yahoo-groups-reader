@@ -134,6 +134,10 @@ a {
     font-size: 0.8em;
 }
 
+.message-thread .message .message-body .inline-message-header dl.field-list > dd {
+    color: var(--color-fg-muted);
+}
+
 dl.field-list {
     display: grid;
     grid-template-columns: max-content auto;
