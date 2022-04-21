@@ -2,47 +2,10 @@ package body
 
 import (
 	"bufio"
-	"errors"
-	"fmt"
 	"io"
+	"regexp"
 	"strings"
 )
-
-const (
-	whitespaceChars = " \t"
-)
-
-var ErrInvalidTokenType = errors.New("invalid TokenType")
-
-type TokenType string
-
-const (
-	TokenTypeStartParagraph TokenType = "StartParagraph"
-	TokenTypeEndParagraph   TokenType = "EndParagraph"
-	TokenTypeStartQuote     TokenType = "StartQuote"
-	TokenTypeEndQuote       TokenType = "EndQuote"
-	TokenTypeSignatureLine  TokenType = "SignatureLine"
-	TokenTypeText           TokenType = "Text"
-)
-
-func (t TokenType) TagType() TagType {
-	switch t {
-	case TokenTypeStartParagraph:
-		return TagTypeOpen
-	case TokenTypeEndParagraph:
-		return TagTypeClose
-	case TokenTypeStartQuote:
-		return TagTypeOpen
-	case TokenTypeEndQuote:
-		return TagTypeClose
-	case TokenTypeSignatureLine:
-		return TagTypeSelfClose
-	case TokenTypeText:
-		return TagTypeSelfClose
-	default:
-		panic(fmt.Errorf("%w: %v", ErrInvalidTokenType, t))
-	}
-}
 
 type TagType string
 
@@ -52,61 +15,136 @@ const (
 	TagTypeSelfClose TagType = "SelfClose"
 )
 
-type Token struct {
-	kind TokenType
-	text string
+type Block interface {
+	ToHtml(indent string) string
 }
 
-var (
-	TokenStartParagraph = Token{kind: TokenTypeStartParagraph}
-	TokenEndParagraph   = Token{kind: TokenTypeEndParagraph}
-	TokenStartQuote     = Token{kind: TokenTypeStartQuote}
-	TokenEndQuote       = Token{kind: TokenTypeEndQuote}
-	TokenSignatureLine  = Token{kind: TokenTypeSignatureLine}
-)
+type MessageHeaderBlock map[string]string
 
-func (t Token) Kind() TokenType {
-	return t.kind
+type SignatureLineBlock struct{}
+
+type Token interface {
+	IsToken()
+	TagType() TagType
+	ToHtml(indent string) string
 }
 
-func (t Token) Text() string {
-	return t.text
+type StartParagraphToken struct{}
+
+func (StartParagraphToken) IsToken() {}
+
+func (StartParagraphToken) TagType() TagType {
+	return TagTypeOpen
 }
 
-func NewTextToken(text string) Token {
-	return Token{kind: TokenTypeText, text: text + "\n"}
+type EndParagraphToken struct{}
+
+func (EndParagraphToken) IsToken() {}
+
+func (EndParagraphToken) TagType() TagType {
+	return TagTypeClose
 }
 
-type LineType string
+type StartQuoteToken struct{}
 
-const (
-	LineTypeEmpty     LineType = "Empty"
-	LineTypeSignature LineType = "Signature"
-	LineTypeContent   LineType = "Content"
-)
+func (StartQuoteToken) IsToken() {}
+
+func (StartQuoteToken) TagType() TagType {
+	return TagTypeOpen
+}
+
+type EndQuoteToken struct{}
+
+func (EndQuoteToken) IsToken() {}
+
+func (EndQuoteToken) TagType() TagType {
+	return TagTypeClose
+}
+
+type BlockToken struct {
+	Block
+}
+
+func (BlockToken) IsToken() {}
+
+func (BlockToken) TagType() TagType {
+	return TagTypeSelfClose
+}
+
+type TextToken string
+
+func (TextToken) IsToken() {}
+
+func (TextToken) TagType() TagType {
+	return TagTypeSelfClose
+}
 
 type Line struct {
-	kind       LineType
-	quoteDepth int
-	content    string
+	QuoteDepth int
+	Content    LineContent
 }
 
-func (l Line) Kind() LineType {
-	return l.kind
+func (l Line) IsEmpty() bool {
+	_, ok := l.Content.(EmptyLineContent)
+	return ok
 }
 
-func (l Line) QuoteDepth() int {
-	return l.quoteDepth
+func (l Line) IsText() bool {
+	_, ok := l.Content.(TextLineContent)
+	return ok
 }
 
-func (l Line) Content() string {
-	return l.content
+func (l Line) IsSignature() bool {
+	_, ok := l.Content.(SignatureLineContent)
+	return ok
 }
+
+func (l Line) IsMessageHeader() bool {
+	_, ok := l.Content.(MessageHeaderLineContent)
+	return ok
+}
+
+func (l Line) IsField() bool {
+	_, ok := l.Content.(FieldLineContent)
+	return ok
+}
+
+type LineContent interface {
+	IsLineContent()
+}
+
+type EmptyLineContent struct{}
+
+func (EmptyLineContent) IsLineContent() {}
+
+type TextLineContent string
+
+func (TextLineContent) IsLineContent() {}
+
+type SignatureLineContent struct{}
+
+func (SignatureLineContent) IsLineContent() {}
+
+type MessageHeaderLineContent struct{}
+
+func (MessageHeaderLineContent) IsLineContent() {}
+
+type FieldLineContent struct {
+	Name  string
+	Value string
+	Text  string
+}
+
+func (FieldLineContent) IsLineContent() {}
 
 const (
-	signatureLine = "--"
-	quoteChar     = ">"
+	whitespaceChars   = " \t"
+	signatureLine     = "--"
+	quoteChar         = ">"
+	messageHeaderLine = "----- Original Message -----"
 )
+
+var fieldRegex = regexp.MustCompile(`^([A-Z](?:-[A-Z]|[A-Za-z])*): (\S.*)$`)
 
 func ParseLine(line string) Line {
 	quoteDepth := 0
@@ -120,24 +158,39 @@ func ParseLine(line string) Line {
 
 	if len(strings.TrimSpace(content)) == 0 {
 		return Line{
-			kind:       LineTypeEmpty,
-			quoteDepth: quoteDepth,
-			content:    "",
+			Content:    EmptyLineContent{},
+			QuoteDepth: quoteDepth,
 		}
 	}
 
-	if strings.TrimRight(content, " ") == signatureLine {
+	if strings.TrimRight(content, whitespaceChars) == signatureLine {
 		return Line{
-			kind:       LineTypeSignature,
-			quoteDepth: quoteDepth,
-			content:    "",
+			Content:    SignatureLineContent{},
+			QuoteDepth: quoteDepth,
+		}
+	}
+
+	if content == messageHeaderLine {
+		return Line{
+			Content:    MessageHeaderLineContent{},
+			QuoteDepth: quoteDepth,
+		}
+	}
+
+	if matches := fieldRegex.FindStringSubmatch(content); matches != nil {
+		return Line{
+			Content: FieldLineContent{
+				Name:  matches[1],
+				Value: matches[2],
+				Text:  matches[0],
+			},
+			QuoteDepth: quoteDepth,
 		}
 	}
 
 	return Line{
-		kind:       LineTypeContent,
-		quoteDepth: quoteDepth,
-		content:    content,
+		Content:    TextLineContent(content),
+		QuoteDepth: quoteDepth,
 	}
 }
 
@@ -161,54 +214,55 @@ func Tokenize(lines []Line) []Token {
 	var tokens []Token
 
 	currentQuoteDepth := 0
-	previousLineType := LineTypeEmpty
+
+	var previousLine Line
 
 	for _, line := range lines {
 		switch {
-		case line.QuoteDepth() > currentQuoteDepth:
-			if previousLineType == LineTypeContent {
-				tokens = append(tokens, TokenEndParagraph)
+		case line.QuoteDepth > currentQuoteDepth:
+			if previousLine.IsText() {
+				tokens = append(tokens, EndParagraphToken{})
 			}
 
-			for quoteIndex := currentQuoteDepth; quoteIndex < line.QuoteDepth(); quoteIndex++ {
-				tokens = append(tokens, TokenStartQuote)
+			for quoteIndex := currentQuoteDepth; quoteIndex < line.QuoteDepth; quoteIndex++ {
+				tokens = append(tokens, StartQuoteToken{})
 			}
 
-			switch line.Kind() {
-			case LineTypeSignature:
-				tokens = append(tokens, TokenSignatureLine)
-			case LineTypeContent:
-				tokens = append(tokens, TokenStartParagraph, NewTextToken(line.Content()))
+			switch content := line.Content.(type) {
+			case SignatureLineContent:
+				tokens = append(tokens, BlockToken{SignatureLineBlock{}})
+			case TextLineContent:
+				tokens = append(tokens, StartParagraphToken{}, TextToken(content))
 			}
 
-			currentQuoteDepth = line.QuoteDepth()
-		case line.QuoteDepth() < currentQuoteDepth && line.Kind() == LineTypeEmpty:
-			if previousLineType == LineTypeContent {
-				tokens = append(tokens, TokenEndParagraph)
+			currentQuoteDepth = line.QuoteDepth
+		case line.QuoteDepth < currentQuoteDepth && line.IsEmpty():
+			if previousLine.IsText() {
+				tokens = append(tokens, EndParagraphToken{})
 			}
 
-			for quoteIndex := currentQuoteDepth; quoteIndex > line.QuoteDepth(); quoteIndex-- {
-				tokens = append(tokens, TokenEndQuote)
+			for quoteIndex := currentQuoteDepth; quoteIndex > line.QuoteDepth; quoteIndex-- {
+				tokens = append(tokens, EndQuoteToken{})
 			}
 
-			currentQuoteDepth = line.QuoteDepth()
-		case line.Kind() == LineTypeSignature:
-			if previousLineType == LineTypeContent {
-				tokens = append(tokens, TokenEndParagraph)
+			currentQuoteDepth = line.QuoteDepth
+		case line.IsSignature():
+			if previousLine.IsText() {
+				tokens = append(tokens, EndParagraphToken{})
 			}
 
-			tokens = append(tokens, TokenSignatureLine)
-		case line.Kind() == LineTypeEmpty && previousLineType == LineTypeContent:
-			tokens = append(tokens, TokenEndParagraph)
-		case line.Kind() == LineTypeContent:
-			if previousLineType == LineTypeEmpty || previousLineType == LineTypeSignature {
-				tokens = append(tokens, TokenStartParagraph)
+			tokens = append(tokens, BlockToken{SignatureLineBlock{}})
+		case line.IsEmpty() && previousLine.IsText():
+			tokens = append(tokens, EndParagraphToken{})
+		case line.IsText():
+			if previousLine.IsEmpty() || previousLine.IsSignature() {
+				tokens = append(tokens, StartParagraphToken{})
 			}
 
-			tokens = append(tokens, NewTextToken(line.Content()))
+			tokens = append(tokens, TextToken(line.Content.(TextLineContent)))
 		}
 
-		previousLineType = line.Kind()
+		previousLine = line
 	}
 
 	return tokens

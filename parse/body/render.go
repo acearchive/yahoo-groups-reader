@@ -8,6 +8,39 @@ import (
 
 const IndentPrefix = "  "
 
+func (b MessageHeaderBlock) ToHtml(indent string) string {
+	// TODO: Implement
+	return ""
+}
+
+func (b SignatureLineBlock) ToHtml(indent string) string {
+	return "<hr>\n"
+}
+
+func (StartParagraphToken) ToHtml(indent string) string {
+	return "<p>\n"
+}
+
+func (EndParagraphToken) ToHtml(indent string) string {
+	return "</p>\n"
+}
+
+func (StartQuoteToken) ToHtml(indent string) string {
+	return "<blockquote>\n"
+}
+
+func (EndQuoteToken) ToHtml(indent string) string {
+	return "</blockquote>\n"
+}
+
+func (b BlockToken) ToHtml(indent string) string {
+	return b.ToHtml(indent)
+}
+
+func (t TextToken) ToHtml(indent string) string {
+	return html.EscapeString(string(t))
+}
+
 func Render(tokens []Token) string {
 	var output strings.Builder
 
@@ -22,22 +55,9 @@ func Render(tokens []Token) string {
 	}
 
 	for _, token := range tokens {
-		switch token.Kind() {
-		case TokenTypeStartParagraph:
-			node = "<p>\n"
-		case TokenTypeEndParagraph:
-			node = "</p>\n"
-		case TokenTypeStartQuote:
-			node = "<blockquote>\n"
-		case TokenTypeEndQuote:
-			node = "</blockquote>\n"
-		case TokenTypeSignatureLine:
-			node = "<hr>\n"
-		case TokenTypeText:
-			node = html.EscapeString(token.Text())
-		}
+		node = token.ToHtml(IndentPrefix)
 
-		switch token.Kind().TagType() {
+		switch token.TagType() {
 		case TagTypeOpen:
 			writeToken()
 			indentLevel++
