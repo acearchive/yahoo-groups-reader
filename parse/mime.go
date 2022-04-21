@@ -2,6 +2,7 @@ package parse
 
 import (
 	"errors"
+	"golang.org/x/text/encoding/ianaindex"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -16,10 +17,11 @@ const (
 	contentTypePrefixMultipart        = "multipart/"
 	contentTypePlainText              = "text/plain"
 	contentTypeParamBoundary          = "boundary"
+	contentTypeParamCharset           = "charset"
 	quotedPrintable                   = "quoted-printable"
 )
 
-func MultipartMessageBody(email *mail.Message) (io.Reader, error) {
+func decodeMultipart(email *mail.Message) (io.Reader, error) {
 	mediaType, contentTypeParams, err := mime.ParseMediaType(email.Header.Get(MimeHeaderContentType))
 
 	if err == nil && strings.HasPrefix(mediaType, contentTypePrefixMultipart) {
@@ -48,4 +50,28 @@ func MultipartMessageBody(email *mail.Message) (io.Reader, error) {
 	}
 
 	return email.Body, nil
+}
+
+func decodeCharset(body io.Reader, contentType string) (io.Reader, error) {
+	_, contentTypeParams, err := mime.ParseMediaType(contentType)
+
+	if charset, hasCharset := contentTypeParams[contentTypeParamCharset]; hasCharset && err == nil {
+		encoding, err := ianaindex.MIME.Encoding(charset)
+		if err != nil {
+			return body, nil
+		}
+
+		return encoding.NewDecoder().Reader(body), nil
+	}
+
+	return body, nil
+}
+
+func DecodeMessageBody(email *mail.Message) (io.Reader, error) {
+	multipartDecoded, err := decodeMultipart(email)
+	if err != nil {
+		return nil, err
+	}
+
+	return decodeCharset(multipartDecoded, email.Header.Get(MimeHeaderContentType))
 }

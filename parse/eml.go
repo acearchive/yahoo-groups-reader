@@ -77,7 +77,7 @@ func flairFromEmail(email *mail.Message) string {
 }
 
 func bodyFromEmail(email *mail.Message) (string, error) {
-	rawTextBody, err := MultipartMessageBody(email)
+	rawTextBody, err := DecodeMessageBody(email)
 	if err != nil {
 		return "", err
 	}
