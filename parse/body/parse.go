@@ -2,6 +2,7 @@ package body
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -159,6 +160,14 @@ const (
 	quoteChar       = ">"
 )
 
+func TrimSpaceStart(text string) string {
+	return strings.TrimLeft(text, whitespaceChars)
+}
+
+func TrimSpaceEnd(text string) string {
+	return strings.TrimRight(text, whitespaceChars)
+}
+
 var (
 	attributionLineRegex = regexp.MustCompile(`^--- In [^\s@]+@(?:yahoogroups\.com|y?\.{3}),`)
 	attributionNameRegex = regexp.MustCompile(`^--- In [^\s@]+@(?:yahoogroups\.com|y?\.{3}), ([^<>]+)(?: <[^<>\s]+>)? wrote:$`)
@@ -169,12 +178,12 @@ var (
 
 func ParseLine(line string) Line {
 	quoteDepth := 0
-	content := strings.TrimLeft(line, whitespaceChars)
+	content := TrimSpaceStart(line)
 
 	for strings.HasPrefix(content, quoteChar) {
 		quoteDepth++
 		content = strings.TrimPrefix(content, quoteChar)
-		content = strings.TrimLeft(content, whitespaceChars)
+		content = TrimSpaceStart(content)
 	}
 
 	if len(strings.TrimSpace(content)) == 0 {
@@ -184,14 +193,14 @@ func ParseLine(line string) Line {
 		}
 	}
 
-	if dividerRegex.MatchString(strings.TrimRight(content, whitespaceChars)) {
+	if dividerRegex.MatchString(TrimSpaceEnd(content)) {
 		return Line{
 			Content:    DividerLineContent{},
 			QuoteDepth: quoteDepth,
 		}
 	}
 
-	if messageHeaderRegex.MatchString(strings.TrimRight(content, whitespaceChars)) {
+	if messageHeaderRegex.MatchString(TrimSpaceEnd(content)) {
 		return Line{
 			Content:    MessageHeaderLineContent{},
 			QuoteDepth: quoteDepth,
@@ -211,7 +220,7 @@ func ParseLine(line string) Line {
 		}
 	}
 
-	if attributionLineRegex.MatchString(strings.TrimRight(content, whitespaceChars)) {
+	if attributionLineRegex.MatchString(TrimSpaceEnd(content)) {
 		return Line{
 			Content:    AttributionLineContent(content),
 			QuoteDepth: quoteDepth,
@@ -362,7 +371,7 @@ func (t *Tokenizer) tokenizeLineForAttribution(line Line) bool {
 	} else {
 		if textContent, isText := line.Content.(TextLineContent); line.QuoteDepth <= t.currentQuoteDepth && isText {
 			t.nextLine(Line{
-				Content:    attributionContent + AttributionLineContent(textContent),
+				Content:    AttributionLineContent(fmt.Sprintf("%s %s", TrimSpaceEnd(string(attributionContent)), textContent)),
 				QuoteDepth: line.QuoteDepth,
 			})
 			return true
