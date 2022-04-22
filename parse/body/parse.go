@@ -241,11 +241,10 @@ func ParseLines(text io.Reader) ([]Line, error) {
 }
 
 type Tokenizer struct {
-	previousLine       Line
-	currentHeader      MessageHeaderBlock
-	currentAttribution string
-	currentQuoteDepth  int
-	tokens             []Token
+	previousLine      Line
+	currentHeader     MessageHeaderBlock
+	currentQuoteDepth int
+	tokens            []Token
 }
 
 func (t *Tokenizer) reset() {
@@ -254,7 +253,6 @@ func (t *Tokenizer) reset() {
 		QuoteDepth: 0,
 	}
 	t.currentHeader = nil
-	t.currentAttribution = ""
 	t.currentQuoteDepth = 0
 	t.tokens = nil
 }
@@ -265,14 +263,6 @@ func (t *Tokenizer) addTokens(tokens ...Token) {
 
 func (t *Tokenizer) nextLine(line Line) {
 	t.previousLine = line
-}
-
-func (t *Tokenizer) isInHeader() bool {
-	return len(t.currentHeader) > 0
-}
-
-func (t *Tokenizer) isInAttribution() bool {
-	return t.currentAttribution != ""
 }
 
 func (t *Tokenizer) tokenizeSimpleLine(line Line) {
@@ -293,8 +283,6 @@ func (t *Tokenizer) tokenizeSimpleLine(line Line) {
 			t.addTokens(StartParagraphToken{}, TextToken(content))
 		case FieldLineContent:
 			t.currentHeader = append(t.currentHeader, content.Field)
-		case AttributionLineContent:
-			t.currentAttribution = string(content)
 		}
 
 		t.currentQuoteDepth = line.QuoteDepth
@@ -312,8 +300,6 @@ func (t *Tokenizer) tokenizeSimpleLine(line Line) {
 		if t.previousLine.IsText() {
 			t.addTokens(EndParagraphToken{})
 		}
-
-		t.currentAttribution = string(line.Content.(AttributionLineContent))
 	case line.IsDivider():
 		if t.previousLine.IsText() {
 			t.addTokens(EndParagraphToken{})
@@ -333,18 +319,22 @@ func (t *Tokenizer) tokenizeSimpleLine(line Line) {
 	t.nextLine(line)
 }
 
-func (t *Tokenizer) tokenizeLineForHeader(line Line) {
+func (t *Tokenizer) tokenizeLineForHeader(line Line) bool {
+	if t.currentHeader == nil {
+		return false
+	}
+
 	if line.QuoteDepth == t.currentQuoteDepth {
 		switch lineContent := line.Content.(type) {
 		case FieldLineContent:
 			t.currentHeader = append(t.currentHeader, lineContent.Field)
 			t.nextLine(line)
-			return
+			return true
 		case TextLineContent:
 			// This is a continuation line for the previous field.
 			t.currentHeader[len(t.currentHeader)-1].Value += string(lineContent)
 			t.nextLine(line)
-			return
+			return true
 		}
 	}
 
@@ -352,54 +342,76 @@ func (t *Tokenizer) tokenizeLineForHeader(line Line) {
 	t.currentHeader = nil
 
 	t.tokenizeSimpleLine(line)
+
+	return true
 }
 
-func (t *Tokenizer) tokenizeLineForAttribution(line Line) {
-	if matches := attributionNameRegex.FindStringSubmatch(t.currentAttribution); matches != nil {
+func (t *Tokenizer) tokenizeLineForAttribution(line Line) bool {
+	attributionContent, isAttribution := t.previousLine.Content.(AttributionLineContent)
+	if !isAttribution {
+		return false
+	}
+
+	if matches := attributionNameRegex.FindStringSubmatch(string(attributionContent)); matches != nil {
 		name := strings.TrimSuffix(strings.TrimPrefix(matches[1], "\""), "\"")
 		t.addTokens(BlockToken{AttributionBlock{Name: name}})
-		t.currentAttribution = ""
+		t.nextLine(Line{
+			Content:    EmptyLineContent{},
+			QuoteDepth: line.QuoteDepth,
+		})
 	} else {
 		if textContent, isText := line.Content.(TextLineContent); line.QuoteDepth <= t.currentQuoteDepth && isText {
-			t.currentAttribution += string(textContent)
-			t.nextLine(line)
-			return
+			t.nextLine(Line{
+				Content:    attributionContent + AttributionLineContent(textContent),
+				QuoteDepth: line.QuoteDepth,
+			})
+			return true
 		}
 
 		t.tokenizeSimpleLine(Line{
-			Content:    TextLineContent(t.currentAttribution),
+			Content:    TextLineContent(attributionContent),
 			QuoteDepth: line.QuoteDepth,
 		})
-		t.currentAttribution = ""
 	}
 
 	t.tokenizeSimpleLine(line)
+
+	return true
 }
 
-func (t *Tokenizer) tokenizeLineForField(quoteDepth int, content FieldLineContent) {
-	if quoteDepth == t.currentQuoteDepth && (t.previousLine.IsEmpty() || t.previousLine.IsMessageHeader()) {
-		t.currentHeader = append(t.currentHeader, content.Field)
-		t.nextLine(Line{QuoteDepth: quoteDepth, Content: content})
-		return
+func (t *Tokenizer) tokenizeLineForField(line Line) bool {
+	if content, isField := line.Content.(FieldLineContent); isField {
+		if line.QuoteDepth == t.currentQuoteDepth && (t.previousLine.IsEmpty() || t.previousLine.IsMessageHeader()) {
+			t.currentHeader = append(t.currentHeader, content.Field)
+			t.nextLine(Line{QuoteDepth: line.QuoteDepth, Content: content})
+			return true
+		}
+
+		t.tokenizeSimpleLine(Line{
+			Content:    TextLineContent(content.Text),
+			QuoteDepth: line.QuoteDepth,
+		})
+
+		return true
 	}
 
-	t.tokenizeSimpleLine(Line{
-		Content:    TextLineContent(content.Text),
-		QuoteDepth: quoteDepth,
-	})
+	return false
 }
 
 func (t *Tokenizer) tokenizeLine(line Line) {
-	switch {
-	case t.isInHeader():
-		t.tokenizeLineForHeader(line)
-	case t.isInAttribution():
-		t.tokenizeLineForAttribution(line)
-	case line.IsField():
-		t.tokenizeLineForField(line.QuoteDepth, line.Content.(FieldLineContent))
-	default:
-		t.tokenizeSimpleLine(line)
+	if t.tokenizeLineForHeader(line) {
+		return
 	}
+
+	if t.tokenizeLineForAttribution(line) {
+		return
+	}
+
+	if t.tokenizeLineForField(line) {
+		return
+	}
+
+	t.tokenizeSimpleLine(line)
 }
 
 func (t *Tokenizer) Tokenize(lines []Line) []Token {
