@@ -123,5 +123,7 @@ func ToHtml(text io.Reader) (string, error) {
 		return "", err
 	}
 
-	return Render(Tokenize(lines)), nil
+	var tokenizer Tokenizer
+
+	return Render(tokenizer.Tokenize(lines)), nil
 }
