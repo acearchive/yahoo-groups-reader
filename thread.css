@@ -194,3 +194,7 @@ dl.field-list > dd {
 .message-thread .message .inline-message-header dl.field-list > dd {
     color: var(--color-fg-muted);
 }
+
+.message-thread .message .message-body .inline-quote-attribution {
+    margin-bottom: 0.5em;
+}
