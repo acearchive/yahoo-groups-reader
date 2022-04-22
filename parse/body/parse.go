@@ -172,7 +172,7 @@ var (
 	attributionLineRegex = regexp.MustCompile(`^--- In [^\s@]+@(?:yahoogroups\.com|y?\.{3}),`)
 	attributionNameRegex = regexp.MustCompile(`^--- In [^\s@]+@(?:yahoogroups\.com|y?\.{3}), ([^<>]+)(?: <[^<>\s]+>)? wrote:$`)
 	dividerRegex         = regexp.MustCompile(`^[-_]{2,}$`)
-	fieldRegex           = regexp.MustCompile(`^(From|Reply-To|To|Subject|Date|Sent|Message): (\S.*)$`)
+	fieldRegex           = regexp.MustCompile(`^(From|Reply-To|To|Subject|Date|Sent|Message): +(\S.*)$`)
 	messageHeaderRegex   = regexp.MustCompile(`^-+ ?Original Message ?-+$`)
 )
 
