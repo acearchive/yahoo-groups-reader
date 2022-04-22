@@ -28,6 +28,10 @@ type MessageHeaderBlock []Field
 
 type DividerBlock struct{}
 
+type AttributionBlock struct {
+	Name string
+}
+
 type Token interface {
 	IsToken()
 	TagType() TagType
@@ -114,6 +118,11 @@ func (l Line) IsField() bool {
 	return ok
 }
 
+func (l Line) IsAttribution() bool {
+	_, ok := l.Content.(AttributionLineContent)
+	return ok
+}
+
 type LineContent interface {
 	IsLineContent()
 }
@@ -141,15 +150,21 @@ type FieldLineContent struct {
 
 func (FieldLineContent) IsLineContent() {}
 
+type AttributionLineContent string
+
+func (AttributionLineContent) IsLineContent() {}
+
 const (
 	whitespaceChars = " \t"
 	quoteChar       = ">"
 )
 
 var (
-	dividerRegex       = regexp.MustCompile(`^[-_]{2,}$`)
-	fieldRegex         = regexp.MustCompile(`^(From|Reply-To|To|Subject|Date|Sent|Message): (\S.*)$`)
-	messageHeaderRegex = regexp.MustCompile(`^-+ ?Original Message ?-+$`)
+	attributionLineRegex = regexp.MustCompile(`^--- In [^\s@]+@(?:yahoogroups\.com|y?\.{3}),`)
+	attributionNameRegex = regexp.MustCompile(`^--- In [^\s@]+@(?:yahoogroups\.com|y?\.{3}), ([^<>]+)(?: <[^<>\s]+>)? wrote:$`)
+	dividerRegex         = regexp.MustCompile(`^[-_]{2,}$`)
+	fieldRegex           = regexp.MustCompile(`^(From|Reply-To|To|Subject|Date|Sent|Message): (\S.*)$`)
+	messageHeaderRegex   = regexp.MustCompile(`^-+ ?Original Message ?-+$`)
 )
 
 func ParseLine(line string) Line {
@@ -196,6 +211,13 @@ func ParseLine(line string) Line {
 		}
 	}
 
+	if attributionLineRegex.MatchString(strings.TrimRight(content, whitespaceChars)) {
+		return Line{
+			Content:    AttributionLineContent(content),
+			QuoteDepth: quoteDepth,
+		}
+	}
+
 	return Line{
 		Content:    TextLineContent(content),
 		QuoteDepth: quoteDepth,
@@ -224,8 +246,9 @@ func Tokenize(lines []Line) []Token {
 	currentQuoteDepth := 0
 
 	var (
-		previousLine  Line
-		currentHeader MessageHeaderBlock
+		previousLine       Line
+		currentHeader      MessageHeaderBlock
+		currentAttribution string
 	)
 
 	for _, line := range lines {
@@ -246,6 +269,26 @@ func Tokenize(lines []Line) []Token {
 
 			tokens = append(tokens, BlockToken{currentHeader})
 			currentHeader = nil
+		}
+
+		if currentAttribution != "" {
+			if matches := attributionNameRegex.FindStringSubmatch(currentAttribution); matches != nil {
+				name := strings.TrimSuffix(strings.TrimPrefix(matches[1], "\""), "\"")
+				tokens = append(tokens, BlockToken{AttributionBlock{Name: name}})
+				currentAttribution = ""
+			} else {
+				if textContent, isText := line.Content.(TextLineContent); line.QuoteDepth <= currentQuoteDepth && isText {
+					currentAttribution += string(textContent)
+					previousLine = line
+					continue
+				}
+
+				line = Line{
+					Content:    TextLineContent(currentAttribution),
+					QuoteDepth: line.QuoteDepth,
+				}
+				currentAttribution = ""
+			}
 		}
 
 		if fieldContent, isField := line.Content.(FieldLineContent); isField {
@@ -278,6 +321,8 @@ func Tokenize(lines []Line) []Token {
 				tokens = append(tokens, StartParagraphToken{}, TextToken(content))
 			case FieldLineContent:
 				currentHeader = append(currentHeader, content.Field)
+			case AttributionLineContent:
+				currentAttribution = string(content)
 			}
 
 			currentQuoteDepth = line.QuoteDepth
@@ -291,6 +336,12 @@ func Tokenize(lines []Line) []Token {
 			}
 
 			currentQuoteDepth = line.QuoteDepth
+		case line.IsAttribution():
+			if previousLine.IsText() {
+				tokens = append(tokens, EndParagraphToken{})
+			}
+
+			currentAttribution = string(line.Content.(AttributionLineContent))
 		case line.IsDivider():
 			if previousLine.IsText() {
 				tokens = append(tokens, EndParagraphToken{})
