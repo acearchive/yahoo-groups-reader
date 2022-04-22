@@ -1,7 +1,6 @@
 package render
 
 import (
-	"fmt"
 	"github.com/acearchive/yg-render/parse"
 	"golang.org/x/text/language"
 	textmessage "golang.org/x/text/message"
@@ -10,7 +9,7 @@ import (
 )
 
 type ParentArgs struct {
-	ID            string
+	Index         int
 	User          string
 	Body          template.HTML
 	FormattedDate string
@@ -18,11 +17,11 @@ type ParentArgs struct {
 }
 
 type MessageArgs struct {
-	ID                string
+	Index             int
+	Number            string
+	TotalCount        string
 	Timestamp         string
 	FormattedDatetime string
-	Index             string
-	TotalCount        string
 	Parent            *ParentArgs
 	User              string
 	Flair             string
@@ -44,25 +43,16 @@ func formatDatetime(input time.Time) string {
 }
 
 func formatDate(input time.Time) string {
-	return input.Format("_2 January 2006")
+	return input.Format("2 January 2006")
 }
 
 func formatTime(input time.Time) string {
 	return input.Format("15:04 MST")
 }
 
-func formatID(index int) string {
-	return fmt.Sprintf("message-%d", index)
-}
-
 func formatHumanReadableNumber(number int) string {
 	localizedPrinter := textmessage.NewPrinter(language.English)
 	return localizedPrinter.Sprintf("%d", number)
-}
-
-func formatParentBody(body string) string {
-	// TODO: Truncate parent message bodies.
-	return body
 }
 
 func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
@@ -85,9 +75,9 @@ func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 
 			if parentIndexExists && parentExists {
 				parentArgs = &ParentArgs{
-					ID:            formatID(parentIndex + 1),
+					Index:         parentIndex + 1,
 					User:          parent.User,
-					Body:          template.HTML(formatParentBody(parent.Body)),
+					Body:          template.HTML(parent.Body),
 					FormattedDate: formatDate(parent.Date),
 					FormattedTime: formatTime(parent.Date),
 				}
@@ -95,11 +85,11 @@ func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 		}
 
 		argsList[messageIndex] = MessageArgs{
-			ID:                formatID(messageIndex + 1),
+			Index:             messageIndex + 1,
+			Number:            formatHumanReadableNumber(messageIndex + 1),
+			TotalCount:        formatHumanReadableNumber(len(messagesByDate)),
 			Timestamp:         formatTimestamp(message.Date),
 			FormattedDatetime: formatDatetime(message.Date),
-			Index:             formatHumanReadableNumber(messageIndex + 1),
-			TotalCount:        formatHumanReadableNumber(len(messagesByDate)),
 			Parent:            parentArgs,
 			User:              message.User,
 			Flair:             message.Flair,
