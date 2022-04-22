@@ -39,8 +39,14 @@ type messageHeaderTemplateParams struct {
 	Fields []Field
 }
 
-func (b MessageHeaderBlock) ToHtml() string {
-	params := messageHeaderTemplateParams{Fields: b}
+type attributionTemplateParams struct {
+	Name string
+	Date string
+	Time string
+}
+
+func (b *MessageHeaderBlock) ToHtml() string {
+	params := messageHeaderTemplateParams{Fields: *b}
 
 	var output strings.Builder
 
@@ -51,14 +57,24 @@ func (b MessageHeaderBlock) ToHtml() string {
 	return output.String()
 }
 
-func (b DividerBlock) ToHtml() string {
+func (b *DividerBlock) ToHtml() string {
 	return "<hr>\n"
 }
 
-func (a AttributionBlock) ToHtml() string {
+func (b *AttributionBlock) ToHtml() string {
+	params := attributionTemplateParams{Name: b.Name}
+
+	if b.Time != nil {
+		params.Date = b.Time.Format("2 January 2006")
+
+		if b.IncludeTime {
+			params.Time = b.Time.Format("15:04 MST")
+		}
+	}
+
 	var output strings.Builder
 
-	if err := attributionTemplate.Execute(&output, a); err != nil {
+	if err := attributionTemplate.Execute(&output, b); err != nil {
 		panic(err)
 	}
 
