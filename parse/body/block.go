@@ -13,7 +13,7 @@ var (
 )
 
 const (
-	attributionNameRegexPart                 = `(?:[^<>\s]|[^<>\s][^<>]*[^<>\s])`
+	attributionNameRegexPart                 = `(?:[^<>,\s]|[^<>,\s][^<>,]*[^<>,\s])`
 	attributionEmailRegexPart                = `[^<>\s]+`
 	attributionGroupEmailRegexPart           = `[^\s@]+@(?:yahoogroups\.com|y?\.{3})`
 	attributionShortMonthRegexPart           = `(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)`
@@ -134,28 +134,11 @@ var (
 
 var attributionRegexes = []attributionRegex{
 	{
-		Format: attributionFormatName,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]s-{2,3}\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			attributionGroupEmailRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-	},
-	{
-		Format: attributionFormatName,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-	},
-	{
-		Format: attributionFormatNameDate,
+		Format: attributionFormatNameDateAbbreviationTimezone,
 		Regex: regexp.MustCompile(fmt.Sprintf(
 			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
 			nonNewlineWhitespaceRegexPart,
-			dateRegexPart,
+			timeWithAbbreviationTimezoneRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
 	},
@@ -169,11 +152,28 @@ var attributionRegexes = []attributionRegex{
 		)),
 	},
 	{
-		Format: attributionFormatNameDateAbbreviationTimezone,
+		Format: attributionFormatNameDate,
 		Regex: regexp.MustCompile(fmt.Sprintf(
 			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
 			nonNewlineWhitespaceRegexPart,
-			timeWithAbbreviationTimezoneRegexPart,
+			dateRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+	{
+		Format: attributionFormatName,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]s-{2,3}\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
+			attributionGroupEmailRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+	{
+		Format: attributionFormatName,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
 	},
