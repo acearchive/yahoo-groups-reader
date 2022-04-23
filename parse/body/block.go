@@ -25,7 +25,8 @@ const (
 )
 
 const (
-	attributionDateFormat                 = "Mon, 2 Jan 2006"
+	attributionLongDateFormat             = "Mon, 2 Jan 2006"
+	attributionShortDateFormat            = "Mon, 01/02/06"
 	attributionNumericTimezoneFormat      = "Mon, 2 Jan 2006 15:04:05 -0700"
 	attributionAbbreviationTimezoneFormat = "Mon, 2 Jan 2006 15:04:05 -0700 (MST)"
 )
@@ -34,7 +35,8 @@ type attributionFormat string
 
 const (
 	attributionFormatName                         attributionFormat = "Name"
-	attributionFormatNameDate                     attributionFormat = "NameDate"
+	attributionFormatNameLongDate                 attributionFormat = "NameLongDate"
+	attributionFormatNameShortDate                attributionFormat = "NameShortDate"
 	attributionFormatNameDateNumericTimezone      attributionFormat = "NameDateNumericTimezone"
 	attributionFormatNameDateAbbreviationTimezone attributionFormat = "NameDateAbbreviationTimezone"
 )
@@ -43,7 +45,7 @@ func (f attributionFormat) HasTime() bool {
 	switch f {
 	case attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
 		return true
-	case attributionFormatName, attributionFormatNameDate:
+	case attributionFormatName, attributionFormatNameLongDate, attributionFormatNameShortDate:
 		return false
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidAttributionFormat, f))
@@ -56,8 +58,10 @@ func (f attributionFormat) DateFormat() *string {
 	switch f {
 	case attributionFormatName:
 		return nil
-	case attributionFormatNameDate:
-		format = attributionDateFormat
+	case attributionFormatNameLongDate:
+		format = attributionLongDateFormat
+	case attributionFormatNameShortDate:
+		format = attributionShortDateFormat
 	case attributionFormatNameDateNumericTimezone:
 		format = attributionNumericTimezoneFormat
 	case attributionFormatNameDateAbbreviationTimezone:
@@ -77,7 +81,7 @@ func (f attributionFormat) TimeIndices(match []int) []int {
 	switch f {
 	case attributionFormatName:
 		return nil
-	case attributionFormatNameDate, attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
+	case attributionFormatNameLongDate, attributionFormatNameShortDate, attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
 		return indicesForSubmatch(1, match)
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidAttributionFormat, f))
@@ -91,7 +95,7 @@ func (f attributionFormat) NameIndices(match []int) []int {
 	switch f {
 	case attributionFormatName:
 		firstNameSubmatchIndex = 1
-	case attributionFormatNameDate, attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
+	case attributionFormatNameLongDate, attributionFormatNameShortDate, attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
 		firstNameSubmatchIndex = 2
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidAttributionFormat, f))
@@ -120,9 +124,10 @@ const attributionUserCapturingRegexPartNumSubmatches = 4
 var (
 	messageHeaderBannerRegexPart          = fmt.Sprintf(`%[1]s-+ ?Original Message ?-+%[1]s`, nonNewlineWhitespaceRegexPart)
 	attributionUserCapturingRegexPart     = fmt.Sprintf(`(?:"(%[1]s)"\s+<%[2]s>|(%[1]s)\s+<%[2]s>|<(%[2]s)>|(%[1]s))`, attributionNameRegexPart, attributionEmailRegexPart)
-	dateRegexPart                         = fmt.Sprintf(`%s, \d{1,2} %s \d{4}`, attributionShortWeekdayRegexPart, attributionShortMonthRegexPart)
-	timeWithNumericTimezoneRegexPart      = fmt.Sprintf(`%s %s %s`, dateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart)
-	timeWithAbbreviationTimezoneRegexPart = fmt.Sprintf(`%s %s %s %s`, dateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart, attributionAbbreviationTimezoneRegexPart)
+	longDateRegexPart                     = fmt.Sprintf(`%s, \d{1,2} %s \d{4}`, attributionShortWeekdayRegexPart, attributionShortMonthRegexPart)
+	shortDateRegexPart                    = fmt.Sprintf(`%s, \d{2}/\d{2}/\d{2}`, attributionShortWeekdayRegexPart)
+	timeWithNumericTimezoneRegexPart      = fmt.Sprintf(`%s %s %s`, longDateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart)
+	timeWithAbbreviationTimezoneRegexPart = fmt.Sprintf(`%s %s %s %s`, longDateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart, attributionAbbreviationTimezoneRegexPart)
 )
 
 var (
@@ -152,11 +157,20 @@ var attributionRegexes = []attributionRegex{
 		)),
 	},
 	{
-		Format: attributionFormatNameDate,
+		Format: attributionFormatNameLongDate,
 		Regex: regexp.MustCompile(fmt.Sprintf(
 			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
 			nonNewlineWhitespaceRegexPart,
-			dateRegexPart,
+			longDateRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+	{
+		Format: attributionFormatNameShortDate,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]s-{2,3}\s+On\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
+			shortDateRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
 	},
