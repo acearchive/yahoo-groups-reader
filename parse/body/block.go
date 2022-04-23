@@ -133,7 +133,7 @@ var (
 var (
 	dividerRegex            = regexp.MustCompile(fmt.Sprintf(`(?m)^%[1]s[-_]{2,}%[1]s$`, nonNewlineWhitespaceRegexPart))
 	fieldLabelRegex         = regexp.MustCompile(fmt.Sprintf(`(?m)^%s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
-	messageHeaderStartRegex = regexp.MustCompile(fmt.Sprintf(`(?:^(?:%[2]s\n)?|\n%[1]s(?:%[2]s)?\n)%[1]s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart, messageHeaderBannerRegexPart))
+	messageHeaderStartRegex = regexp.MustCompile(fmt.Sprintf(`(?:^%[2]s\n|^%[1]s\n?|\n%[1]s(?:%[2]s)?\n)%[1]s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart, messageHeaderBannerRegexPart))
 	messageHeaderEndRegex   = regexp.MustCompile(fmt.Sprintf(`(?m)^%s\n`, nonNewlineWhitespaceRegexPart))
 )
 
