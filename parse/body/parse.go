@@ -75,10 +75,6 @@ func TrimSpaceStart(text string) string {
 	return strings.TrimLeft(text, whitespaceChars)
 }
 
-func TrimSpaceEnd(text string) string {
-	return strings.TrimRight(text, whitespaceChars)
-}
-
 func ParseLine(line string) Line {
 	quoteDepth := 0
 	content := TrimSpaceStart(line)
@@ -206,6 +202,10 @@ func findBlocksInParagraph(text string) []Token {
 		}
 	}
 
+	if len(strings.TrimSpace(text)) == 0 {
+		return []Token{}
+	}
+
 	return []Token{
 		StartParagraphToken{},
 		TextToken(text),
@@ -226,6 +226,7 @@ func parseBlocks(tokens []Token) []Token {
 			output = append(output, findBlocksInParagraph(currentParagraph.String())...)
 		case TextToken:
 			currentParagraph.WriteString(string(concrete))
+			currentParagraph.WriteString("\n")
 		default:
 			output = append(output, token)
 		}
