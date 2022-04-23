@@ -130,7 +130,7 @@ var (
 		{
 			Format: attributionFormatName,
 			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^%[1]s---\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
+				`(?m)^%[1]s-{2,3}\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
 				nonNewlineWhitespaceRegexPart,
 				attributionGroupEmailRegexPart,
 				attributionUserCapturingRegexPart,
@@ -139,7 +139,7 @@ var (
 		{
 			Format: attributionFormatName,
 			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^%[1]s---\s+%[2]s\s+wrote:%[1]s$`,
+				`(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s$`,
 				nonNewlineWhitespaceRegexPart,
 				attributionUserCapturingRegexPart,
 			)),
