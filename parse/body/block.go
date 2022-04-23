@@ -272,12 +272,13 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 
 		if dateFormat := regex.Format.DateFormat(); dateFormat != nil {
 			timeIndices := regex.Format.TimeIndices(match)
-			datetime, err := time.Parse(*dateFormat, text[timeIndices[0]:timeIndices[1]])
+			localTime, err := time.Parse(*dateFormat, text[timeIndices[0]:timeIndices[1]])
 			if err != nil {
 				continue
 			}
 
-			b.Time = &datetime
+			dateTime := localTime.UTC()
+			b.Time = &dateTime
 		}
 
 		b.HasTime = regex.Format.HasTime()
