@@ -21,6 +21,7 @@ const (
 	attributionTimeRegexPart                 = `\d{2}:\d{2}:\d{2}`
 	attributionNumericTimezoneRegexPart      = `[-+]\d{4}`
 	attributionAbbreviationTimezoneRegexPart = `\([A-Z]{2,}\)`
+	nonNewlineWhitespaceRegexPart            = `[\t ]*`
 )
 
 const (
@@ -68,8 +69,8 @@ func (f attributionFormat) DateFormat() *string {
 	return &format
 }
 
-func indicesForSubmatch(number int) []int {
-	return []int{2 * number, 2*number + 1}
+func indicesForSubmatch(number int, match []int) []int {
+	return []int{match[2*number], match[2*number+1]}
 }
 
 func (f attributionFormat) TimeIndices(match []int) []int {
@@ -77,7 +78,7 @@ func (f attributionFormat) TimeIndices(match []int) []int {
 	case attributionFormatName:
 		return nil
 	case attributionFormatNameDate, attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
-		return indicesForSubmatch(1)
+		return indicesForSubmatch(1, match)
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidAttributionFormat, f))
 	}
@@ -96,10 +97,10 @@ func (f attributionFormat) NameIndices(match []int) []int {
 		panic(fmt.Errorf("%w: %s", ErrInvalidAttributionFormat, f))
 	}
 
-	for i := firstNameSubmatchIndex; i <= attributionUserCapturingRegexPartNumSubmatches; i++ {
+	for i := firstNameSubmatchIndex; i < i+attributionUserCapturingRegexPartNumSubmatches; i++ {
 		// Try each capture group in `attributionUserCapturingRegexPart`
 		// until we find the first one that matched.
-		submatchIndices := indicesForSubmatch(i)
+		submatchIndices := indicesForSubmatch(i, match)
 		startIndex, endIndex := submatchIndices[0], submatchIndices[1]
 		if startIndex >= 0 && endIndex >= 0 {
 			return []int{startIndex, endIndex}
@@ -117,10 +118,10 @@ type attributionRegex struct {
 const attributionUserCapturingRegexPartNumSubmatches = 4
 
 var (
-	dividerRegex                          = regexp.MustCompile(`(?m)^\s*[-_]{2,}\s*$`)
-	fieldLabelRegex                       = regexp.MustCompile(`(?m)^\s*(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`)
-	messageHeaderStartRegex               = regexp.MustCompile(`(?m)^\s*(?:-+ ?Original Message ?-+|\n)\s*\n\s*(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`)
-	messageHeaderEndRegex                 = regexp.MustCompile(`(?m)^\s*\n`)
+	dividerRegex                          = regexp.MustCompile(fmt.Sprintf(`(?m)^%[1]s[-_]{2,}%[1]s$`, nonNewlineWhitespaceRegexPart))
+	fieldLabelRegex                       = regexp.MustCompile(fmt.Sprintf(`(?m)^%s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
+	messageHeaderStartRegex               = regexp.MustCompile(fmt.Sprintf(`(?:^|\n%[1]s(?:-+ ?Original Message ?-+%[1]s)?\n)%[1]s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
+	messageHeaderEndRegex                 = regexp.MustCompile(fmt.Sprintf(`(?m)^%s\n`, nonNewlineWhitespaceRegexPart))
 	attributionUserCapturingRegexPart     = fmt.Sprintf(`(?:"(%[1]s)"\s+<%[2]s>|(%[1]s)\s+<%[2]s>|<(%[2]s)>|(%[1]s))`, attributionNameRegexPart, attributionEmailRegexPart)
 	dateRegexPart                         = fmt.Sprintf(`%s, \d{1,2} %s \d{4}`, attributionShortWeekdayRegexPart, attributionShortMonthRegexPart)
 	timeWithNumericTimezoneRegexPart      = fmt.Sprintf(`%s %s %s`, dateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart)
@@ -129,7 +130,8 @@ var (
 		{
 			Format: attributionFormatName,
 			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^--- In %s,\s+%s\s+wrote:$`,
+				`(?m)^%[1]s---\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
+				nonNewlineWhitespaceRegexPart,
 				attributionGroupEmailRegexPart,
 				attributionUserCapturingRegexPart,
 			)),
@@ -137,14 +139,16 @@ var (
 		{
 			Format: attributionFormatName,
 			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^---\s+%s\s+wrote:$`,
+				`(?m)^%[1]s---\s+%[2]s\s+wrote:%[1]s$`,
+				nonNewlineWhitespaceRegexPart,
 				attributionUserCapturingRegexPart,
 			)),
 		},
 		{
 			Format: attributionFormatNameDate,
 			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^On\s+(%s),\s+%s\s+wrote:$`,
+				`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
+				nonNewlineWhitespaceRegexPart,
 				dateRegexPart,
 				attributionUserCapturingRegexPart,
 			)),
@@ -152,7 +156,8 @@ var (
 		{
 			Format: attributionFormatNameDateNumericTimezone,
 			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^On\s+(%s),\s+%s\s+wrote:$`,
+				`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
+				nonNewlineWhitespaceRegexPart,
 				timeWithNumericTimezoneRegexPart,
 				attributionUserCapturingRegexPart,
 			)),
@@ -160,7 +165,8 @@ var (
 		{
 			Format: attributionFormatNameDateAbbreviationTimezone,
 			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^On\s+(%s),\s+%s\s+wrote:$`,
+				`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
+				nonNewlineWhitespaceRegexPart,
 				timeWithAbbreviationTimezoneRegexPart,
 				attributionUserCapturingRegexPart,
 			)),
