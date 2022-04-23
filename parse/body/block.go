@@ -118,61 +118,66 @@ type attributionRegex struct {
 const attributionUserCapturingRegexPartNumSubmatches = 4
 
 var (
-	dividerRegex                          = regexp.MustCompile(fmt.Sprintf(`(?m)^%[1]s[-_]{2,}%[1]s$`, nonNewlineWhitespaceRegexPart))
-	fieldLabelRegex                       = regexp.MustCompile(fmt.Sprintf(`(?m)^%s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
-	messageHeaderStartRegex               = regexp.MustCompile(fmt.Sprintf(`(?:^|\n%[1]s(?:-+ ?Original Message ?-+%[1]s)?\n)%[1]s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
-	messageHeaderEndRegex                 = regexp.MustCompile(fmt.Sprintf(`(?m)^%s\n`, nonNewlineWhitespaceRegexPart))
+	messageHeaderBannerRegexPart          = fmt.Sprintf(`%[1]s-+ ?Original Message ?-+%[1]s`, nonNewlineWhitespaceRegexPart)
 	attributionUserCapturingRegexPart     = fmt.Sprintf(`(?:"(%[1]s)"\s+<%[2]s>|(%[1]s)\s+<%[2]s>|<(%[2]s)>|(%[1]s))`, attributionNameRegexPart, attributionEmailRegexPart)
 	dateRegexPart                         = fmt.Sprintf(`%s, \d{1,2} %s \d{4}`, attributionShortWeekdayRegexPart, attributionShortMonthRegexPart)
 	timeWithNumericTimezoneRegexPart      = fmt.Sprintf(`%s %s %s`, dateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart)
 	timeWithAbbreviationTimezoneRegexPart = fmt.Sprintf(`%s %s %s %s`, dateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart, attributionAbbreviationTimezoneRegexPart)
-	attributionRegexes                    = []attributionRegex{
-		{
-			Format: attributionFormatName,
-			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^%[1]s-{2,3}\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
-				nonNewlineWhitespaceRegexPart,
-				attributionGroupEmailRegexPart,
-				attributionUserCapturingRegexPart,
-			)),
-		},
-		{
-			Format: attributionFormatName,
-			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s$`,
-				nonNewlineWhitespaceRegexPart,
-				attributionUserCapturingRegexPart,
-			)),
-		},
-		{
-			Format: attributionFormatNameDate,
-			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
-				nonNewlineWhitespaceRegexPart,
-				dateRegexPart,
-				attributionUserCapturingRegexPart,
-			)),
-		},
-		{
-			Format: attributionFormatNameDateNumericTimezone,
-			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
-				nonNewlineWhitespaceRegexPart,
-				timeWithNumericTimezoneRegexPart,
-				attributionUserCapturingRegexPart,
-			)),
-		},
-		{
-			Format: attributionFormatNameDateAbbreviationTimezone,
-			Regex: regexp.MustCompile(fmt.Sprintf(
-				`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
-				nonNewlineWhitespaceRegexPart,
-				timeWithAbbreviationTimezoneRegexPart,
-				attributionUserCapturingRegexPart,
-			)),
-		},
-	}
 )
+
+var (
+	dividerRegex            = regexp.MustCompile(fmt.Sprintf(`(?m)^%[1]s[-_]{2,}%[1]s$`, nonNewlineWhitespaceRegexPart))
+	fieldLabelRegex         = regexp.MustCompile(fmt.Sprintf(`(?m)^%s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
+	messageHeaderStartRegex = regexp.MustCompile(fmt.Sprintf(`(?:^(?:%[2]s\n)?|\n%[1]s(?:%[2]s)?\n)%[1]s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart, messageHeaderBannerRegexPart))
+	messageHeaderEndRegex   = regexp.MustCompile(fmt.Sprintf(`(?m)^%s\n`, nonNewlineWhitespaceRegexPart))
+)
+
+var attributionRegexes = []attributionRegex{
+	{
+		Format: attributionFormatName,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]s-{2,3}\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
+			attributionGroupEmailRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+	{
+		Format: attributionFormatName,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+	{
+		Format: attributionFormatNameDate,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
+			dateRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+	{
+		Format: attributionFormatNameDateNumericTimezone,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
+			timeWithNumericTimezoneRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+	{
+		Format: attributionFormatNameDateAbbreviationTimezone,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
+			nonNewlineWhitespaceRegexPart,
+			timeWithAbbreviationTimezoneRegexPart,
+			attributionUserCapturingRegexPart,
+		)),
+	},
+}
 
 type Block interface {
 	ToHtml() string
