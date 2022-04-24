@@ -73,38 +73,25 @@ func (f attributionFormat) DateFormat() *string {
 	return &format
 }
 
+type attributionRegex struct {
+	Format            attributionFormat
+	Regex             *regexp.Regexp
+	NameCaptureGroups []int
+	TimeCaptureGroups []int
+}
+
 func indicesForSubmatch(number int, match []int) []int {
 	return []int{match[2*number], match[2*number+1]}
 }
 
-func (f attributionFormat) TimeIndices(match []int) []int {
-	switch f {
-	case attributionFormatName:
+func (r attributionRegex) TimeIndices(match []int) []int {
+	if r.TimeCaptureGroups == nil {
 		return nil
-	case attributionFormatNameLongDate, attributionFormatNameShortDate, attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
-		return indicesForSubmatch(1, match)
-	default:
-		panic(fmt.Errorf("%w: %s", ErrInvalidAttributionFormat, f))
 	}
 
-}
-
-func (f attributionFormat) NameIndices(match []int) []int {
-	var firstNameSubmatchIndex int
-
-	switch f {
-	case attributionFormatName:
-		firstNameSubmatchIndex = 1
-	case attributionFormatNameLongDate, attributionFormatNameShortDate, attributionFormatNameDateNumericTimezone, attributionFormatNameDateAbbreviationTimezone:
-		firstNameSubmatchIndex = 2
-	default:
-		panic(fmt.Errorf("%w: %s", ErrInvalidAttributionFormat, f))
-	}
-
-	for i := firstNameSubmatchIndex; i < i+attributionUserCapturingRegexPartNumSubmatches; i++ {
-		// Try each capture group in `attributionUserCapturingRegexPart`
-		// until we find the first one that matched.
-		submatchIndices := indicesForSubmatch(i, match)
+	for _, captureGroup := range r.TimeCaptureGroups {
+		// Try each capture group until we find the first one that matched.
+		submatchIndices := indicesForSubmatch(captureGroup, match)
 		startIndex, endIndex := submatchIndices[0], submatchIndices[1]
 		if startIndex >= 0 && endIndex >= 0 {
 			return []int{startIndex, endIndex}
@@ -114,20 +101,31 @@ func (f attributionFormat) NameIndices(match []int) []int {
 	panic(ErrInvalidRegex)
 }
 
-type attributionRegex struct {
-	Format attributionFormat
-	Regex  *regexp.Regexp
+func (r attributionRegex) NameIndices(match []int) []int {
+	if r.NameCaptureGroups == nil {
+		return nil
+	}
+
+	for _, captureGroup := range r.NameCaptureGroups {
+		// Try each capture group until we find the first one that matched.
+		submatchIndices := indicesForSubmatch(captureGroup, match)
+		startIndex, endIndex := submatchIndices[0], submatchIndices[1]
+		if startIndex >= 0 && endIndex >= 0 {
+			return []int{startIndex, endIndex}
+		}
+	}
+
+	panic(ErrInvalidRegex)
 }
 
-const attributionUserCapturingRegexPartNumSubmatches = 4
-
 var (
-	messageHeaderBannerRegexPart          = fmt.Sprintf(`%[1]s-+ ?Original Message ?-+%[1]s`, nonNewlineWhitespaceRegexPart)
-	attributionUserCapturingRegexPart     = fmt.Sprintf(`(?:"(%[1]s)"\s+<%[2]s>|(%[1]s)\s+<%[2]s>|<(%[2]s)>|(%[1]s))`, attributionNameRegexPart, attributionEmailRegexPart)
-	longDateRegexPart                     = fmt.Sprintf(`%s, \d{1,2} %s \d{4}`, attributionShortWeekdayRegexPart, attributionShortMonthRegexPart)
-	shortDateRegexPart                    = fmt.Sprintf(`%s, \d{2}/\d{2}/\d{2}`, attributionShortWeekdayRegexPart)
-	timeWithNumericTimezoneRegexPart      = fmt.Sprintf(`%s %s %s`, longDateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart)
-	timeWithAbbreviationTimezoneRegexPart = fmt.Sprintf(`%s %s %s %s`, longDateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart, attributionAbbreviationTimezoneRegexPart)
+	messageHeaderBannerRegexPart               = fmt.Sprintf(`%[1]s-+ ?Original Message ?-+%[1]s`, nonNewlineWhitespaceRegexPart)
+	attributionUserCapturingRegexPart          = fmt.Sprintf(`(?:"(%[1]s)"\s+<%[2]s>|(%[1]s)\s+<%[2]s>|<(%[2]s)>|(%[1]s))`, attributionNameRegexPart, attributionEmailRegexPart)
+	attributionUserWithEmailCapturingRegexPart = fmt.Sprintf(`(?:"(%[1]s)"\s+<%[2]s>|(%[1]s)\s+<%[2]s>|<(%[2]s)>)`, attributionNameRegexPart, attributionEmailRegexPart)
+	longDateRegexPart                          = fmt.Sprintf(`%s, \d{1,2} %s \d{4}`, attributionShortWeekdayRegexPart, attributionShortMonthRegexPart)
+	shortDateRegexPart                         = fmt.Sprintf(`%s, \d{2}/\d{2}/\d{2}`, attributionShortWeekdayRegexPart)
+	timeWithNumericTimezoneRegexPart           = fmt.Sprintf(`%s %s %s`, longDateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart)
+	timeWithAbbreviationTimezoneRegexPart      = fmt.Sprintf(`%s %s %s %s`, longDateRegexPart, attributionTimeRegexPart, attributionNumericTimezoneRegexPart, attributionAbbreviationTimezoneRegexPart)
 )
 
 var (
@@ -146,6 +144,8 @@ var attributionRegexes = []attributionRegex{
 			timeWithAbbreviationTimezoneRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
+		NameCaptureGroups: []int{2, 3, 4, 5},
+		TimeCaptureGroups: []int{1},
 	},
 	{
 		Format: attributionFormatNameDateNumericTimezone,
@@ -155,6 +155,8 @@ var attributionRegexes = []attributionRegex{
 			timeWithNumericTimezoneRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
+		NameCaptureGroups: []int{2, 3, 4, 5},
+		TimeCaptureGroups: []int{1},
 	},
 	{
 		Format: attributionFormatNameLongDate,
@@ -164,6 +166,8 @@ var attributionRegexes = []attributionRegex{
 			longDateRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
+		NameCaptureGroups: []int{2, 3, 4, 5},
+		TimeCaptureGroups: []int{1},
 	},
 	{
 		Format: attributionFormatNameShortDate,
@@ -173,6 +177,8 @@ var attributionRegexes = []attributionRegex{
 			shortDateRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
+		NameCaptureGroups: []int{2, 3, 4, 5},
+		TimeCaptureGroups: []int{1},
 	},
 	{
 		Format: attributionFormatName,
@@ -182,6 +188,7 @@ var attributionRegexes = []attributionRegex{
 			attributionGroupEmailRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
+		NameCaptureGroups: []int{1, 2, 3, 4},
 	},
 	{
 		Format: attributionFormatName,
@@ -190,6 +197,16 @@ var attributionRegexes = []attributionRegex{
 			nonNewlineWhitespaceRegexPart,
 			attributionUserCapturingRegexPart,
 		)),
+		NameCaptureGroups: []int{1, 2, 3, 4},
+	},
+	{
+		Format: attributionFormatName,
+		Regex: regexp.MustCompile(fmt.Sprintf(
+			`(?m)^%[1]s%[2]s%[1]swrote:\s+`,
+			nonNewlineWhitespaceRegexPart,
+			attributionUserWithEmailCapturingRegexPart,
+		)),
+		NameCaptureGroups: []int{1, 2, 3},
 	},
 }
 
@@ -309,12 +326,12 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 		}
 
 		matchStartIndex, matchEndIndex := match[0], match[1]
-		nameIndices := regex.Format.NameIndices(match)
+		nameIndices := regex.NameIndices(match)
 
 		b.Name = text[nameIndices[0]:nameIndices[1]]
 
 		if dateFormat := regex.Format.DateFormat(); dateFormat != nil {
-			timeIndices := regex.Format.TimeIndices(match)
+			timeIndices := regex.TimeIndices(match)
 			localTime, err := time.Parse(*dateFormat, text[timeIndices[0]:timeIndices[1]])
 			if err != nil {
 				continue
