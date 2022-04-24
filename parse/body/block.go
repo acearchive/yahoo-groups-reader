@@ -14,7 +14,7 @@ var (
 
 const (
 	attributionNameRegexPart                 = `(?:[^<>,\s]|[^<>,\s][^<>,]*[^<>,\s])`
-	attributionEmailRegexPart                = `[^<>\s]+`
+	attributionEmailRegexPart                = `[^<>@\s]+@[^<>@\s]+`
 	attributionGroupEmailRegexPart           = `[^\s@]+@(?:yahoogroups\.com|y?\.{3})`
 	attributionShortMonthRegexPart           = `(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)`
 	attributionShortWeekdayRegexPart         = `(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)`
