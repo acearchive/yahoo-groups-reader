@@ -1,5 +1,5 @@
 @media (prefers-color-scheme: dark) {
-    .message-thread {
+    body {
         color-scheme: dark;
         --color-fg-default: #c9d1d9;
         --color-fg-muted: #8b949e;
@@ -11,7 +11,7 @@
 }
 
 @media (prefers-color-scheme: light) {
-    .message-thread {
+    body {
         color-scheme: light;
         --color-fg-default: #24292f;
         --color-fg-muted: #57606a;
@@ -48,6 +48,21 @@
 .card > .card-header {
     border-color: var(--color-border-default);
     background-color: var(--color-canvas-subtle);
+}
+
+.pagination .page-item .page-link {
+    color: var(--color-fg-default);
+    background-color: var(--color-canvas-subtle);
+    border-color: var(--color-border-default);
+}
+
+.pagination .page-item .page-link:hover {
+    color: var(--color-fg-muted);
+}
+
+
+.pagination .page-item.active .page-link {
+    font-weight: bold;
 }
 
 a {
@@ -96,6 +111,24 @@ dl.field-list > dd {
     vertical-align: middle;
 }
 
+body {
+    font-family: "Noto Sans", sans-serif;
+}
+
+.thread-title {
+    font-size: 2.2em;
+    text-align: center;
+    color: var(--color-fg-default);
+    margin-top: 1em;
+    margin-bottom: 0.8em;
+}
+
+.page-list {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .message-thread {
     min-width: 200px;
     max-width: 1000px;
@@ -103,13 +136,6 @@ dl.field-list > dd {
     padding: 25px;
     color: var(--color-fg-default);
     background-color: var(--color-canvas-default);
-    font-family: "Noto Sans", sans-serif;
-}
-
-.message-thread .thread-title {
-    font-size: 2.2em;
-    margin-bottom: 0.8em;
-    text-align: center;
 }
 
 .message-thread .message {
