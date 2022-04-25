@@ -6,7 +6,6 @@ import (
 	"golang.org/x/text/language"
 	textmessage "golang.org/x/text/message"
 	"html/template"
-	"strconv"
 	"time"
 )
 
@@ -18,6 +17,7 @@ const (
 
 type ParentArgs struct {
 	Index         int
+	PagePath      PagePath
 	User          string
 	Body          template.HTML
 	FormattedDate string
@@ -41,17 +41,17 @@ type PagePath string
 
 type PageRef struct {
 	Path      PagePath
-	Number    string
+	Number    int
 	IsCurrent bool
 }
 
 type PaginationArgs struct {
-	Pages       []PageRef
-	IsFirstPage bool
-	Next        *PagePath
-	Prev        *PagePath
-	First       PagePath
-	Last        PagePath
+	Pages      []PageRef
+	PageNumber int
+	Next       *PagePath
+	Prev       *PagePath
+	First      PagePath
+	Last       PagePath
 }
 
 type TemplateArgs struct {
@@ -174,16 +174,16 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 		for pageInNavNumber := firstPageInNav; pageInNavNumber <= lastPageInNav; pageInNavNumber++ {
 			pageRefs = append(pageRefs, PageRef{
 				Path:      pagePath(pageInNavNumber, pageNumber),
-				Number:    strconv.Itoa(pageInNavNumber),
+				Number:    pageInNavNumber,
 				IsCurrent: pageInNavNumber == pageNumber,
 			})
 		}
 
 		paginationArgs := PaginationArgs{
-			Pages:       pageRefs,
-			First:       pagePath(firstPageNumber, pageNumber),
-			Last:        pagePath(totalPages, pageNumber),
-			IsFirstPage: pageNumber == firstPageNumber,
+			Pages:      pageRefs,
+			PageNumber: pageNumber,
+			First:      pagePath(firstPageNumber, pageNumber),
+			Last:       pagePath(totalPages, pageNumber),
 		}
 
 		if pageNumber > firstPageNumber {
@@ -202,9 +202,18 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 			messageEndIndex = len(messages)
 		}
 
+		messagesInPage := messages[messageStartIndex:messageEndIndex]
+
+		for _, message := range messagesInPage {
+			if message.Parent != nil {
+				parentPageNumber := message.Parent.Index / config.PageSize
+				message.Parent.PagePath = pagePath(parentPageNumber, pageNumber)
+			}
+		}
+
 		args = append(args, TemplateArgs{
 			Title:      config.Title,
-			Messages:   messages[messageStartIndex:messageEndIndex],
+			Messages:   messagesInPage,
 			Pagination: paginationArgs,
 		})
 	}
