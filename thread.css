@@ -64,7 +64,6 @@
 
 
 .pagination .page-item.active .page-link {
-    font-weight: bold;
     background-color: var(--color-canvas-active);
 }
 
