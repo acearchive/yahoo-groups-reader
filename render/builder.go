@@ -29,9 +29,26 @@ type MessageArgs struct {
 	Body              template.HTML
 }
 
+type PagePath string
+
+type PageRef struct {
+	Path      PagePath
+	Number    string
+	IsCurrent bool
+}
+
+type PaginationArgs struct {
+	Pages []PageRef
+	Next  *PagePath
+	Prev  *PagePath
+	First PagePath
+	Last  PagePath
+}
+
 type TemplateArgs struct {
-	Title    string
-	Messages []MessageArgs
+	Title      string
+	Messages   []MessageArgs
+	Pagination PaginationArgs
 }
 
 func formatTimestamp(input time.Time) string {

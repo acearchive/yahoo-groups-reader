@@ -19,8 +19,41 @@ const templateString = `
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
   </head>
   <body>
+	<h1 class="thread-title">{{ .Title }}</h1>
+    <nav class="page-list" aria-label="Message thread pages">
+      <ul class="pagination">
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.First }}">«</a>
+        </li>
+		{{ if .Pagination.Prev -}}
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.Prev }}">Prev</a>
+        </li>
+		{{- else -}}
+        <li class="page-item disabled">
+          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Prev</a>
+        </li>
+		{{- end }}
+        {{ range .Pagination.Pages -}}
+        <li class="page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
+          <a class="page-link" href="{{ .Page }}">{{ .Number }}</a>
+        </li>
+        {{- end }}
+		{{ if .Pagination.Next -}}
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
+        </li>
+		{{- else -}}
+        <li class="page-item disabled">
+          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Next</a>
+        </li>
+		{{- end }}
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.Last }}">»</a>
+        </li>
+      </ul>
+	</nav>
     <main class="message-thread">
-      <h1 class="thread-title">{{ .Title }}</h1>
       {{ range $message := .Messages -}}
       <div id="{{ printf "message-%d" $message.Index }}" class="message">
         <div class="message-header">
