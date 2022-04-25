@@ -1,16 +1,60 @@
 package render
 
 import (
+	"embed"
 	"github.com/acearchive/yg-render/parse"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
 )
 
 const (
-	outputFileMode = 0o644
-	outputDirMode  = 0o755
+	outputFileMode  = 0o644
+	outputDirMode   = 0o755
+	assetsDirectory = "assets"
 )
+
+//go:embed assets/*
+var assets embed.FS
+
+func assetFileNames() []string {
+	return []string{
+		"thread.css",
+	}
+}
+
+func writeAssets(path string) error {
+	if err := os.Mkdir(filepath.Join(path, assetsDirectory), outputDirMode); err != nil {
+		return err
+	}
+
+	for _, fileName := range assetFileNames() {
+		assetFile, err := assets.Open(filepath.Join(assetsDirectory, fileName))
+		if err != nil {
+			return err
+		}
+
+		outputFile, err := os.OpenFile(filepath.Join(path, assetsDirectory, fileName), os.O_CREATE|os.O_EXCL|os.O_WRONLY, outputFileMode)
+		if err != nil {
+			return err
+		}
+
+		if _, err := io.Copy(outputFile, assetFile); err != nil {
+			return err
+		}
+
+		if err := assetFile.Close(); err != nil {
+			return err
+		}
+
+		if err := outputFile.Close(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 func Execute(path string, config OutputConfig, thread parse.MessageThread) error {
 	if err := os.Mkdir(path, outputDirMode); err != nil {
@@ -45,5 +89,5 @@ func Execute(path string, config OutputConfig, thread parse.MessageThread) error
 		}
 	}
 
-	return nil
+	return writeAssets(path)
 }
