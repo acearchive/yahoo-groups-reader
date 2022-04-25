@@ -67,6 +67,10 @@
     background-color: var(--color-canvas-active);
 }
 
+.pagination .page-item.disabled .page-link {
+    color: var(--color-fg-muted);
+}
+
 a {
     color: var(--color-accent-fg);
     text-decoration: none;
