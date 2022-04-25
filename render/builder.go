@@ -1,11 +1,19 @@
 package render
 
 import (
+	"fmt"
 	"github.com/acearchive/yg-render/parse"
 	"golang.org/x/text/language"
 	textmessage "golang.org/x/text/message"
 	"html/template"
+	"strconv"
 	"time"
+)
+
+const (
+	pagesToDisplayInNavigation = 9
+	pagesToDisplayOnEitherSide = pagesToDisplayInNavigation / 2
+	firstPageNumber            = 1
 )
 
 type ParentArgs struct {
@@ -38,11 +46,12 @@ type PageRef struct {
 }
 
 type PaginationArgs struct {
-	Pages []PageRef
-	Next  *PagePath
-	Prev  *PagePath
-	First PagePath
-	Last  PagePath
+	Pages       []PageRef
+	IsFirstPage bool
+	Next        *PagePath
+	Prev        *PagePath
+	First       PagePath
+	Last        PagePath
 }
 
 type TemplateArgs struct {
@@ -72,7 +81,7 @@ func formatHumanReadableNumber(number int) string {
 	return localizedPrinter.Sprintf("%d", number)
 }
 
-func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
+func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 	argsList := make([]MessageArgs, len(thread))
 
 	messagesByDate, messageIndices := thread.SortedByDate()
@@ -116,4 +125,89 @@ func MessageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 	}
 
 	return argsList
+}
+
+type OutputConfig struct {
+	PageSize int
+	Title    string
+}
+
+func pagePath(pageNumber, currentPageNumber int) PagePath {
+	switch {
+	case pageNumber == currentPageNumber:
+		return "."
+	case currentPageNumber == firstPageNumber:
+		return PagePath(fmt.Sprintf("./%d", pageNumber))
+	case pageNumber == firstPageNumber:
+		return "../"
+	default:
+		return PagePath(fmt.Sprintf("../%d", pageNumber))
+	}
+}
+
+func navPagesRange(pageNumber, totalPages int) (first, last int) {
+	switch {
+	case pageNumber < firstPageNumber+pagesToDisplayOnEitherSide:
+		return firstPageNumber, firstPageNumber + pagesToDisplayInNavigation - 1
+	case pageNumber > totalPages-pagesToDisplayOnEitherSide:
+		return totalPages - pagesToDisplayInNavigation + 1, totalPages
+	default:
+		return pageNumber - pagesToDisplayOnEitherSide, pageNumber + pagesToDisplayOnEitherSide
+	}
+}
+
+func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
+	messages := messageThreadToArgs(thread)
+
+	totalPages := len(messages) / config.PageSize
+	if len(messages)%config.PageSize > 0 {
+		totalPages++
+	}
+
+	var args []TemplateArgs
+
+	for pageNumber := firstPageNumber; pageNumber <= totalPages; pageNumber++ {
+		firstPageInNav, lastPageInNav := navPagesRange(pageNumber, totalPages)
+
+		var pageRefs []PageRef
+
+		for pageInNavNumber := firstPageInNav; pageInNavNumber <= lastPageInNav; pageInNavNumber++ {
+			pageRefs = append(pageRefs, PageRef{
+				Path:      pagePath(pageInNavNumber, pageNumber),
+				Number:    strconv.Itoa(pageInNavNumber),
+				IsCurrent: pageInNavNumber == pageNumber,
+			})
+		}
+
+		paginationArgs := PaginationArgs{
+			Pages:       pageRefs,
+			First:       pagePath(firstPageNumber, pageNumber),
+			Last:        pagePath(totalPages, pageNumber),
+			IsFirstPage: pageNumber == firstPageNumber,
+		}
+
+		if pageNumber > firstPageNumber {
+			prevPath := pagePath(pageNumber-1, pageNumber)
+			paginationArgs.Prev = &prevPath
+		}
+
+		if pageNumber < totalPages {
+			nextPath := pagePath(pageNumber+1, pageNumber)
+			paginationArgs.Next = &nextPath
+		}
+
+		messageStartIndex := (pageNumber - 1) * config.PageSize
+		messageEndIndex := messageStartIndex + config.PageSize
+		if messageEndIndex > len(messages) {
+			messageEndIndex = len(messages)
+		}
+
+		args = append(args, TemplateArgs{
+			Title:      config.Title,
+			Messages:   messages[messageStartIndex:messageEndIndex],
+			Pagination: paginationArgs,
+		})
+	}
+
+	return args
 }

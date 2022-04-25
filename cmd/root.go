@@ -10,14 +10,16 @@ import (
 )
 
 var (
-	flagOutput  string
-	flagTitle   string
-	flagVerbose bool
+	flagOutput   string
+	flagPageSize int
+	flagTitle    string
+	flagVerbose  bool
 )
 
 func init() {
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", ".", "The directory to write the rendered output to")
 	rootCmd.Flags().StringVarP(&flagTitle, "title", "t", "Yahoo Group", "The title of the group")
+	rootCmd.Flags().IntVar(&flagPageSize, "page-size", 50, "The maximum number of messages per page")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
 }
 
@@ -38,7 +40,12 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		if err := render.Execute(flagTitle, "test.html", thread); err != nil {
+		config := render.OutputConfig{
+			Title:    flagTitle,
+			PageSize: flagPageSize,
+		}
+
+		if err := render.Execute("output", config, thread); err != nil {
 			return err
 		}
 
