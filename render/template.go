@@ -136,6 +136,39 @@ const templateString = `
       </div>
 	  {{ end }}
     </main>
+    <nav class="page-list" aria-label="Message thread pages">
+      <ul class="pagination">
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.First }}">«</a>
+        </li>
+		{{ if .Pagination.Prev -}}
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.Prev }}">Prev</a>
+        </li>
+		{{- else -}}
+        <li class="page-item disabled">
+          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Prev</a>
+        </li>
+		{{- end }}
+        {{ range .Pagination.Pages -}}
+        <li class="page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
+          <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
+        </li>
+        {{- end }}
+		{{ if .Pagination.Next -}}
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
+        </li>
+		{{- else -}}
+        <li class="page-item disabled">
+          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Next</a>
+        </li>
+		{{- end }}
+        <li class="page-item">
+          <a class="page-link" href="{{ .Pagination.Last }}">»</a>
+        </li>
+      </ul>
+	</nav>
   </body>
 </html>
 `
