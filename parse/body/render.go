@@ -87,6 +87,10 @@ func (b *AttributionBlock) ToHtml() string {
 	return output.String()
 }
 
+func (b *HardBreakBlock) ToHtml() string {
+	return ""
+}
+
 func (StartParagraphToken) ToHtml() string {
 	return "<p>\n"
 }

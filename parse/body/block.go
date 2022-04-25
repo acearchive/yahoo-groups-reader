@@ -133,6 +133,7 @@ var (
 	fieldLabelRegex         = regexp.MustCompile(fmt.Sprintf(`(?m)^%s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
 	messageHeaderStartRegex = regexp.MustCompile(fmt.Sprintf(`(?:^%[2]s\n|^%[1]s\n?|\n%[1]s(?:%[2]s)?\n)%[1]s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart, messageHeaderBannerRegexPart))
 	messageHeaderEndRegex   = regexp.MustCompile(fmt.Sprintf(`(?m)^%s\n`, nonNewlineWhitespaceRegexPart))
+	hardBreakRegex          = regexp.MustCompile(`(?:<br>\s*)+`)
 )
 
 var attributionRegexes = []attributionRegex{
@@ -344,6 +345,16 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 		b.HasTime = regex.Format.HasTime()
 
 		return true, text[:matchStartIndex], text[matchEndIndex:]
+	}
+
+	return false, "", ""
+}
+
+type HardBreakBlock struct{}
+
+func (b *HardBreakBlock) FromText(text string) (ok bool, before, after string) {
+	if match := hardBreakRegex.FindStringIndex(text); match != nil {
+		return true, text[:match[0]], text[match[1]:]
 	}
 
 	return false, "", ""

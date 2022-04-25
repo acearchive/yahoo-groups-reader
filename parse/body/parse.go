@@ -181,6 +181,7 @@ func (t *Tokenizer) Tokenize(lines []Line) []Token {
 
 func createEmptyBlocks() []Block {
 	return []Block{
+		&HardBreakBlock{},
 		&DividerBlock{},
 		&MessageHeaderBlock{},
 		&AttributionBlock{},
