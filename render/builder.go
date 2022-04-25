@@ -206,7 +206,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 
 		for _, message := range messagesInPage {
 			if message.Parent != nil {
-				parentPageNumber := message.Parent.Index / config.PageSize
+				parentPageNumber := (message.Parent.Index / config.PageSize) + 1
 				message.Parent.PagePath = pagePath(parentPageNumber, pageNumber)
 			}
 		}
