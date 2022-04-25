@@ -71,6 +71,16 @@
     color: var(--color-fg-muted);
 }
 
+.pagination .page-item.number-page-item:not(.active) {
+    display: list-item;
+}
+
+@media (max-width: 576px) {
+    .pagination .page-item.number-page-item:not(.active) {
+        display: none;
+    }
+}
+
 a {
     color: var(--color-accent-fg);
     text-decoration: none;

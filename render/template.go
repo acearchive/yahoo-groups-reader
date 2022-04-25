@@ -35,7 +35,7 @@ const templateString = `
         </li>
 		{{- end }}
         {{ range .Pagination.Pages -}}
-        <li class="page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
+        <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
           <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
         </li>
         {{- end }}
@@ -151,7 +151,7 @@ const templateString = `
         </li>
 		{{- end }}
         {{ range .Pagination.Pages -}}
-        <li class="page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
+        <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
           <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
         </li>
         {{- end }}
