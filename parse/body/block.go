@@ -42,14 +42,22 @@ type regexMatcher interface {
 	Regex() *regexp.Regexp
 }
 
-func joinMatchers(matchers []regexMatcher) *regexp.Regexp {
+func joinMatchers(matchers []regexMatcher, capture bool) *regexp.Regexp {
 	regexParts := make([]string, len(matchers))
 
 	for i, matcher := range matchers {
 		regexParts[i] = matcher.Regex().String()
 	}
 
-	return regexp.MustCompile(fmt.Sprintf("(?:%s)", strings.Join(regexParts, "|")))
+	var groupTemplate string
+
+	if capture {
+		groupTemplate = "(%s)"
+	} else {
+		groupTemplate = "(?:%s)"
+	}
+
+	return regexp.MustCompile(fmt.Sprintf(groupTemplate, strings.Join(regexParts, "|")))
 }
 
 type nameFormat string
@@ -137,8 +145,8 @@ const (
 	timeFormatLongTzName = "LongTzName"
 )
 
-func allTimeFormats() []dateFormat {
-	return []dateFormat{
+func allTimeFormats() []timeFormat {
+	return []timeFormat{
 		timeFormatLongTzName,
 		timeFormatLong,
 		timeFormatShort,
@@ -171,26 +179,37 @@ func (f timeFormat) Regex() *regexp.Regexp {
 	}
 }
 
-type attributionFormatType string
+type attributionRegexPart interface {
+	IsAttributionRegexPart()
+}
+
+type attributionRegexCapture string
 
 const (
-	attributionFormatTypeName = "Name"
-	attributionFormatTypeDate = "Date"
-	attributionFormatTypeTime = "Time"
+	attributionRegexCaptureName attributionRegexCapture = "Name"
+	attributionRegexCaptureDate attributionRegexCapture = "Date"
+	attributionRegexCaptureTime attributionRegexCapture = "Time"
 )
 
+func (attributionRegexCapture) IsAttributionRegexPart() {}
+
+type attributionRegexLiteral string
+
+func (attributionRegexLiteral) IsAttributionRegexPart() {}
+
 type attributionRegex struct {
-	RegexTemplate string
-	NameFormats   []nameFormat
-	DateFormats   []dateFormat
-	TimeFormats   []timeFormat
-	FormatArgs    []attributionFormatType
+	Template    string
+	Parts       []attributionRegexPart
+	NameFormats []nameFormat
+	DateFormats []dateFormat
+	TimeFormats []timeFormat
 }
 
 func indicesForSubmatch(number int, match []int) []int {
 	return []int{match[2*number], match[2*number+1]}
 }
 
+/*
 func (f attributionRegex) TimeIndices(match []int) []int {
 	if f.DateTimeCaptureGroups == nil {
 		return nil
@@ -224,79 +243,64 @@ func (f attributionRegex) NameIndices(match []int) []int {
 
 	panic(ErrInvalidRegex)
 }
+*/
 
 var attributionRegexes = []attributionRegex{
 	{
-		Format: attributionFormatNameDateAbbreviationTimezone,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			timeWithAbbreviationTimezoneRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-		NameCaptureGroups:     []int{2, 3, 4, 5},
-		DateTimeCaptureGroups: []int{1},
+		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s\s+%[3]s,\s+%[4]s\s+wrote:%[1]s$`,
+		Parts: []attributionRegexPart{
+			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
+			attributionRegexCaptureDate,
+			attributionRegexCaptureTime,
+			attributionRegexCaptureName,
+		},
+		NameFormats: allNameFormats(),
+		DateFormats: allDateFormats(),
+		TimeFormats: allTimeFormats(),
 	},
 	{
-		Format: attributionFormatNameDateNumericTimezone,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			timeWithNumericTimezoneRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-		NameCaptureGroups:     []int{2, 3, 4, 5},
-		DateTimeCaptureGroups: []int{1},
+		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
+		Parts: []attributionRegexPart{
+			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
+			attributionRegexCaptureDate,
+			attributionRegexCaptureName,
+		},
+		NameFormats: allNameFormats(),
+		DateFormats: allDateFormats(),
+		TimeFormats: nil,
 	},
 	{
-		Format: attributionFormatNameLongDate,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]sOn\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			longDateRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-		NameCaptureGroups:     []int{2, 3, 4, 5},
-		DateTimeCaptureGroups: []int{1},
+		Template: `(?m)^%[1]s(?:-{2,3}\s+)?In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
+		Parts: []attributionRegexPart{
+			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
+			attributionRegexLiteral(attributionGroupEmailRegexPart),
+			attributionRegexCaptureName,
+		},
+		NameFormats: allNameFormats(),
+		DateFormats: nil,
+		TimeFormats: nil,
 	},
 	{
-		Format: attributionFormatNameShortDate,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]s-{2,3}\s+On\s+(%[2]s),\s+%[3]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			shortDateRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-		NameCaptureGroups:     []int{2, 3, 4, 5},
-		DateTimeCaptureGroups: []int{1},
+		Template: `(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s$`,
+		Parts: []attributionRegexPart{
+			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
+			attributionRegexCaptureName,
+		},
+		NameFormats: allNameFormats(),
+		DateFormats: nil,
+		TimeFormats: nil,
 	},
 	{
-		Format: attributionFormatName,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]s-{2,3}\s+In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			attributionGroupEmailRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-		NameCaptureGroups: []int{1, 2, 3, 4},
-	},
-	{
-		Format: attributionFormatName,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s$`,
-			nonNewlineWhitespaceRegexPart,
-			attributionUserCapturingRegexPart,
-		)),
-		NameCaptureGroups: []int{1, 2, 3, 4},
-	},
-	{
-		Format: attributionFormatName,
-		Regex: regexp.MustCompile(fmt.Sprintf(
-			`(?m)^%[1]s%[2]s%[1]swrote:\s+`,
-			nonNewlineWhitespaceRegexPart,
-			attributionUserWithEmailCapturingRegexPart,
-		)),
-		NameCaptureGroups: []int{1, 2, 3},
+		Template: `(?m)^%[1]s%[2]s%[1]swrote:\s+`,
+		Parts: []attributionRegexPart{
+			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
+			attributionRegexCaptureName,
+		},
+		// We only allow name formats that include an email address to reduce
+		// the likelihood of false positive matches on this pattern.
+		NameFormats: allEmailNameFormats(),
+		DateFormats: nil,
+		TimeFormats: nil,
 	},
 }
 
