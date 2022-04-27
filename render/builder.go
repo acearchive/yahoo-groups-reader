@@ -148,12 +148,21 @@ func pagePath(pageNumber, currentPageNumber int) PagePath {
 func navPagesRange(pageNumber, totalPages int) (first, last int) {
 	switch {
 	case pageNumber < firstPageNumber+pagesToDisplayOnEitherSide:
-		return firstPageNumber, firstPageNumber + pagesToDisplayInNavigation - 1
+		first = firstPageNumber
+		last = firstPageNumber + pagesToDisplayInNavigation - 1
 	case pageNumber > totalPages-pagesToDisplayOnEitherSide:
-		return totalPages - pagesToDisplayInNavigation + 1, totalPages
+		first = totalPages - pagesToDisplayInNavigation + 1
+		last = totalPages
 	default:
-		return pageNumber - pagesToDisplayOnEitherSide, pageNumber + pagesToDisplayOnEitherSide
+		first = pageNumber - pagesToDisplayOnEitherSide
+		last = pageNumber + pagesToDisplayOnEitherSide
 	}
+
+	if last > totalPages {
+		last = totalPages
+	}
+
+	return first, last
 }
 
 func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
