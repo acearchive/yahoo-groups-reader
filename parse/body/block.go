@@ -396,7 +396,7 @@ func (r *attributionRegex) TimeIndices(match []int) (start, end int, format time
 
 var attributionRegexes = []attributionRegex{
 	{
-		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s\s+(?:at\s+)?%[3]s,\s+%[4]s\s+wrote:%[1]s\s+`,
+		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s\s+(?:at\s+)?%[3]s,?\s+%[4]s\s+wrote:\s+`,
 		Parts: []attributionRegexPart{
 			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
 			attributionRegexCaptureDate,
@@ -408,7 +408,7 @@ var attributionRegexes = []attributionRegex{
 		TimeFormats: allTimeFormats(),
 	},
 	{
-		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s,\s+%[3]s\s+wrote:%[1]s\s+`,
+		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s,?\s+%[3]s\s+wrote:\s+`,
 		Parts: []attributionRegexPart{
 			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
 			attributionRegexCaptureDate,
@@ -419,7 +419,7 @@ var attributionRegexes = []attributionRegex{
 		TimeFormats: nil,
 	},
 	{
-		Template: `(?m)^%[1]s(?:-{2,3}\s+)?In\s+%[2]s,\s+%[3]s\s+wrote:%[1]s\s+`,
+		Template: `(?m)^%[1]s(?:-{2,3}\s+)?In\s+%[2]s,\s+%[3]s\s+wrote:\s+`,
 		Parts: []attributionRegexPart{
 			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
 			attributionRegexLiteral(attributionGroupEmailRegexPart),
@@ -430,7 +430,7 @@ var attributionRegexes = []attributionRegex{
 		TimeFormats: nil,
 	},
 	{
-		Template: `(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:%[1]s\s+`,
+		Template: `(?m)^%[1]s-{2,3}\s+%[2]s\s+wrote:\s+`,
 		Parts: []attributionRegexPart{
 			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
 			attributionRegexCaptureName,
