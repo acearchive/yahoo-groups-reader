@@ -98,5 +98,9 @@ func Execute(path string, config OutputConfig, thread parse.MessageThread) error
 		}
 	}
 
-	return writeAssets(path)
+	if err := writeAssets(path); err != nil {
+		return err
+	}
+
+	return writeSearchData(thread, path)
 }

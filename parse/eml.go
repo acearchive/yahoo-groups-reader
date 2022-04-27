@@ -3,8 +3,8 @@ package parse
 import (
 	"errors"
 	"fmt"
+	"github.com/acearchive/yg-render/body"
 	"github.com/acearchive/yg-render/logger"
-	"github.com/acearchive/yg-render/parse/body"
 	"io"
 	"net/mail"
 	"regexp"
@@ -76,13 +76,25 @@ func flairFromEmail(email *mail.Message) string {
 	return ""
 }
 
-func bodyFromEmail(email *mail.Message) (string, error) {
+func bodyFromEmail(email *mail.Message) (MessageBody, error) {
 	rawTextBody, err := DecodeMessageBody(email)
 	if err != nil {
-		return "", err
+		return MessageBody{}, err
 	}
 
-	return body.ToHtml(rawTextBody)
+	var (
+		tokenizer   body.Tokenizer
+		messageBody MessageBody
+	)
+
+	messageBody.Tokens, err = tokenizer.Tokenize(rawTextBody)
+	if err != nil {
+		return MessageBody{}, err
+	}
+
+	messageBody.Html = body.Render(messageBody.Tokens)
+
+	return messageBody, nil
 }
 
 func Email(contents io.Reader) (Message, error) {

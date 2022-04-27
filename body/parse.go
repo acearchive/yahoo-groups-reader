@@ -2,7 +2,7 @@ package body
 
 import (
 	"bufio"
-	"github.com/acearchive/yg-render/parse/block"
+	block2 "github.com/acearchive/yg-render/block"
 	"io"
 	"strings"
 )
@@ -45,7 +45,7 @@ func (EndQuoteToken) TagType() TagType {
 }
 
 type BlockToken struct {
-	block.Block
+	block2.Block
 }
 
 func (BlockToken) TagType() TagType {
@@ -168,7 +168,7 @@ func (t *Tokenizer) tokenizeLineWithoutBlocks(line Line) []Token {
 	return tokens
 }
 
-func (t *Tokenizer) Tokenize(lines []Line) []Token {
+func (t *Tokenizer) TokenizeLines(lines []Line) []Token {
 	t.reset()
 
 	var tokens []Token
@@ -180,12 +180,21 @@ func (t *Tokenizer) Tokenize(lines []Line) []Token {
 	return parseBlocks(tokens)
 }
 
-func createEmptyBlocks() []block.Block {
-	return []block.Block{
-		&block.HardBreakBlock{},
-		&block.DividerBlock{},
-		&block.MessageHeaderBlock{},
-		&block.AttributionBlock{},
+func (t *Tokenizer) Tokenize(body io.Reader) ([]Token, error) {
+	lines, err := ParseLines(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return t.TokenizeLines(lines), nil
+}
+
+func createEmptyBlocks() []block2.Block {
+	return []block2.Block{
+		&block2.HardBreakBlock{},
+		&block2.DividerBlock{},
+		&block2.MessageHeaderBlock{},
+		&block2.AttributionBlock{},
 	}
 }
 

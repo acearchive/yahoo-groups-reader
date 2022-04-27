@@ -104,7 +104,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 				parentArgs = &ParentArgs{
 					Index:         parentIndex + 1,
 					User:          parent.User,
-					Body:          template.HTML(parent.Body),
+					Body:          template.HTML(parent.Body.Html),
 					Timestamp:     formatTimestamp(parent.Date),
 					FormattedDate: formatDate(parent.Date),
 					FormattedTime: formatTime(parent.Date),
@@ -122,7 +122,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 			User:              message.User,
 			Flair:             message.Flair,
 			Title:             messageTitle,
-			Body:              template.HTML(message.Body),
+			Body:              template.HTML(message.Body.Html),
 		}
 	}
 

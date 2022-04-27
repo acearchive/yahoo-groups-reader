@@ -1,11 +1,17 @@
 package parse
 
 import (
+	"github.com/acearchive/yg-render/body"
 	"sort"
 	"time"
 )
 
 type MessageID string
+
+type MessageBody struct {
+	Tokens []body.Token
+	Html   string
+}
 
 type Message struct {
 	ID     MessageID
@@ -14,7 +20,7 @@ type Message struct {
 	Flair  string
 	Date   time.Time
 	Title  *string
-	Body   string
+	Body   MessageBody
 }
 
 type MessageThread map[MessageID]Message

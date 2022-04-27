@@ -2,7 +2,6 @@ package body
 
 import (
 	"html"
-	"io"
 	"strings"
 )
 
@@ -58,15 +57,4 @@ func Render(tokens []Token) string {
 	}
 
 	return output.String()
-}
-
-func ToHtml(text io.Reader) (string, error) {
-	lines, err := ParseLines(text)
-	if err != nil {
-		return "", err
-	}
-
-	var tokenizer Tokenizer
-
-	return Render(tokenizer.Tokenize(lines)), nil
 }
