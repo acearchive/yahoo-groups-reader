@@ -2,6 +2,7 @@ package body
 
 import (
 	"bufio"
+	"github.com/acearchive/yg-render/parse/block"
 	"io"
 	"strings"
 )
@@ -44,7 +45,7 @@ func (EndQuoteToken) TagType() TagType {
 }
 
 type BlockToken struct {
-	Block
+	block.Block
 }
 
 func (BlockToken) TagType() TagType {
@@ -179,24 +180,24 @@ func (t *Tokenizer) Tokenize(lines []Line) []Token {
 	return parseBlocks(tokens)
 }
 
-func createEmptyBlocks() []Block {
-	return []Block{
-		&HardBreakBlock{},
-		&DividerBlock{},
-		&MessageHeaderBlock{},
-		&AttributionBlock{},
+func createEmptyBlocks() []block.Block {
+	return []block.Block{
+		&block.HardBreakBlock{},
+		&block.DividerBlock{},
+		&block.MessageHeaderBlock{},
+		&block.AttributionBlock{},
 	}
 }
 
 func findBlocksInParagraph(text string) []Token {
-	for _, block := range createEmptyBlocks() {
-		if ok, before, after := block.FromText(text); ok {
+	for _, newBlock := range createEmptyBlocks() {
+		if ok, before, after := newBlock.FromText(text); ok {
 			beforeBlocks := findBlocksInParagraph(before)
 			afterBlocks := findBlocksInParagraph(after)
 
 			output := make([]Token, 0, len(beforeBlocks)+len(afterBlocks)+1)
 			output = append(output, beforeBlocks...)
-			output = append(output, BlockToken{block})
+			output = append(output, BlockToken{newBlock})
 			output = append(output, afterBlocks...)
 
 			return output

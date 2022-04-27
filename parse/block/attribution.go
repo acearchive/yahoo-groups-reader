@@ -1,4 +1,4 @@
-package body
+package block
 
 import (
 	"errors"
@@ -16,27 +16,12 @@ var (
 	ErrNoMatchingCaptureGroups = errors.New("match has no matching capture groups")
 )
 
-const nonNewlineWhitespaceRegexPart = `[\t ]*`
-
 const (
 	attributionNameRegexPart       = `(?:[^<>,"\s]|[^<>,"\s][^<>,"]*[^<>,"\s])`
 	attributionEmailRegexPart      = `[^<>@\s]+@[^<>@\s]*`
 	attributionGroupEmailRegexPart = `[^\s@]+@(?:yahoogroups\.com|y?\.{3})`
-)
-
-const (
-	shortMonthRegexPart   = `(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)`
-	shortWeekdayRegexPart = `(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)`
-)
-
-var messageHeaderBannerRegexPart = fmt.Sprintf(`%[1]s-+ ?Original Message ?-+%[1]s`, nonNewlineWhitespaceRegexPart)
-
-var (
-	hardBreakRegex          = regexp.MustCompile(`(?:<br>\s*)+`)
-	dividerRegex            = regexp.MustCompile(fmt.Sprintf(`(?m)^%[1]s(?:-{2,}|_{2,}|#{2,})%[1]s$`, nonNewlineWhitespaceRegexPart))
-	fieldLabelRegex         = regexp.MustCompile(fmt.Sprintf(`(?m)^%s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart))
-	messageHeaderStartRegex = regexp.MustCompile(fmt.Sprintf(`(?:^%[2]s\n|^%[1]s\n?|\n%[1]s(?:%[2]s)?\n)%[1]s(From|Reply-To|To|Subject|Date|Sent|Message): +(\S)`, nonNewlineWhitespaceRegexPart, messageHeaderBannerRegexPart))
-	messageHeaderEndRegex   = regexp.MustCompile(fmt.Sprintf(`(?m)^%s\n`, nonNewlineWhitespaceRegexPart))
+	shortMonthRegexPart            = `(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)`
+	shortWeekdayRegexPart          = `(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)`
 )
 
 type regexMatcher interface {
@@ -457,108 +442,6 @@ var attributionRegexes = []attributionRegex{
 	},
 }
 
-type Block interface {
-	ToHtml() string
-	FromText(text string) (ok bool, before, after string)
-}
-
-type Field struct {
-	Name  string
-	Value string
-}
-
-type MessageHeaderBlock []Field
-
-type messageHeaderFieldPosition struct {
-	LabelStartIndex int
-	LabelEndIndex   int
-	ValueStartIndex int
-}
-
-func (b *MessageHeaderBlock) FromText(text string) (ok bool, before, after string) {
-	var fieldPositions []messageHeaderFieldPosition
-
-	remaining := text
-	currentIndex := 0
-	absoluteFieldListEndIndex := len(text)
-
-	if match := messageHeaderStartRegex.FindStringSubmatchIndex(remaining); match != nil {
-		position := messageHeaderFieldPosition{
-			LabelStartIndex: match[2],
-			LabelEndIndex:   match[3],
-			ValueStartIndex: match[4],
-		}
-		fieldPositions = append(fieldPositions, position)
-
-		currentIndex += position.LabelEndIndex
-		remaining = remaining[position.LabelEndIndex:]
-
-		matchStartIndex := match[0]
-		before = text[:matchStartIndex]
-	} else {
-		return false, "", ""
-	}
-
-	if match := messageHeaderEndRegex.FindStringIndex(remaining); match != nil {
-		relativeStartIndex, relativeEndIndex := match[0], match[1]
-		absoluteStartIndex, absoluteEndIndex := currentIndex+relativeStartIndex, currentIndex+relativeEndIndex
-
-		remaining = remaining[:relativeStartIndex]
-		absoluteFieldListEndIndex = absoluteStartIndex
-		after = text[absoluteEndIndex:]
-	}
-
-	for {
-		match := fieldLabelRegex.FindStringSubmatchIndex(remaining)
-		if match == nil {
-			break
-		}
-
-		relativeFieldStartIndex, relativeFieldEndIndex, relativeValueStartIndex := match[2], match[3], match[4]
-
-		position := messageHeaderFieldPosition{
-			LabelStartIndex: currentIndex + relativeFieldStartIndex,
-			LabelEndIndex:   currentIndex + relativeFieldEndIndex,
-			ValueStartIndex: currentIndex + relativeValueStartIndex,
-		}
-		fieldPositions = append(fieldPositions, position)
-
-		currentIndex += relativeFieldEndIndex
-		remaining = remaining[relativeFieldEndIndex:]
-	}
-
-	for i, position := range fieldPositions {
-		if i+1 < len(fieldPositions) {
-			nextPosition := fieldPositions[i+1]
-
-			*b = append(*b, Field{
-				Name:  text[position.LabelStartIndex:position.LabelEndIndex],
-				Value: text[position.ValueStartIndex:nextPosition.LabelStartIndex],
-			})
-		} else {
-			*b = append(*b, Field{
-				Name:  text[position.LabelStartIndex:position.LabelEndIndex],
-				Value: text[position.ValueStartIndex:absoluteFieldListEndIndex],
-			})
-		}
-	}
-
-	return true, before, after
-}
-
-type DividerBlock struct{}
-
-func (DividerBlock) FromText(text string) (ok bool, before, after string) {
-	match := dividerRegex.FindStringIndex(text)
-	if match == nil {
-		return false, "", ""
-	}
-
-	matchStartIndex, matchEndIndex := match[0], match[1]
-
-	return true, text[:matchStartIndex], text[matchEndIndex:]
-}
-
 type AttributionBlock struct {
 	Name        string
 	Time        time.Time
@@ -611,16 +494,6 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 		b.HasTime = regex.HasTime()
 
 		return true, text[:matchStartIndex], text[matchEndIndex:]
-	}
-
-	return false, "", ""
-}
-
-type HardBreakBlock struct{}
-
-func (b *HardBreakBlock) FromText(text string) (ok bool, before, after string) {
-	if match := hardBreakRegex.FindStringIndex(text); match != nil {
-		return true, text[:match[0]], text[match[1]:]
 	}
 
 	return false, "", ""
