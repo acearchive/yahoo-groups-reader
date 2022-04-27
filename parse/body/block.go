@@ -284,17 +284,22 @@ type attributionRegex struct {
 	NameFormats []nameFormat
 	DateFormats []dateFormat
 	TimeFormats []timeFormat
+	regex       *regexp.Regexp
 }
 
-func (r attributionRegex) HasDate() bool {
+func (r *attributionRegex) HasDate() bool {
 	return len(r.DateFormats) > 0
 }
 
-func (r attributionRegex) HasTime() bool {
+func (r *attributionRegex) HasTime() bool {
 	return len(r.TimeFormats) > 0
 }
 
-func (r attributionRegex) Regex() *regexp.Regexp {
+func (r *attributionRegex) Regex() *regexp.Regexp {
+	if r.regex != nil {
+		return r.regex
+	}
+
 	formatArgs := make([]interface{}, len(r.Parts))
 
 	for partIndex, part := range r.Parts {
@@ -313,10 +318,12 @@ func (r attributionRegex) Regex() *regexp.Regexp {
 		}
 	}
 
-	return regexp.MustCompile(fmt.Sprintf(r.Template, formatArgs...))
+	r.regex = regexp.MustCompile(fmt.Sprintf(r.Template, formatArgs...))
+
+	return r.regex
 }
 
-func (r attributionRegex) matchersOfKind(kind attributionRegexCapture) []regexMatcher {
+func (r *attributionRegex) matchersOfKind(kind attributionRegexCapture) []regexMatcher {
 	var matchers []regexMatcher
 
 	switch kind {
@@ -343,7 +350,7 @@ func indicesForCaptureGroup(match []int, number int) (start, end int) {
 	return match[2*number], match[2*number+1]
 }
 
-func (r attributionRegex) MatchIndices(match []int, kind attributionRegexCapture) (start, end int, matcher regexMatcher) {
+func (r *attributionRegex) MatchIndices(match []int, kind attributionRegexCapture) (start, end int, matcher regexMatcher) {
 	precedingCaptureGroups := 0
 
 	for _, part := range r.Parts {
@@ -369,19 +376,19 @@ func (r attributionRegex) MatchIndices(match []int, kind attributionRegexCapture
 	panic(fmt.Errorf("%w of kind %s", ErrNoMatchingCaptureGroups, kind))
 }
 
-func (r attributionRegex) NameIndices(match []int) (start, end int, format nameFormat) {
+func (r *attributionRegex) NameIndices(match []int) (start, end int, format nameFormat) {
 	start, end, matcher := r.MatchIndices(match, attributionRegexCaptureName)
 
 	return start, end, matcher.(nameFormat)
 }
 
-func (r attributionRegex) DateIndices(match []int) (start, end int, format dateFormat) {
+func (r *attributionRegex) DateIndices(match []int) (start, end int, format dateFormat) {
 	start, end, matcher := r.MatchIndices(match, attributionRegexCaptureDate)
 
 	return start, end, matcher.(dateFormat)
 }
 
-func (r attributionRegex) TimeIndices(match []int) (start, end int, format timeFormat) {
+func (r *attributionRegex) TimeIndices(match []int) (start, end int, format timeFormat) {
 	start, end, matcher := r.MatchIndices(match, attributionRegexCaptureTime)
 
 	return start, end, matcher.(timeFormat)
@@ -556,7 +563,9 @@ type AttributionBlock struct {
 }
 
 func (b *AttributionBlock) FromText(text string) (ok bool, before, after string) {
-	for _, regex := range attributionRegexes {
+	for i := range attributionRegexes {
+		regex := &attributionRegexes[i]
+
 		match := regex.Regex().FindStringSubmatchIndex(text)
 		if match == nil {
 			continue
