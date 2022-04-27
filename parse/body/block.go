@@ -20,7 +20,7 @@ const nonNewlineWhitespaceRegexPart = `[\t ]*`
 
 const (
 	attributionNameRegexPart       = `(?:[^<>,\s]|[^<>,\s][^<>,]*[^<>,\s])`
-	attributionEmailRegexPart      = `[^<>@\s]+@[^<>@\s]+`
+	attributionEmailRegexPart      = `[^<>@\s]+@[^<>@\s]*`
 	attributionGroupEmailRegexPart = `[^\s@]+@(?:yahoogroups\.com|y?\.{3})`
 )
 
@@ -86,14 +86,16 @@ func joinTimeFormats(formats []timeFormat) string {
 type nameFormat string
 
 const (
-	nameFormatName            = "Name"
-	nameFormatEmail           = "Email"
-	nameFormatNameEmail       = "NameEmail"
-	nameFormatQuotedNameEmail = "QuotedNameEamil"
+	nameFormatName                     = "Name"
+	nameFormatEmail                    = "Email"
+	nameFormatNameEmail                = "NameEmail"
+	nameFormatQuotedNameEmail          = "QuotedNameEmail"
+	nameFormatQuotedNameDuplicateEmail = "QuotedNameDuplicateEmail"
 )
 
 func allNameFormats() []nameFormat {
 	return []nameFormat{
+		nameFormatQuotedNameDuplicateEmail,
 		nameFormatQuotedNameEmail,
 		nameFormatNameEmail,
 		nameFormatEmail,
@@ -103,6 +105,7 @@ func allNameFormats() []nameFormat {
 
 func allEmailNameFormats() []nameFormat {
 	return []nameFormat{
+		nameFormatQuotedNameDuplicateEmail,
 		nameFormatQuotedNameEmail,
 		nameFormatNameEmail,
 		nameFormatEmail,
@@ -119,6 +122,8 @@ func (f nameFormat) Regex() *regexp.Regexp {
 		return regexp.MustCompile(fmt.Sprintf(`(%s)\s+<%s>`, attributionNameRegexPart, attributionEmailRegexPart))
 	case nameFormatQuotedNameEmail:
 		return regexp.MustCompile(fmt.Sprintf(`"(%s)"\s+<%s>`, attributionNameRegexPart, attributionEmailRegexPart))
+	case nameFormatQuotedNameDuplicateEmail:
+		return regexp.MustCompile(fmt.Sprintf(`"(%[1]s)\s+<%[2]s>"\s+<%[2]s>`, attributionNameRegexPart, attributionEmailRegexPart))
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidNameFormat, f))
 	}
