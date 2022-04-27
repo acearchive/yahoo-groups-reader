@@ -127,13 +127,17 @@ func (f nameFormat) Regex() *regexp.Regexp {
 type dateFormat string
 
 const (
-	dateFormatShort = "Short"
-	dateFormatLong  = "Long"
+	dateFormatShort        = "Short"
+	dateFormatLong         = "Long"
+	dateFormatShortWeekday = "ShortWeekday"
+	dateFormatLongWeekday  = "LongWeekday"
 )
 
 func allDateFormats() []dateFormat {
 	return []dateFormat{
+		dateFormatLongWeekday,
 		dateFormatLong,
+		dateFormatShortWeekday,
 		dateFormatShort,
 	}
 }
@@ -141,8 +145,12 @@ func allDateFormats() []dateFormat {
 func (f dateFormat) FormatString() string {
 	switch f {
 	case dateFormatShort:
+		return "01/02/06"
+	case dateFormatShortWeekday:
 		return "Mon, 01/02/06"
 	case dateFormatLong:
+		return "2 Jan 2006"
+	case dateFormatLongWeekday:
 		return "Mon, 2 Jan 2006"
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidDateFormat, f))
@@ -152,8 +160,12 @@ func (f dateFormat) FormatString() string {
 func (f dateFormat) Regex() *regexp.Regexp {
 	switch f {
 	case dateFormatShort:
+		return regexp.MustCompile(`(\d{2}/\d{2}/\d{2})`)
+	case dateFormatShortWeekday:
 		return regexp.MustCompile(fmt.Sprintf(`(%s, \d{2}/\d{2}/\d{2})`, shortWeekdayRegexPart))
 	case dateFormatLong:
+		return regexp.MustCompile(fmt.Sprintf(`(\d{1,2} %s \d{4})`, shortMonthRegexPart))
+	case dateFormatLongWeekday:
 		return regexp.MustCompile(fmt.Sprintf(`(%s, \d{1,2} %s \d{4})`, shortWeekdayRegexPart, shortMonthRegexPart))
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidDateFormat, f))
@@ -163,7 +175,8 @@ func (f dateFormat) Regex() *regexp.Regexp {
 type timeFormat string
 
 const (
-	timeFormatShort      = "Short"
+	timeFormatShort12Hr  = "Short12Hr"
+	timeFormatShort24Hr  = "Short24Hr"
 	timeFormatLong       = "Long"
 	timeFormatLongTzName = "LongTzName"
 )
@@ -172,14 +185,17 @@ func allTimeFormats() []timeFormat {
 	return []timeFormat{
 		timeFormatLongTzName,
 		timeFormatLong,
-		timeFormatShort,
+		timeFormatShort12Hr,
+		timeFormatShort24Hr,
 	}
 }
 
 func (f timeFormat) FormatString() string {
 	switch f {
-	case timeFormatShort:
+	case timeFormatShort12Hr:
 		return "3:04 PM"
+	case timeFormatShort24Hr:
+		return "15:04"
 	case timeFormatLong:
 		return "15:04:05 -0700"
 	case timeFormatLongTzName:
@@ -191,8 +207,10 @@ func (f timeFormat) FormatString() string {
 
 func (f timeFormat) Regex() *regexp.Regexp {
 	switch f {
-	case timeFormatShort:
+	case timeFormatShort12Hr:
 		return regexp.MustCompile(`(\d{1,2}:\d{2} (?:AM|PM))`)
+	case timeFormatShort24Hr:
+		return regexp.MustCompile(`(\d{1,2}:\d{2})`)
 	case timeFormatLong:
 		return regexp.MustCompile(`(\d{2}:\d{2}:\d{2} [+-]\d{4})`)
 	case timeFormatLongTzName:
@@ -239,19 +257,19 @@ func (r attributionRegex) HasTime() bool {
 func (r attributionRegex) Regex() *regexp.Regexp {
 	formatArgs := make([]interface{}, len(r.Parts))
 
-	for i, part := range r.Parts {
+	for partIndex, part := range r.Parts {
 		switch concretePart := part.(type) {
 		case attributionRegexCapture:
 			switch concretePart {
 			case attributionRegexCaptureName:
-				formatArgs[i] = joinNameFormats(r.NameFormats)
+				formatArgs[partIndex] = joinNameFormats(r.NameFormats)
 			case attributionRegexCaptureDate:
-				formatArgs[i] = joinDateFormats(r.DateFormats)
+				formatArgs[partIndex] = joinDateFormats(r.DateFormats)
 			case attributionRegexCaptureTime:
-				formatArgs[i] = joinTimeFormats(r.TimeFormats)
+				formatArgs[partIndex] = joinTimeFormats(r.TimeFormats)
 			}
 		case attributionRegexLiteral:
-			formatArgs[i] = string(concretePart)
+			formatArgs[partIndex] = string(concretePart)
 		}
 	}
 
@@ -331,7 +349,7 @@ func (r attributionRegex) TimeIndices(match []int) (start, end int, format timeF
 
 var attributionRegexes = []attributionRegex{
 	{
-		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s\s+%[3]s,\s+%[4]s\s+wrote:%[1]s$`,
+		Template: `(?m)^%[1]s(?:-{2,3}\s+)?On\s+%[2]s\s+(?:at\s+)?%[3]s,\s+%[4]s\s+wrote:%[1]s$`,
 		Parts: []attributionRegexPart{
 			attributionRegexLiteral(nonNewlineWhitespaceRegexPart),
 			attributionRegexCaptureDate,
