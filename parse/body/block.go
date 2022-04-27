@@ -19,7 +19,7 @@ var (
 const nonNewlineWhitespaceRegexPart = `[\t ]*`
 
 const (
-	attributionNameRegexPart       = `(?:[^<>,\s]|[^<>,\s][^<>,]*[^<>,\s])`
+	attributionNameRegexPart       = `(?:[^<>,"\s]|[^<>,"\s][^<>,"]*[^<>,"\s])`
 	attributionEmailRegexPart      = `[^<>@\s]+@[^<>@\s]*`
 	attributionGroupEmailRegexPart = `[^\s@]+@(?:yahoogroups\.com|y?\.{3})`
 )
@@ -89,6 +89,7 @@ const (
 	nameFormatName                     = "Name"
 	nameFormatEmail                    = "Email"
 	nameFormatNameEmail                = "NameEmail"
+	nameFormatQuotedName               = "QuotedName"
 	nameFormatQuotedNameEmail          = "QuotedNameEmail"
 	nameFormatQuotedNameDuplicateEmail = "QuotedNameDuplicateEmail"
 )
@@ -99,6 +100,7 @@ func allNameFormats() []nameFormat {
 		nameFormatQuotedNameEmail,
 		nameFormatNameEmail,
 		nameFormatEmail,
+		nameFormatQuotedName,
 		nameFormatName,
 	}
 }
@@ -120,6 +122,8 @@ func (f nameFormat) Regex() *regexp.Regexp {
 		return regexp.MustCompile(fmt.Sprintf(`<(%s)>`, attributionEmailRegexPart))
 	case nameFormatNameEmail:
 		return regexp.MustCompile(fmt.Sprintf(`(%s)\s+<%s>`, attributionNameRegexPart, attributionEmailRegexPart))
+	case nameFormatQuotedName:
+		return regexp.MustCompile(fmt.Sprintf(`"(%s)"`, attributionNameRegexPart))
 	case nameFormatQuotedNameEmail:
 		return regexp.MustCompile(fmt.Sprintf(`"(%s)"\s+<%s>`, attributionNameRegexPart, attributionEmailRegexPart))
 	case nameFormatQuotedNameDuplicateEmail:
