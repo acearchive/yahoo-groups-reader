@@ -30,7 +30,7 @@ const attributionTemplateString = `
     </svg>
   </span>
   {{ if (and .Date .Time) -}}
-    On {{ .Date }} at {{ .Time }}, {{ .Name }} said:
+    On {{ .Date }} at {{ .Time }} {{ if .HasTimeZone }}UTC{{ else }}<em>(local time)</em>{{ end }}, {{ .Name }} said:
   {{- else if .Date -}}
     On {{ .Date }}, {{ .Name }} said:
   {{- else -}}
@@ -46,9 +46,10 @@ type messageHeaderTemplateParams struct {
 }
 
 type attributionTemplateParams struct {
-	Name string
-	Date string
-	Time string
+	Name        string
+	Date        string
+	Time        string
+	HasTimeZone bool
 }
 
 func (b *MessageHeaderBlock) ToHtml() string {
@@ -74,7 +75,8 @@ func (b *AttributionBlock) ToHtml() string {
 		params.Date = b.Time.Format("2 January 2006")
 
 		if b.HasTime {
-			params.Time = b.Time.Format("15:04 MST")
+			params.Time = b.Time.Format("15:04")
+			params.HasTimeZone = b.HasTimeZone
 		}
 	}
 

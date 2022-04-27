@@ -220,6 +220,17 @@ func (f timeFormat) Regex() *regexp.Regexp {
 	}
 }
 
+func (f timeFormat) HasTimeZone() bool {
+	switch f {
+	case timeFormatShort12Hr, timeFormatShort24Hr:
+		return false
+	case timeFormatLong, timeFormatLongTzName:
+		return true
+	default:
+		panic(fmt.Errorf("%w: %s", ErrInvalidTimeFormat, f))
+	}
+}
+
 type attributionRegexPart interface {
 	IsAttributionRegexPart()
 }
@@ -509,9 +520,10 @@ func (DividerBlock) FromText(text string) (ok bool, before, after string) {
 }
 
 type AttributionBlock struct {
-	Name    string
-	Time    time.Time
-	HasTime bool
+	Name        string
+	Time        time.Time
+	HasTime     bool
+	HasTimeZone bool
 }
 
 func (b *AttributionBlock) FromText(text string) (ok bool, before, after string) {
@@ -528,12 +540,12 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 
 		if regex.HasDate() {
 			dateStartIndex, dateEndIndex, matchedDateFormat := regex.DateIndices(match)
-			localDate, err := time.Parse(matchedDateFormat.FormatString(), text[dateStartIndex:dateEndIndex])
+			parsedDate, err := time.Parse(matchedDateFormat.FormatString(), text[dateStartIndex:dateEndIndex])
 			if err != nil {
 				continue
 			}
 
-			b.Time = localDate.UTC()
+			b.Time = parsedDate.UTC()
 		}
 
 		if regex.HasTime() {
@@ -550,6 +562,8 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 			} else {
 				b.Time = b.Time.Add(normalizedTime.Sub(time.Time{}))
 			}
+
+			b.HasTimeZone = matchedTimeFormat.HasTimeZone()
 		}
 
 		b.HasTime = regex.HasTime()
