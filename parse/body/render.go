@@ -70,7 +70,7 @@ func (b *DividerBlock) ToHtml() string {
 func (b *AttributionBlock) ToHtml() string {
 	params := attributionTemplateParams{Name: b.Name}
 
-	if b.Time != nil {
+	if !b.Time.IsZero() {
 		params.Date = b.Time.Format("2 January 2006")
 
 		if b.HasTime {

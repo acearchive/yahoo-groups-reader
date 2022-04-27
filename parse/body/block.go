@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	ErrInvalidDateFormat = errors.New("invalid date format")
-	ErrInvalidTimeFormat = errors.New("invalid time format")
-	ErrInvalidNameFormat = errors.New("invalid name format")
-	ErrInvalidRegex      = errors.New("invalid regex")
+	ErrInvalidDateFormat       = errors.New("invalid date format")
+	ErrInvalidTimeFormat       = errors.New("invalid time format")
+	ErrInvalidNameFormat       = errors.New("invalid name format")
+	ErrInvalidCaptureKind      = errors.New("invalid capture kind")
+	ErrNoMatchingCaptureGroups = errors.New("match has no matching capture groups")
 )
 
 const nonNewlineWhitespaceRegexPart = `[\t ]*`
@@ -42,22 +43,44 @@ type regexMatcher interface {
 	Regex() *regexp.Regexp
 }
 
-func joinMatchers(matchers []regexMatcher, capture bool) *regexp.Regexp {
+func joinMatchers(matchers []regexMatcher) string {
 	regexParts := make([]string, len(matchers))
 
 	for i, matcher := range matchers {
 		regexParts[i] = matcher.Regex().String()
 	}
 
-	var groupTemplate string
+	return fmt.Sprintf("(?:%s)", strings.Join(regexParts, "|"))
+}
 
-	if capture {
-		groupTemplate = "(%s)"
-	} else {
-		groupTemplate = "(?:%s)"
+func joinNameFormats(formats []nameFormat) string {
+	matchers := make([]regexMatcher, len(formats))
+
+	for i, format := range formats {
+		matchers[i] = format
 	}
 
-	return regexp.MustCompile(fmt.Sprintf(groupTemplate, strings.Join(regexParts, "|")))
+	return joinMatchers(matchers)
+}
+
+func joinDateFormats(formats []dateFormat) string {
+	matchers := make([]regexMatcher, len(formats))
+
+	for i, format := range formats {
+		matchers[i] = format
+	}
+
+	return joinMatchers(matchers)
+}
+
+func joinTimeFormats(formats []timeFormat) string {
+	matchers := make([]regexMatcher, len(formats))
+
+	for i, format := range formats {
+		matchers[i] = format
+	}
+
+	return joinMatchers(matchers)
 }
 
 type nameFormat string
@@ -129,9 +152,9 @@ func (f dateFormat) FormatString() string {
 func (f dateFormat) Regex() *regexp.Regexp {
 	switch f {
 	case dateFormatShort:
-		return regexp.MustCompile(fmt.Sprintf(`%s, \d{2}/\d{2}/\d{2}`, shortWeekdayRegexPart))
+		return regexp.MustCompile(fmt.Sprintf(`(%s, \d{2}/\d{2}/\d{2})`, shortWeekdayRegexPart))
 	case dateFormatLong:
-		return regexp.MustCompile(fmt.Sprintf(`%s, \d{1,2} %s \d{4}`, shortWeekdayRegexPart, shortMonthRegexPart))
+		return regexp.MustCompile(fmt.Sprintf(`(%s, \d{1,2} %s \d{4})`, shortWeekdayRegexPart, shortMonthRegexPart))
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidDateFormat, f))
 	}
@@ -169,11 +192,11 @@ func (f timeFormat) FormatString() string {
 func (f timeFormat) Regex() *regexp.Regexp {
 	switch f {
 	case timeFormatShort:
-		return regexp.MustCompile(`\d{1,2}:\d{2} (?:AM|PM)`)
+		return regexp.MustCompile(`(\d{1,2}:\d{2} (?:AM|PM))`)
 	case timeFormatLong:
-		return regexp.MustCompile(`\d{2}:\d{2}:\d{2} [+-]\d{4}`)
+		return regexp.MustCompile(`(\d{2}:\d{2}:\d{2} [+-]\d{4})`)
 	case timeFormatLongTzName:
-		return regexp.MustCompile(`\d{2}:\d{2}:\d{2} [+-]\d{4} \([A-Z]{2,5}\)`)
+		return regexp.MustCompile(`(\d{2}:\d{2}:\d{2} [+-]\d{4} \([A-Z]{2,5}\))`)
 	default:
 		panic(fmt.Errorf("%w: %s", ErrInvalidTimeFormat, f))
 	}
@@ -205,45 +228,106 @@ type attributionRegex struct {
 	TimeFormats []timeFormat
 }
 
-func indicesForSubmatch(number int, match []int) []int {
-	return []int{match[2*number], match[2*number+1]}
+func (r attributionRegex) HasDate() bool {
+	return len(r.DateFormats) > 0
 }
 
-/*
-func (f attributionRegex) TimeIndices(match []int) []int {
-	if f.DateTimeCaptureGroups == nil {
-		return nil
-	}
+func (r attributionRegex) HasTime() bool {
+	return len(r.TimeFormats) > 0
+}
 
-	for _, captureGroup := range f.DateTimeCaptureGroups {
-		// Try each capture group until we find the first one that matched.
-		submatchIndices := indicesForSubmatch(captureGroup, match)
-		startIndex, endIndex := submatchIndices[0], submatchIndices[1]
-		if startIndex >= 0 && endIndex >= 0 {
-			return []int{startIndex, endIndex}
+func (r attributionRegex) Regex() *regexp.Regexp {
+	formatArgs := make([]interface{}, len(r.Parts))
+
+	for i, part := range r.Parts {
+		switch concretePart := part.(type) {
+		case attributionRegexCapture:
+			switch concretePart {
+			case attributionRegexCaptureName:
+				formatArgs[i] = joinNameFormats(r.NameFormats)
+			case attributionRegexCaptureDate:
+				formatArgs[i] = joinDateFormats(r.DateFormats)
+			case attributionRegexCaptureTime:
+				formatArgs[i] = joinTimeFormats(r.TimeFormats)
+			}
+		case attributionRegexLiteral:
+			formatArgs[i] = string(concretePart)
 		}
 	}
 
-	panic(ErrInvalidRegex)
+	return regexp.MustCompile(fmt.Sprintf(r.Template, formatArgs...))
 }
 
-func (f attributionRegex) NameIndices(match []int) []int {
-	if f.NameCaptureGroups == nil {
-		return nil
+func (r attributionRegex) matchersOfKind(kind attributionRegexCapture) []regexMatcher {
+	var matchers []regexMatcher
+
+	switch kind {
+	case attributionRegexCaptureName:
+		for _, format := range r.NameFormats {
+			matchers = append(matchers, format)
+		}
+	case attributionRegexCaptureDate:
+		for _, format := range r.DateFormats {
+			matchers = append(matchers, format)
+		}
+	case attributionRegexCaptureTime:
+		for _, format := range r.TimeFormats {
+			matchers = append(matchers, format)
+		}
+	default:
+		panic(fmt.Errorf("%w: %s", ErrInvalidCaptureKind, kind))
 	}
 
-	for _, captureGroup := range f.NameCaptureGroups {
-		// Try each capture group until we find the first one that matched.
-		submatchIndices := indicesForSubmatch(captureGroup, match)
-		startIndex, endIndex := submatchIndices[0], submatchIndices[1]
+	return matchers
+}
+
+func indicesForCaptureGroup(match []int, number int) (start, end int) {
+	return match[2*number], match[2*number+1]
+}
+
+func (r attributionRegex) MatchIndices(match []int, kind attributionRegexCapture) (start, end int, matcher regexMatcher) {
+	precedingCaptureGroups := 0
+
+	for _, part := range r.Parts {
+		concretePart, isCapture := part.(attributionRegexCapture)
+
+		if !isCapture {
+			continue
+		} else if concretePart == kind {
+			break
+		}
+
+		precedingCaptureGroups += len(r.matchersOfKind(concretePart))
+	}
+
+	for i, matcher := range r.matchersOfKind(kind) {
+		captureGroupNumber := 1 + precedingCaptureGroups + i
+		startIndex, endIndex := indicesForCaptureGroup(match, captureGroupNumber)
 		if startIndex >= 0 && endIndex >= 0 {
-			return []int{startIndex, endIndex}
+			return startIndex, endIndex, matcher
 		}
 	}
 
-	panic(ErrInvalidRegex)
+	panic(fmt.Errorf("%w of kind %s", ErrNoMatchingCaptureGroups, kind))
 }
-*/
+
+func (r attributionRegex) NameIndices(match []int) (start, end int, format nameFormat) {
+	start, end, matcher := r.MatchIndices(match, attributionRegexCaptureName)
+
+	return start, end, matcher.(nameFormat)
+}
+
+func (r attributionRegex) DateIndices(match []int) (start, end int, format dateFormat) {
+	start, end, matcher := r.MatchIndices(match, attributionRegexCaptureDate)
+
+	return start, end, matcher.(dateFormat)
+}
+
+func (r attributionRegex) TimeIndices(match []int) (start, end int, format timeFormat) {
+	start, end, matcher := r.MatchIndices(match, attributionRegexCaptureTime)
+
+	return start, end, matcher.(timeFormat)
+}
 
 var attributionRegexes = []attributionRegex{
 	{
@@ -408,34 +492,49 @@ func (DividerBlock) FromText(text string) (ok bool, before, after string) {
 
 type AttributionBlock struct {
 	Name    string
-	Time    *time.Time
+	Time    time.Time
 	HasTime bool
 }
 
 func (b *AttributionBlock) FromText(text string) (ok bool, before, after string) {
 	for _, regex := range attributionRegexes {
-		match := regex.Regex.FindStringSubmatchIndex(text)
+		match := regex.Regex().FindStringSubmatchIndex(text)
 		if match == nil {
 			continue
 		}
 
 		matchStartIndex, matchEndIndex := match[0], match[1]
-		nameIndices := regex.NameIndices(match)
 
-		b.Name = text[nameIndices[0]:nameIndices[1]]
+		nameStartIndex, nameEndIndex, _ := regex.NameIndices(match)
+		b.Name = text[nameStartIndex:nameEndIndex]
 
-		if dateFormat := regex.Format.DateFormat(); dateFormat != nil {
-			timeIndices := regex.TimeIndices(match)
-			localTime, err := time.Parse(*dateFormat, text[timeIndices[0]:timeIndices[1]])
+		if regex.HasDate() {
+			dateStartIndex, dateEndIndex, matchedDateFormat := regex.DateIndices(match)
+			localDate, err := time.Parse(matchedDateFormat.FormatString(), text[dateStartIndex:dateEndIndex])
 			if err != nil {
 				continue
 			}
 
-			dateTime := localTime.UTC()
-			b.Time = &dateTime
+			b.Time = localDate.UTC()
 		}
 
-		b.HasTime = regex.Format.HasTime()
+		if regex.HasTime() {
+			timeStartIndex, timeEndIndex, matchedTimeFormat := regex.TimeIndices(match)
+			localTime, err := time.Parse(matchedTimeFormat.FormatString(), text[timeStartIndex:timeEndIndex])
+			if err != nil {
+				continue
+			}
+
+			normalizedTime := localTime.UTC()
+
+			if b.Time.IsZero() {
+				b.Time = normalizedTime
+			} else {
+				b.Time = b.Time.Add(normalizedTime.Sub(time.Time{}))
+			}
+		}
+
+		b.HasTime = regex.HasTime()
 
 		return true, text[:matchStartIndex], text[matchEndIndex:]
 	}
