@@ -53,6 +53,12 @@ const templateString = `
         </li>
       </ul>
 	</nav>
+	<div class="d-flex justify-content-center my-3">
+      <form id="message-search" class="message-search flex-grow-1 position-relative">
+        <input class="search-input form-control" type="search" placeholder="Search messages..." aria-label="Search messages..." autocomplete="off">
+        <div class="search-suggestions" class="shadow bg-white rounded d-none"></div>
+      </form>
+	</div>
     <main class="message-thread">
       {{ range $message := .Messages -}}
       <div id="{{ printf "message-%d" $message.Index }}" class="message">
