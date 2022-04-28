@@ -31,7 +31,7 @@ const templateString = `
         </li>
 		{{- else -}}
         <li class="page-item disabled">
-          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Prev</a>
+          <a class="page-link" tabindex="-1" aria-disabled="true">Prev</a>
         </li>
 		{{- end }}
         {{ range .Pagination.Pages -}}
@@ -45,7 +45,7 @@ const templateString = `
         </li>
 		{{- else -}}
         <li class="page-item disabled">
-          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Next</a>
+          <a class="page-link" tabindex="-1" aria-disabled="true">Next</a>
         </li>
 		{{- end }}
         <li class="page-item">
@@ -147,7 +147,7 @@ const templateString = `
         </li>
 		{{- else -}}
         <li class="page-item disabled">
-          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Prev</a>
+          <a class="page-link" tabindex="-1" aria-disabled="true">Prev</a>
         </li>
 		{{- end }}
         {{ range .Pagination.Pages -}}
@@ -161,7 +161,7 @@ const templateString = `
         </li>
 		{{- else -}}
         <li class="page-item disabled">
-          <a class="page-link" href="." tabindex="-1" aria-disabled="true">Next</a>
+          <a class="page-link" tabindex="-1" aria-disabled="true">Next</a>
         </li>
 		{{- end }}
         <li class="page-item">
