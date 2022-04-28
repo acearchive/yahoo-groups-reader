@@ -20,6 +20,7 @@ type ParentArgs struct {
 	PagePath      PagePath
 	User          string
 	Body          template.HTML
+	Timestamp     string
 	FormattedDate string
 	FormattedTime string
 }
@@ -104,6 +105,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 					Index:         parentIndex + 1,
 					User:          parent.User,
 					Body:          template.HTML(parent.Body),
+					Timestamp:     formatTimestamp(parent.Date),
 					FormattedDate: formatDate(parent.Date),
 					FormattedTime: formatTime(parent.Date),
 				}

@@ -26,9 +26,9 @@ const attributionTemplateString = `
     </svg>
   </span>
   {{ if (and .Date .Time) -}}
-    On {{ .Date }} at {{ .Time }} {{ if .HasTimeZone }}UTC{{ else }}<em>(local time)</em>{{ end }}, {{ .Name }} said:
+    On <time datetime="{{ .Timestamp }}">{{ .Date }} at {{ .Time }} {{ if .HasTimeZone }}UTC{{ else }}<em>(local time)</em>{{ end }}</time>, {{ .Name }} said:
   {{- else if .Date -}}
-    On {{ .Date }}, {{ .Name }} said:
+    On <time datetime="{{ .Timestamp }}">{{ .Date }}</time>, {{ .Name }} said:
   {{- else -}}
     {{ .Name }} said:
   {{- end }}
@@ -45,6 +45,7 @@ type attributionTemplateParams struct {
 	Name        string
 	Date        string
 	Time        string
+	Timestamp   string
 	HasTimeZone bool
 }
 
@@ -73,6 +74,14 @@ func (b *AttributionBlock) ToHtml() string {
 		if b.HasTime {
 			params.Time = b.Time.Format("15:04")
 			params.HasTimeZone = b.HasTimeZone
+
+			if b.HasTimeZone {
+				params.Timestamp = b.Time.Format("2006-01-02T15:04Z")
+			} else {
+				params.Timestamp = b.Time.Format("2006-01-02T15:04")
+			}
+		} else {
+			params.Timestamp = b.Time.Format("2006-01-02")
 		}
 	}
 
