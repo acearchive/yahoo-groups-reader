@@ -27,17 +27,13 @@ func assetFileNames() []string {
 }
 
 func writeAssets(path string) error {
-	if err := os.Mkdir(filepath.Join(path, assetsDirectory), outputDirMode); err != nil {
-		return err
-	}
-
 	for _, fileName := range assetFileNames() {
 		assetFile, err := assets.Open(filepath.Join(assetsDirectory, fileName))
 		if err != nil {
 			return err
 		}
 
-		outputFile, err := os.OpenFile(filepath.Join(path, assetsDirectory, fileName), os.O_CREATE|os.O_EXCL|os.O_WRONLY, outputFileMode)
+		outputFile, err := os.OpenFile(filepath.Join(path, fileName), os.O_CREATE|os.O_EXCL|os.O_WRONLY, outputFileMode)
 		if err != nil {
 			return err
 		}
