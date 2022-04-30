@@ -185,8 +185,8 @@ body {
 }
 
 .message-search .search-suggestions {
-    --suggestion-text-max-lines: 5;
-    --suggestion-title-max-lines: 2;
+    --suggestion-text-max-lines: 6;
+    --suggestion-title-max-lines: 3;
     --suggestion-text-line-height: 1.5em;
     --suggestion-title-line-height: 1.5em;
     position: absolute;
@@ -241,7 +241,6 @@ body {
     padding-right: 1rem;
     width: calc((26rem + (9rem * 2)) / 3);
     color: var(--color-fg-popover);
-    margin-bottom: 0.5rem;
 }
 
 .message-search .search-suggestions .suggestion-header > * {
@@ -268,6 +267,7 @@ body {
     color: var(--color-fg-muted-popover);
     max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
     overflow: hidden;
+    overflow-wrap: anywhere;
 }
 
 @media (max-width: 992px) {
@@ -299,6 +299,7 @@ body {
     }
     .message-search .search-suggestions .suggestion-header {
         width: 100%;
+        margin-bottom: 0.5rem;
     }
 
     .message-search .search-suggestions :is(.suggestion-header, .suggestion-text) {
