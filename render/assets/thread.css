@@ -185,6 +185,10 @@ body {
 }
 
 .message-search .search-suggestions {
+    --suggestion-text-max-lines: 5;
+    --suggestion-title-max-lines: 2;
+    --suggestion-text-line-height: 1.5em;
+    --suggestion-title-line-height: 1.5em;
     position: absolute;
     margin-top: 0.5rem;
     z-index: 1;
@@ -195,6 +199,7 @@ body {
 
 .message-search .search-suggestions > * {
     display: flex;
+    max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
 }
 
 .message-search .search-suggestions a {
@@ -231,21 +236,37 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.message-search .search-suggestions .suggestion-title {
-    font-weight: bold;
+.message-search .search-suggestions .suggestion-header {
     display: inline-block;
     border-right: 1px solid var(--color-border-popover);
     padding-right: 1rem;
     width: calc((26rem + (9rem * 2)) / 3);
     color: var(--color-fg-popover);
+}
+
+.message-search .search-suggestions .suggestion-header > * {
+    display: inline-block;
+}
+
+.message-search .search-suggestions .suggestion-timestamp {
+    color: var(--color-fg-muted);
+    font-size: 0.9em;
+}
+
+.message-search .search-suggestions .suggestion-title {
+    font-weight: bold;
     overflow-wrap: anywhere;
+    max-height: calc(var(--suggestion-title-line-height) * var(--suggestion-title-max-lines));
+    overflow: hidden;
 }
 
 .message-search .search-suggestions .suggestion-text {
     flex: 1;
     display: block;
     padding-left: 1rem;
+    line-height: var(--suggestion-text-line-height);
     color: var(--color-fg-muted-popover);
+    overflow: hidden;
 }
 
 @media (max-width: 992px) {
@@ -254,7 +275,7 @@ body {
         width: calc(26rem + (6rem * 2));
     }
 
-    .message-search .search-suggestions .suggestion-title {
+    .message-search .search-suggestions .suggestion-header {
         width: calc((26rem + (6rem * 2)) / 3);
     }
 }
@@ -265,7 +286,7 @@ body {
         width: calc(26rem + (3rem * 2));
     }
 
-    .message-search .search-suggestions .suggestion-title {
+    .message-search .search-suggestions .suggestion-header {
         width: calc((26rem + (3rem * 2)) / 3);
     }
 }
@@ -275,11 +296,11 @@ body {
         left: 0;
         width: 100%;
     }
-    .message-search .search-suggestions .suggestion-title {
+    .message-search .search-suggestions .suggestion-header {
         width: 100%;
     }
 
-    .message-search .search-suggestions :is(.suggestion-title, .suggestion-text) {
+    .message-search .search-suggestions :is(.suggestion-header, .suggestion-text) {
         display: block;
         padding: 0;
         border: none;
@@ -312,7 +333,7 @@ body {
 }
 
 .message-thread .message .message-link:hover {
-    color: var(--color-fg);
+    color: var(--color-fg-default);
 }
 
 .message-thread .message .message-header {
@@ -348,7 +369,7 @@ body {
 
 .message-thread .message .parent-message .parent-name {
     font-size: 0.9em;
-    color: var(--color-fg);
+    color: var(--color-fg-default);
     padding: 0;
     margin-right: 0.4em;
 }
@@ -358,7 +379,7 @@ body {
 }
 
 .message-thread .message .parent-message .parent-link:hover {
-    color: var(--color-fg);
+    color: var(--color-fg-default);
 }
 
 .message-thread .message .parent-message .parent-quote {

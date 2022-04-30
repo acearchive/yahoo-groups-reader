@@ -1,3 +1,10 @@
+const userIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+  </svg>
+`;
+
 function inputFocus(e, search, suggestions) {
     if (e.key === "/") {
         e.preventDefault();
@@ -46,9 +53,20 @@ async function showResults(index, search, suggestions) {
         const doc = flatResults[href];
 
         const entry = document.createElement("div");
-        entry.innerHTML = `<a href="${href}"><span class="suggestion-title"></span><span class="suggestion-text"></span></a>`;
-        entry.querySelector(".suggestion-title").innerHTML = doc.title;
-        entry.querySelector(".suggestion-text").innerHTML = doc.description;
+        entry.innerHTML = `
+          <a href="${href}">
+            <span class="suggestion-header">
+              <span class="suggestion-user">
+                <span class="inline-icon me-1" aria-hidden="true">${userIcon}</span>
+                ${doc.user}
+              </span>
+              <time class="suggestion-timestamp" datetime="${doc.timestamp}">
+                ${new Intl.DateTimeFormat([], { dateStyle: "medium", timeStyle: "short" }).format(new Date(doc.timestamp))}
+              </time>
+              <span class="suggestion-title">${doc.title}</span>
+            </span>
+            <span class="suggestion-text">${doc.body}</span>
+          </a>`;
 
         suggestions.appendChild(entry);
         if (suggestions.childElementCount === maxResult) break;
