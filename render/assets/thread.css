@@ -186,18 +186,11 @@ body {
 
 .message-search .search-suggestions {
     position: absolute;
-    left: -3rem;
     margin-top: 0.5rem;
-    width: calc(26rem + 3rem + 3rem);
     z-index: 1;
     background-color: var(--color-canvas-popover);
-}
-
-@media (max-width: 576px) {
-    .message-search .search-suggestions {
-        left: 0;
-        width: 100%;
-    }
+    left: -9rem;
+    width: calc(26rem + (9rem * 2));
 }
 
 .message-search .search-suggestions > * {
@@ -209,6 +202,12 @@ body {
     flex: 1;
     text-decoration: none;
     padding: 0.75rem 1.25rem;
+}
+
+@media (max-width: 576px) {
+    .message-search .search-suggestions a {
+        display: block;
+    }
 }
 
 .message-search .search-suggestions a:focus {
@@ -233,11 +232,13 @@ body {
 }
 
 .message-search .search-suggestions .suggestion-title {
+    font-weight: bold;
     display: inline-block;
     border-right: 1px solid var(--color-border-popover);
     padding-right: 1rem;
-    width: 9rem;
+    width: calc((26rem + (9rem * 2)) / 3);
     color: var(--color-fg-popover);
+    overflow-wrap: anywhere;
 }
 
 .message-search .search-suggestions .suggestion-text {
@@ -245,6 +246,44 @@ body {
     display: block;
     padding-left: 1rem;
     color: var(--color-fg-muted-popover);
+}
+
+@media (max-width: 992px) {
+    .message-search .search-suggestions {
+        left: -6rem;
+        width: calc(26rem + (6rem * 2));
+    }
+
+    .message-search .search-suggestions .suggestion-title {
+        width: calc((26rem + (6rem * 2)) / 3);
+    }
+}
+
+@media (max-width: 768px) {
+    .message-search .search-suggestions {
+        left: -3rem;
+        width: calc(26rem + (3rem * 2));
+    }
+
+    .message-search .search-suggestions .suggestion-title {
+        width: calc((26rem + (3rem * 2)) / 3);
+    }
+}
+
+@media (max-width: 576px) {
+    .message-search .search-suggestions {
+        left: 0;
+        width: 100%;
+    }
+    .message-search .search-suggestions .suggestion-title {
+        width: 100%;
+    }
+
+    .message-search .search-suggestions :is(.suggestion-title, .suggestion-text) {
+        display: block;
+        padding: 0;
+        border: none;
+    }
 }
 
 .message-thread {
