@@ -24,6 +24,7 @@ func assetFileNames() []string {
 	return []string{
 		"thread.css",
 		"search.js",
+		"time.js",
 	}
 }
 
