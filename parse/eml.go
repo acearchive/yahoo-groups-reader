@@ -124,8 +124,6 @@ func Email(contents io.Reader) (Message, error) {
 		return Message{}, fmt.Errorf("%w: %v", ErrMalformedEmail, err)
 	}
 
-	message.Date = message.Date.UTC()
-
 	if messageTitle := rawMessage.Header.Get(MimeHeaderSubject); messageTitle != "" {
 		message.Title = &messageTitle
 	}

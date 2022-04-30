@@ -443,10 +443,9 @@ var attributionRegexes = []attributionRegex{
 }
 
 type AttributionBlock struct {
-	Name        string
-	Time        time.Time
-	HasTime     bool
-	HasTimeZone bool
+	Name    string
+	Time    time.Time
+	HasTime bool
 }
 
 func (b *AttributionBlock) FromText(text string) (ok bool, before, after string) {
@@ -463,14 +462,14 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 		nameStartIndex, nameEndIndex, _ := regex.NameIndices(match)
 		b.Name = text[nameStartIndex:nameEndIndex]
 
+		var err error
+
 		if regex.HasDate() {
 			dateStartIndex, dateEndIndex, matchedDateFormat := regex.DateIndices(match)
-			parsedDate, err := time.Parse(matchedDateFormat.FormatString(), text[dateStartIndex:dateEndIndex])
+			b.Time, err = time.Parse(matchedDateFormat.FormatString(), text[dateStartIndex:dateEndIndex])
 			if err != nil {
 				continue
 			}
-
-			b.Time = parsedDate.UTC()
 		}
 
 		if regex.HasTime() {
@@ -480,15 +479,11 @@ func (b *AttributionBlock) FromText(text string) (ok bool, before, after string)
 				continue
 			}
 
-			normalizedTime := localTime.UTC()
-
 			if b.Time.IsZero() {
-				b.Time = normalizedTime
+				b.Time = localTime
 			} else {
-				b.Time = b.Time.Add(normalizedTime.Sub(time.Time{}))
+				b.Time = b.Time.Add(localTime.Sub(time.Time{}))
 			}
-
-			b.HasTimeZone = matchedTimeFormat.HasTimeZone()
 		}
 
 		b.HasTime = regex.HasTime()

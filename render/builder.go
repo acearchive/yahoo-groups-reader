@@ -16,13 +16,12 @@ const (
 )
 
 type ParentArgs struct {
-	Index         int
-	PagePath      PagePath
-	User          string
-	Body          template.HTML
-	Timestamp     string
-	FormattedDate string
-	FormattedTime string
+	Index             int
+	PagePath          PagePath
+	User              string
+	Body              template.HTML
+	Timestamp         string
+	FormattedDatetime string
 }
 
 type MessageArgs struct {
@@ -66,15 +65,7 @@ func formatTimestamp(input time.Time) string {
 }
 
 func formatDatetime(input time.Time) string {
-	return input.Format("2 January 2006 15:04 MST")
-}
-
-func formatDate(input time.Time) string {
-	return input.Format("2 January 2006")
-}
-
-func formatTime(input time.Time) string {
-	return input.Format("15:04 MST")
+	return input.UTC().Format("2 January 2006 15:04 MST")
 }
 
 func formatHumanReadableNumber(number int) string {
@@ -102,12 +93,11 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 
 			if parentIndexExists && parentExists {
 				parentArgs = &ParentArgs{
-					Index:         parentIndex + 1,
-					User:          parent.User,
-					Body:          template.HTML(parent.Body.Html),
-					Timestamp:     formatTimestamp(parent.Date),
-					FormattedDate: formatDate(parent.Date),
-					FormattedTime: formatTime(parent.Date),
+					Index:             parentIndex + 1,
+					User:              parent.User,
+					Body:              template.HTML(parent.Body.Html),
+					Timestamp:         formatTimestamp(parent.Date),
+					FormattedDatetime: formatDatetime(parent.Date),
 				}
 			}
 		}

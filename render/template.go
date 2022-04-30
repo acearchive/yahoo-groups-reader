@@ -119,7 +119,7 @@ const templateString = `
                           <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
                         </svg>
                       </span>
-                      On <time datetime="{{ $message.Parent.Timestamp }}">{{ $message.Parent.FormattedDate }} at {{ $message.Parent.FormattedTime }}</time>, {{ $message.Parent.User }} said:
+                      On <time datetime="{{ $message.Parent.Timestamp }}">{{ $message.Parent.FormattedDatetime }}</time>, {{ $message.Parent.User }} said:
                     </button>
                     <a class="parent-link d-inline-block" href="{{ printf "%s#message-%d" $message.Parent.PagePath $message.Parent.Index }}">
                       <span class="visually-hidden">Parent Comment</span>

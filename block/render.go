@@ -3,6 +3,7 @@ package block
 import (
 	"html/template"
 	"strings"
+	"time"
 )
 
 const messageHeaderTemplateString = `
@@ -25,10 +26,8 @@ const attributionTemplateString = `
       <path d="M12 12a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1h-1.388c0-.351.021-.703.062-1.054.062-.372.166-.703.31-.992.145-.29.331-.517.559-.683.227-.186.516-.279.868-.279V3c-.579 0-1.085.124-1.52.372a3.322 3.322 0 0 0-1.085.992 4.92 4.92 0 0 0-.62 1.458A7.712 7.712 0 0 0 9 7.558V11a1 1 0 0 0 1 1h2Zm-6 0a1 1 0 0 0 1-1V8.558a1 1 0 0 0-1-1H4.612c0-.351.021-.703.062-1.054.062-.372.166-.703.31-.992.145-.29.331-.517.559-.683.227-.186.516-.279.868-.279V3c-.579 0-1.085.124-1.52.372a3.322 3.322 0 0 0-1.085.992 4.92 4.92 0 0 0-.62 1.458A7.712 7.712 0 0 0 3 7.558V11a1 1 0 0 0 1 1h2Z"/>
     </svg>
   </span>
-  {{ if (and .Date .Time) -}}
-    On <time datetime="{{ .Timestamp }}">{{ .Date }} at {{ .Time }} {{ if .HasTimeZone }}UTC{{ else }}<em>(local time)</em>{{ end }}</time>, {{ .Name }} said:
-  {{- else if .Date -}}
-    On <time datetime="{{ .Timestamp }}">{{ .Date }}</time>, {{ .Name }} said:
+  {{- if .Timestamp -}}
+    On <time datetime="{{ .Timestamp }}">{{ .FormattedDatetime }}</time>, {{ .Name }} said:
   {{- else -}}
     {{ .Name }} said:
   {{- end }}
@@ -42,11 +41,9 @@ type messageHeaderTemplateParams struct {
 }
 
 type attributionTemplateParams struct {
-	Name        string
-	Date        string
-	Time        string
-	Timestamp   string
-	HasTimeZone bool
+	Name              string
+	FormattedDatetime string
+	Timestamp         string
 }
 
 func (b *MessageHeaderBlock) ToHtml() string {
@@ -69,19 +66,12 @@ func (b *AttributionBlock) ToHtml() string {
 	params := attributionTemplateParams{Name: b.Name}
 
 	if !b.Time.IsZero() {
-		params.Date = b.Time.Format("2 January 2006")
+		params.Timestamp = b.Time.Format(time.RFC3339)
 
 		if b.HasTime {
-			params.Time = b.Time.Format("15:04")
-			params.HasTimeZone = b.HasTimeZone
-
-			if b.HasTimeZone {
-				params.Timestamp = b.Time.Format("2006-01-02T15:04Z")
-			} else {
-				params.Timestamp = b.Time.Format("2006-01-02T15:04")
-			}
+			params.FormattedDatetime = b.Time.UTC().Format("2 January 2006 15:04 MST")
 		} else {
-			params.Timestamp = b.Time.Format("2006-01-02")
+			params.FormattedDatetime = b.Time.UTC().Format("2 January 2006")
 		}
 	}
 
