@@ -102,5 +102,5 @@ func Execute(path string, config OutputConfig, thread parse.MessageThread) error
 		return err
 	}
 
-	return writeSearchData(thread, path)
+	return writeSearchData(thread, config, path)
 }

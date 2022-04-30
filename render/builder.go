@@ -167,13 +167,18 @@ func navPagesRange(pageNumber, totalPages int) (first, last int) {
 	return first, last
 }
 
+func calculateTotalPages(messages, pageSize int) int {
+	if messages%pageSize > 0 {
+		return (messages / pageSize) + 1
+	}
+
+	return messages / pageSize
+}
+
 func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 	messages := messageThreadToArgs(thread)
 
-	totalPages := len(messages) / config.PageSize
-	if len(messages)%config.PageSize > 0 {
-		totalPages++
-	}
+	totalPages := calculateTotalPages(len(messages), config.PageSize)
 
 	var args []TemplateArgs
 

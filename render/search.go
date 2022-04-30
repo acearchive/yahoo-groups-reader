@@ -12,10 +12,16 @@ import (
 const searchFileName = "search.json"
 
 type MessageSearchFields struct {
-	User  string `json:"user"`
-	Flair string `json:"flair"`
-	Title string `json:"title"`
-	Body  string `json:"body"`
+	Index      int    `json:"id"`
+	PageNumber int    `json:"page"`
+	User       string `json:"user"`
+	Flair      string `json:"flair"`
+	Title      string `json:"title"`
+	Body       string `json:"body"`
+}
+
+func pageNumberOfMessage(index, pageSize int) int {
+	return calculateTotalPages(index, pageSize)
 }
 
 func tokensToSearchText(tokens []body.Token) string {
@@ -43,14 +49,18 @@ func tokensToSearchText(tokens []body.Token) string {
 	return builder.String()
 }
 
-func buildSearchFields(thread parse.MessageThread) []MessageSearchFields {
+func buildSearchFields(thread parse.MessageThread, config OutputConfig) []MessageSearchFields {
 	fields := make([]MessageSearchFields, 0, len(thread))
 
-	for _, message := range thread {
+	sortedMessages, _ := thread.SortedByDate()
+
+	for i, message := range sortedMessages {
 		field := MessageSearchFields{
-			User:  message.User,
-			Flair: message.Flair,
-			Body:  tokensToSearchText(message.Body.Tokens),
+			Index:      i + 1,
+			PageNumber: pageNumberOfMessage(i+1, config.PageSize),
+			User:       message.User,
+			Flair:      message.Flair,
+			Body:       tokensToSearchText(message.Body.Tokens),
 		}
 
 		if message.Title != nil {
@@ -63,8 +73,8 @@ func buildSearchFields(thread parse.MessageThread) []MessageSearchFields {
 	return fields
 }
 
-func writeSearchData(thread parse.MessageThread, path string) error {
-	fields := buildSearchFields(thread)
+func writeSearchData(thread parse.MessageThread, config OutputConfig, path string) error {
+	fields := buildSearchFields(thread, config)
 
 	jsonFile, err := os.OpenFile(filepath.Join(path, searchFileName), os.O_CREATE|os.O_EXCL|os.O_WRONLY, outputFileMode)
 	if err != nil {
