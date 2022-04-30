@@ -82,11 +82,11 @@ function suggestionFocus(e, suggestions) {
 
     let nextIndex = 0;
 
-    if ((e.code === "ArrowUp" || e.code === "KeyK") && (!keyDefault)) {
+    if (e.code === "ArrowUp" && !keyDefault) {
         e.preventDefault();
         nextIndex= index > 0 ? index-1 : 0;
         focusableSuggestions[nextIndex].focus();
-    } else if ((e.code === "ArrowDown" || e.code === "KeyJ") && (!keyDefault)) {
+    } else if (e.code === "ArrowDown" && !keyDefault) {
         e.preventDefault();
         nextIndex= index+1 < focusable.length ? index+1 : index;
         focusableSuggestions[nextIndex].focus();
