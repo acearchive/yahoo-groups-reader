@@ -26,11 +26,11 @@ function hrefForMessage(id, page) {
     }
 }
 
-function showResults(index, search, suggestions) {
+async function showResults(index, search, suggestions) {
     const maxResult = 5;
 
     const value = search.value;
-    const results = index.search(value, {limit: maxResult, enrich: true});
+    const results = await index.searchAsync(value, {limit: maxResult, enrich: true});
 
     suggestions.classList.remove("d-none");
     suggestions.innerHTML = "";
@@ -84,17 +84,14 @@ function indexSearch(search, suggestions) {
             store: ["id", "page", "timestamp", "user", "title", "body"],
             index: ["user", "flair", "title", "body"],
         },
+        worker: true,
     });
 
     fetch("/search.json")
         .then(response => response.json())
-        .then(searchData => {
-            for (const searchFields of searchData) {
-                index.add(searchFields);
-            }
-        });
+        .then(searchData => Promise.all(searchData.map(fields => index.addAsync(fields))));
 
-    search.addEventListener("input", () => showResults(index, search, suggestions), true);
+    search.addEventListener("input", async () => await showResults(index, search, suggestions), true);
     suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
 }
 
