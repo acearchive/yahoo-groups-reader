@@ -199,7 +199,6 @@ body {
 
 .message-search .search-suggestions > * {
     display: flex;
-    max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
 }
 
 .message-search .search-suggestions a {
@@ -242,10 +241,11 @@ body {
     padding-right: 1rem;
     width: calc((26rem + (9rem * 2)) / 3);
     color: var(--color-fg-popover);
+    margin-bottom: 0.5rem;
 }
 
 .message-search .search-suggestions .suggestion-header > * {
-    display: inline-block;
+    display: block;
 }
 
 .message-search .search-suggestions .suggestion-timestamp {
@@ -266,6 +266,7 @@ body {
     padding-left: 1rem;
     line-height: var(--suggestion-text-line-height);
     color: var(--color-fg-muted-popover);
+    max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
     overflow: hidden;
 }
 
@@ -304,6 +305,14 @@ body {
         display: block;
         padding: 0;
         border: none;
+    }
+
+    .message-search .search-suggestions .suggestion-header :is(.suggestion-user, .suggestion-timestamp) {
+        display: inline;
+    }
+
+    .message-search .search-suggestions .suggestion-header .suggestion-user::after {
+        content: "•"
     }
 }
 
