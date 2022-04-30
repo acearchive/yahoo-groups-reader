@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const searchFileName = "search.json"
@@ -14,6 +15,7 @@ const searchFileName = "search.json"
 type MessageSearchFields struct {
 	Index      int    `json:"id"`
 	PageNumber int    `json:"page"`
+	Timestamp  string `json:"timestamp"`
 	User       string `json:"user"`
 	Flair      string `json:"flair"`
 	Title      string `json:"title"`
@@ -58,6 +60,7 @@ func buildSearchFields(thread parse.MessageThread, config OutputConfig) []Messag
 		field := MessageSearchFields{
 			Index:      i + 1,
 			PageNumber: pageNumberOfMessage(i+1, config.PageSize),
+			Timestamp:  message.Date.Format(time.RFC3339),
 			User:       message.User,
 			Flair:      message.Flair,
 			Body:       tokensToSearchText(message.Body.Tokens),
