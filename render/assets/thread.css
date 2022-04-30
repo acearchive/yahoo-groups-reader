@@ -154,7 +154,7 @@ body {
 }
 
 .message-search {
-    max-width: 26em;
+    max-width: 26rem;
     margin-left: 24px;
     margin-right: 24px;
 }
@@ -186,11 +186,18 @@ body {
 
 .message-search .search-suggestions {
   position: absolute;
-  left: 0;
+  left: -3rem;
   margin-top: 0.5rem;
-  width: calc(100vw - 3rem);
+  width: calc(26rem + 3rem + 3rem);
   z-index: 1;
   background-color: var(--color-canvas-popover);
+}
+
+@media (max-width: 576px) {
+    .message-search .search-suggestions {
+        left: 0;
+        width: 100%;
+    }
 }
 
 .message-search .search-suggestions a {
