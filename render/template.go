@@ -58,7 +58,7 @@ const templateString = `
 	<div class="d-flex justify-content-center my-3">
       <form id="message-search" class="message-search flex-grow-1 position-relative">
         <input class="search-input form-control" type="search" placeholder="Search messages..." aria-label="Search messages..." autocomplete="off">
-        <div class="search-suggestions" class="shadow bg-white rounded d-none"></div>
+        <div class="search-suggestions shadow rounded d-none"></div>
       </form>
 	</div>
     <main class="message-thread">
