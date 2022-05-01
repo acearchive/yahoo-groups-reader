@@ -6,12 +6,6 @@
     margin-bottom: 2rem;
 }
 
-.page-list {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .message-thread {
     min-width: 200px;
     max-width: 1000px;

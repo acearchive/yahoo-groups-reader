@@ -27,45 +27,47 @@ const templateString = `
   </head>
   <body>
 	<h1 class="thread-title">{{ .Title }}</h1>
-    <nav class="page-list" aria-label="Message thread pages">
-      <ul class="pagination">
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.First }}">«</a>
-        </li>
-		{{ if .Pagination.Prev -}}
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.Prev }}">Prev</a>
-        </li>
-		{{- else -}}
-        <li class="page-item disabled">
-          <a class="page-link" tabindex="-1" aria-disabled="true">Prev</a>
-        </li>
-		{{- end }}
-        {{ range .Pagination.Pages -}}
-        <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
-          <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
-        </li>
-        {{- end }}
-		{{ if .Pagination.Next -}}
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
-        </li>
-		{{- else -}}
-        <li class="page-item disabled">
-          <a class="page-link" tabindex="-1" aria-disabled="true">Next</a>
-        </li>
-		{{- end }}
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.Last }}">»</a>
-        </li>
-      </ul>
+    <nav class="thread-nav" aria-label="Message thread pages">
+      <div class="d-flex justify-content-center align-items-center">
+        <ul class="pagination">
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.First }}">«</a>
+          </li>
+	  	{{ if .Pagination.Prev -}}
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.Prev }}">Prev</a>
+          </li>
+	  	{{- else -}}
+          <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true">Prev</a>
+          </li>
+	  	{{- end }}
+          {{ range .Pagination.Pages -}}
+          <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
+            <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
+          </li>
+          {{- end }}
+	  	{{ if .Pagination.Next -}}
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
+          </li>
+	  	{{- else -}}
+          <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true">Next</a>
+          </li>
+	  	{{- end }}
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.Last }}">»</a>
+          </li>
+        </ul>
+      </div>
+      <div class="d-flex justify-content-center align-items-center my-3">
+        <form id="message-search" class="message-search flex-grow-1 position-relative">
+          <input class="search-input form-control" type="search" placeholder="Search messages..." aria-label="Search messages" autocomplete="off">
+          <div class="search-suggestions shadow rounded d-none"></div>
+        </form>
+      </div>
 	</nav>
-	<div class="d-flex justify-content-center my-3">
-      <form id="message-search" class="message-search flex-grow-1 position-relative">
-        <input class="search-input form-control" type="search" placeholder="Search messages..." aria-label="Search messages..." autocomplete="off">
-        <div class="search-suggestions shadow rounded d-none"></div>
-      </form>
-	</div>
     <main class="message-thread">
       {{ range $message := .Messages -}}
       <div id="{{ printf "message-%d" $message.Index }}" class="message">
