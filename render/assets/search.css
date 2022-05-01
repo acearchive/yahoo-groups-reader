@@ -5,28 +5,33 @@
 }
 
 .message-search .search-input {
-    padding-right: 2.5rem;
     color: var(--color-fg-default);
     background-color: var(--color-canvas-subtle);
     border-color: var(--color-border-default);
 }
 
-.message-search::after {
-    position: absolute;
-    top: 0.4625rem;
-    right: 0.5375rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 1.5rem;
-    width: 1.5rem;
-    padding-right: 0.3125rem;
-    padding-left: 0.3125rem;
-    color: var(--color-fg-default);
-    content: "/";
-    border: 1px solid var(--color-border-default);
-    border-radius: 0.25rem;
-    font-size: var(--font-size-tiny);
+@media (min-width: 576px) {
+    .message-search .search-input {
+        padding-right: 2.5rem;
+    }
+
+    .message-search::after {
+        position: absolute;
+        top: 0.4625rem;
+        right: 0.5375rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 1.5rem;
+        width: 1.5rem;
+        padding-right: 0.3125rem;
+        padding-left: 0.3125rem;
+        color: var(--color-fg-default);
+        content: "/";
+        border: 1px solid var(--color-border-default);
+        border-radius: 0.25rem;
+        font-size: var(--font-size-tiny);
+    }
 }
 
 .message-search .search-suggestions {
