@@ -44,8 +44,8 @@ body {
     --search-base-width: 26rem;
     --suggestion-text-max-lines: 6;
     --suggestion-title-max-lines: 3;
-    --suggestion-text-line-height: 1.5em;
-    --suggestion-title-line-height: 1.5em;
+    --suggestion-text-line-height: 1.5rem;
+    --suggestion-title-line-height: 1.5rem;
     --suggestion-added-width: 9rem;
 }
 
@@ -67,7 +67,7 @@ body {
 
 .message-thread .message {
     --message-link-icon-size: 30px;
-    --message-link-margin: 0.5em;
+    --message-link-margin: 0.5rem;
     --message-link-width: calc(var(--message-link-icon-size) + var(--message-link-margin));
 }
 
