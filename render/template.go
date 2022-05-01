@@ -33,7 +33,7 @@ const templateString = `
   </head>
   <body>
 	<h1 class="thread-title">{{ .Title }}</h1>
-    <nav class="thread-nav" aria-label="Message thread pages">
+    <nav aria-label="Message thread pages">
       <div class="d-flex justify-content-center align-items-center">
         <ul class="pagination">
           <li class="page-item">
@@ -165,44 +165,46 @@ const templateString = `
       </div>
 	  {{ end }}
     </main>
-    <nav class="page-list" aria-label="Message thread pages">
-      <ul class="pagination">
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.First }}">
-            <span aria-hidden="true">«</span>
-            <span class="visually-hidden">First</span>
-          </a>
-        </li>
-		{{ if .Pagination.Prev -}}
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.Prev }}">Prev</a>
-        </li>
-		{{- else -}}
-        <li class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Prev</a>
-        </li>
-		{{- end }}
-        {{ range .Pagination.Pages -}}
-        <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
-          <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
-        </li>
-        {{- end }}
-		{{ if .Pagination.Next -}}
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
-        </li>
-		{{- else -}}
-        <li class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
-        </li>
-		{{- end }}
-        <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.Last }}">
-            <span aria-hidden="true">»</span>
-            <span class="visually-hidden">Last</span>
-          </a>
-        </li>
-      </ul>
+    <nav aria-label="Message thread pages">
+      <div class="d-flex justify-content-center align-items-center">
+        <ul class="pagination">
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.First }}">
+              <span aria-hidden="true">«</span>
+              <span class="visually-hidden">First</span>
+            </a>
+          </li>
+	  	{{ if .Pagination.Prev -}}
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.Prev }}">Prev</a>
+          </li>
+	  	{{- else -}}
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Prev</a>
+          </li>
+	  	{{- end }}
+          {{ range .Pagination.Pages -}}
+          <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
+            <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
+          </li>
+          {{- end }}
+	  	{{ if .Pagination.Next -}}
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
+          </li>
+	  	{{- else -}}
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+          </li>
+	  	{{- end }}
+          <li class="page-item">
+            <a class="page-link" href="{{ .Pagination.Last }}">
+              <span aria-hidden="true">»</span>
+              <span class="visually-hidden">Last</span>
+            </a>
+          </li>
+        </ul>
+      </div>
 	</nav>
   </body>
 </html>
