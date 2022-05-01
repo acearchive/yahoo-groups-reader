@@ -6,7 +6,7 @@ const userIcon = `
 `;
 
 function inputFocus(e, search, suggestions) {
-    if (e.key === "/") {
+    if (e.key === "/" && search !== document.activeElement) {
         e.preventDefault();
         search.focus();
         search.scrollIntoView();
