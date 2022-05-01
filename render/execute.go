@@ -132,5 +132,11 @@ func Execute(path string, config OutputConfig, thread parse.MessageThread) error
 		return err
 	}
 
-	return writeSearchData(thread, config, path)
+	if config.IncludeSearch {
+		if err := writeSearchData(thread, config, path); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

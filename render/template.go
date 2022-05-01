@@ -23,10 +23,12 @@ const templateString = `
     <link href="/global.css" rel="stylesheet">
     <link href="/components.css" rel="stylesheet">
     <link href="/thread.css" rel="stylesheet">
-    <link href="/search.css" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous" async></script>
+    {{ if .IncludeSearch -}}
+    <link href="/search.css" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.min.js" defer></script>
     <script src="/search.js" defer></script>
+    {{- end }}
     <script src="/time.js" defer></script>
   </head>
   <body>
@@ -71,12 +73,14 @@ const templateString = `
           </li>
         </ul>
       </div>
+      {{ if .IncludeSearch -}}
       <div class="d-flex justify-content-center align-items-center my-3">
         <form id="message-search" class="message-search flex-grow-1 position-relative">
           <input class="search-input form-control" type="search" placeholder="Search messages..." aria-label="Search messages" autocomplete="off">
           <div class="search-suggestions shadow rounded d-none"></div>
         </form>
       </div>
+      {{- end }}
 	</nav>
     <main class="message-thread">
       {{ range $message := .Messages -}}

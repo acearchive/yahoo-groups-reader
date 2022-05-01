@@ -56,9 +56,10 @@ type PaginationArgs struct {
 }
 
 type TemplateArgs struct {
-	Title      string
-	Messages   []MessageArgs
-	Pagination PaginationArgs
+	Title         string
+	IncludeSearch bool
+	Messages      []MessageArgs
+	Pagination    PaginationArgs
 }
 
 func formatTimestamp(input time.Time) string {
@@ -121,9 +122,10 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 }
 
 type OutputConfig struct {
-	PageSize int
-	Title    string
-	Minify   bool
+	PageSize      int
+	Title         string
+	Minify        bool
+	IncludeSearch bool
 }
 
 func pagePath(pageNumber int) PagePath {
@@ -216,9 +218,10 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 		}
 
 		args = append(args, TemplateArgs{
-			Title:      config.Title,
-			Messages:   messagesInPage,
-			Pagination: paginationArgs,
+			Title:         config.Title,
+			IncludeSearch: config.IncludeSearch,
+			Messages:      messagesInPage,
+			Pagination:    paginationArgs,
 		})
 	}
 
