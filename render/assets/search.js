@@ -9,6 +9,7 @@ function inputFocus(e, search, suggestions) {
     if (e.key === "/") {
         e.preventDefault();
         search.focus();
+        search.scrollIntoView();
     }
 
     if (e.key === "Escape") {
