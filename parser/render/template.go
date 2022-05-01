@@ -15,21 +15,21 @@ const templateString = `
     <link rel="canonical" href="{{ .Pagination.Current }}">
     {{ if .Pagination.Next }}<link rel="next" href="{{ .Pagination.Next }}">{{ end }}
     {{ if .Pagination.Prev }}<link rel="prev" href="{{ .Pagination.Prev }}">{{ end }}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link href="/variables.css" rel="stylesheet">
-    <link href="/global.css" rel="stylesheet">
-    <link href="/components.css" rel="stylesheet">
-    <link href="/thread.css" rel="stylesheet">
-    {{ if .IncludeSearch }}<link href="/search.css" rel="stylesheet">{{ end }}
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous" async></script>
+    <link href="/font/noto-sans/300.css" rel="stylesheet">
+    <link href="/font/noto-sans/400.css" rel="stylesheet">
+    <link href="/font/noto-sans/500.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/variables.min.css" rel="stylesheet">
+    <link href="/css/global.min.css" rel="stylesheet">
+    <link href="/css/components.min.css" rel="stylesheet">
+    <link href="/css/thread.min.css" rel="stylesheet">
+    {{ if .IncludeSearch }}<link href="/css/search.min.css" rel="stylesheet">{{ end }}
+	<script src="/js/bootstrap.min.js" async></script>
     {{ if .IncludeSearch -}}
-	<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.21/dist/flexsearch.bundle.min.js" defer></script>
-    <script src="/search.js" defer></script>
+	<script src="/js/flexsearch.bundle.min.js" defer></script>
+    <script src="/js/search.min.js" defer></script>
     {{- end }}
-    <script src="/time.js" defer></script>
+    <script src="/js/time.min.js" defer></script>
   </head>
   <body>
 	<h1 class="thread-title">{{ .Title }}</h1>
