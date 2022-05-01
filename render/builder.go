@@ -48,6 +48,7 @@ type PageRef struct {
 type PaginationArgs struct {
 	Pages      []PageRef
 	PageNumber int
+	Current    PagePath
 	Next       *PagePath
 	Prev       *PagePath
 	First      PagePath
@@ -125,16 +126,11 @@ type OutputConfig struct {
 	Minify   bool
 }
 
-func pagePath(pageNumber, currentPageNumber int) PagePath {
-	switch {
-	case pageNumber == currentPageNumber:
-		return "."
-	case currentPageNumber == firstPageNumber:
-		return PagePath(fmt.Sprintf("./%d", pageNumber))
-	case pageNumber == firstPageNumber:
-		return "../"
-	default:
-		return PagePath(fmt.Sprintf("../%d", pageNumber))
+func pagePath(pageNumber int) PagePath {
+	if pageNumber == firstPageNumber {
+		return "/"
+	} else {
+		return PagePath(fmt.Sprintf("/%d/", pageNumber))
 	}
 }
 
@@ -180,7 +176,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 
 		for pageInNavNumber := firstPageInNav; pageInNavNumber <= lastPageInNav; pageInNavNumber++ {
 			pageRefs = append(pageRefs, PageRef{
-				Path:      pagePath(pageInNavNumber, pageNumber),
+				Path:      pagePath(pageInNavNumber),
 				Number:    pageInNavNumber,
 				IsCurrent: pageInNavNumber == pageNumber,
 			})
@@ -189,17 +185,18 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 		paginationArgs := PaginationArgs{
 			Pages:      pageRefs,
 			PageNumber: pageNumber,
-			First:      pagePath(firstPageNumber, pageNumber),
-			Last:       pagePath(totalPages, pageNumber),
+			Current:    pagePath(pageNumber),
+			First:      pagePath(firstPageNumber),
+			Last:       pagePath(totalPages),
 		}
 
 		if pageNumber > firstPageNumber {
-			prevPath := pagePath(pageNumber-1, pageNumber)
+			prevPath := pagePath(pageNumber - 1)
 			paginationArgs.Prev = &prevPath
 		}
 
 		if pageNumber < totalPages {
-			nextPath := pagePath(pageNumber+1, pageNumber)
+			nextPath := pagePath(pageNumber + 1)
 			paginationArgs.Next = &nextPath
 		}
 
@@ -214,7 +211,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 		for _, message := range messagesInPage {
 			if message.Parent != nil {
 				parentPageNumber := (message.Parent.Index / config.PageSize) + 1
-				message.Parent.PagePath = pagePath(parentPageNumber, pageNumber)
+				message.Parent.PagePath = pagePath(parentPageNumber)
 			}
 		}
 

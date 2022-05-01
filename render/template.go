@@ -11,6 +11,9 @@ const templateString = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Haven for the Human Amoeba</title>
+    <link rel="canonical" href="{{ .Pagination.Current }}">
+    {{ if .Pagination.Next }}<link rel="next" href="{{ .Pagination.Next }}">{{ end }}
+    {{ if .Pagination.Prev }}<link rel="prev" href="{{ .Pagination.Prev }}">{{ end }}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500&display=swap" rel="stylesheet">
