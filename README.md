@@ -12,6 +12,7 @@ yahoo-group-archiver and builds a static site for browsing the archive.
 
 - Accessibility. A key design goal is to make the generated site as accessible
   as possible.
+- Responsive and mobile-friendly.
 - Parses the plain-text email markup used by Yahoo Groups into beautiful and
   semantic HTML.
 - The site is paginated with a configurable page size set at build time.
