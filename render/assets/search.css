@@ -88,15 +88,20 @@
     display: block;
 }
 
-.message-search .search-suggestions .suggestion-timestamp {
-    color: var(--color-fg-muted);
+.message-search .search-suggestions .suggestion-user {
+    font-weight: var(--font-weight-heavier);
     font-size: var(--font-size-small);
 }
 
+.message-search .search-suggestions .suggestion-timestamp {
+    color: var(--color-fg-muted);
+    font-size: var(--font-size-tiny);
+}
+
 .message-search .search-suggestions .suggestion-title {
-    font-weight: bold;
-    overflow-wrap: anywhere;
+    font-weight: var(--font-weight-lighter);
     max-height: calc(var(--suggestion-title-line-height) * var(--suggestion-title-max-lines));
+    overflow-wrap: anywhere;
     overflow: hidden;
 }
 
@@ -109,6 +114,7 @@
     max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
     overflow: hidden;
     overflow-wrap: anywhere;
+    font-size: var(--font-size-small);
 }
 
 @media (max-width: 576px) {
