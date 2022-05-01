@@ -18,7 +18,7 @@ var (
 	flagNoSearch bool
 )
 
-const DefaultPageSize = 50
+const DefaultPageSize = 25
 
 func init() {
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", "./output", "The directory to write the rendered output to")
