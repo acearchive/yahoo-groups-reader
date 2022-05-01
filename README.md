@@ -25,22 +25,15 @@ yahoo-group-archiver and builds a static site for browsing the archive.
 
 ## Usage
 
-```
-Render an exported Yahoo Groups archive as HTML
+This tool has two components:
 
-This accepts the path of the directory containing the .eml files.
+1. A Go program in `parser/` which parses the archive and builds the HTML.
+2. A [Gulp](https://gulpjs.com/) pipeline in `pipeline/` which builds,
+   minifies, and optimizes all the necessary CSS, JavaScript, and fonts.
 
-Usage:
-  yg-render [options] archive-path
+### Run the parser
 
-Flags:
-  -h, --help            help for yg-render
-      --no-search       Disable the search functionality in the generated site
-      --page-size int   The maximum number of messages per page (default 25)
-  -t, --title string    The title of the group (default "Yahoo Group")
-  -v, --verbose         Print verbose output.
-      --version         version for yg-render
-```
+### Run the asset pipeline
 
 ## Gotchas
 
@@ -59,5 +52,3 @@ Flags:
 - The way the full-text search is implemented currently may not scale well to
   large archives. If performance is a problem, you can disable the search
   functionality at build time.
-- Third-party fonts, CSS, and JS are included via CDNs. Hosting these assets
-  yourself is not currently supported.
