@@ -1,0 +1,25 @@
+{
+  "name": "yg-render",
+  "version": "0.1.0",
+  "description": "Render exported Yahoo Groups archives as a static site",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acearchive/yg-render.git"
+  },
+  "author": "Frawley <frawleyskid@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/acearchive/yg-render/issues"
+  },
+  "homepage": "https://github.com/acearchive/yg-render#readme",
+  "dependencies": {
+    "flexsearch": "^0.7.21"
+  }
+}
