@@ -21,7 +21,7 @@ var (
 const DefaultPageSize = 50
 
 func init() {
-	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", ".", "The directory to write the rendered output to")
+	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", "./output", "The directory to write the rendered output to")
 	rootCmd.Flags().StringVarP(&flagTitle, "title", "t", "Yahoo Group", "The title of the group")
 	rootCmd.Flags().IntVar(&flagPageSize, "page-size", DefaultPageSize, "The maximum number of messages per page")
 	rootCmd.Flags().BoolVar(&flagMinify, "minify", false, "Minify the output HTML/CSS/JS files")
@@ -53,7 +53,7 @@ var rootCmd = &cobra.Command{
 			IncludeSearch: !flagNoSearch,
 		}
 
-		if err := render.Execute("output", config, thread); err != nil {
+		if err := render.Execute(flagOutput, config, thread); err != nil {
 			return err
 		}
 
