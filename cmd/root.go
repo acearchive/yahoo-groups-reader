@@ -13,6 +13,7 @@ var (
 	flagOutput   string
 	flagPageSize int
 	flagTitle    string
+	flagMinify   bool
 	flagVerbose  bool
 )
 
@@ -20,6 +21,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", ".", "The directory to write the rendered output to")
 	rootCmd.Flags().StringVarP(&flagTitle, "title", "t", "Yahoo Group", "The title of the group")
 	rootCmd.Flags().IntVar(&flagPageSize, "page-size", 50, "The maximum number of messages per page")
+	rootCmd.Flags().BoolVar(&flagMinify, "minify", false, "Minify the output HTML/CSS/JS files")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
 }
 
@@ -43,6 +45,7 @@ var rootCmd = &cobra.Command{
 		config := render.OutputConfig{
 			Title:    flagTitle,
 			PageSize: flagPageSize,
+			Minify:   flagMinify,
 		}
 
 		if err := render.Execute("output", config, thread); err != nil {

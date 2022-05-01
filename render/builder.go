@@ -122,6 +122,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 type OutputConfig struct {
 	PageSize int
 	Title    string
+	Minify   bool
 }
 
 func pagePath(pageNumber, currentPageNumber int) PagePath {
