@@ -35,10 +35,8 @@ Usage:
 
 Flags:
   -h, --help            help for yg-render
-      --minify          Minify the output HTML/CSS/JS files
       --no-search       Disable the search functionality in the generated site
-  -o, --output string   The directory to write the rendered output to (default ".")
-      --page-size int   The maximum number of messages per page (default 50)
+      --page-size int   The maximum number of messages per page (default 25)
   -t, --title string    The title of the group (default "Yahoo Group")
   -v, --verbose         Print verbose output.
       --version         version for yg-render

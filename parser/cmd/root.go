@@ -10,21 +10,20 @@ import (
 )
 
 var (
-	flagOutput   string
 	flagPageSize int
 	flagTitle    string
-	flagMinify   bool
 	flagVerbose  bool
 	flagNoSearch bool
 )
 
-const DefaultPageSize = 25
+const (
+	DefaultPageSize = 25
+	OutputPath      = "../output/"
+)
 
 func init() {
-	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", "./output", "The directory to write the rendered output to")
 	rootCmd.Flags().StringVarP(&flagTitle, "title", "t", "Yahoo Group", "The title of the group")
 	rootCmd.Flags().IntVar(&flagPageSize, "page-size", DefaultPageSize, "The maximum number of messages per page")
-	rootCmd.Flags().BoolVar(&flagMinify, "minify", false, "Minify the output HTML/CSS/JS files")
 	rootCmd.Flags().BoolVar(&flagNoSearch, "no-search", false, "Disable the search functionality in the generated site")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
 }
@@ -49,11 +48,10 @@ var rootCmd = &cobra.Command{
 		config := render.OutputConfig{
 			Title:         flagTitle,
 			PageSize:      flagPageSize,
-			Minify:        flagMinify,
 			IncludeSearch: !flagNoSearch,
 		}
 
-		if err := render.Execute(flagOutput, config, thread); err != nil {
+		if err := render.Execute(OutputPath, config, thread); err != nil {
 			return err
 		}
 
