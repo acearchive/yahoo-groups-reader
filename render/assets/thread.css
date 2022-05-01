@@ -1,146 +1,5 @@
-@media (prefers-color-scheme: dark) {
-    body {
-        color-scheme: dark;
-        --color-fg-default: #c9d1d9;
-        --color-fg-muted: #8b949e;
-        --color-canvas-default: #0d1117;
-        --color-canvas-subtle: #161b22;
-        --color-canvas-active: #1e242e;
-        --color-border-default: #30363d;
-        --color-accent-fg: #58a6ff;
-    }
-}
-
-@media (prefers-color-scheme: light) {
-    body {
-        color-scheme: light;
-        --color-fg-default: #24292f;
-        --color-fg-muted: #57606a;
-        --color-canvas-default: #ffffff;
-        --color-canvas-subtle: #f6f8fa;
-        --color-canvas-active: #e9eef3;
-        --color-border-default: #d0d7de;
-        --color-accent-fg: #0969da;
-    }
-}
-
-body {
-    --color-canvas-popover: #ffffff;
-    --color-border-popover: #d0d7de;
-    --color-canvas-selected-popover: #f6f8fa;
-    --color-fg-popover: #24292f;
-    --color-fg-muted-popover: #57606a;
-}
-
-.message-thread .message {
-    --message-link-icon-size: 30px;
-    --message-link-margin: 0.5em;
-    --message-link-size: calc(30px + 0.5em);
-}
-
-@media (max-width: 576px) {
-    .message-thread .message {
-        --message-link-size: 0;
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #0d1117;
-    }
-}
-
-.card {
-    background-color: var(--color-canvas-default);
-    border-color: var(--color-border-default);
-}
-
-.card > .card-header {
-    border-color: var(--color-border-default);
-    background-color: var(--color-canvas-subtle);
-}
-
-.pagination .page-item .page-link {
-    color: var(--color-fg-default);
-    background-color: var(--color-canvas-subtle);
-    border-color: var(--color-border-default);
-}
-
-.pagination .page-item .page-link:hover {
-    background-color: var(--color-canvas-active);
-}
-
-
-.pagination .page-item.active .page-link {
-    background-color: var(--color-canvas-active);
-}
-
-.pagination .page-item.disabled .page-link {
-    color: var(--color-fg-muted);
-}
-
-.pagination .page-item.number-page-item:not(.active) {
-    display: list-item;
-}
-
-@media (max-width: 576px) {
-    .pagination .page-item.number-page-item:not(.active) {
-        display: none;
-    }
-}
-
-a {
-    color: var(--color-accent-fg);
-    text-decoration: none;
-}
-
-.btn-toggle .collapse-arrow > * {
-    transition: transform 0.25s ease;
-    transform: rotate(0deg);
-}
-
-.btn-toggle[aria-expanded="true"] .collapse-arrow > * {
-    transform: rotate(90deg);
-}
-
-dl.field-list {
-    display: grid;
-    grid-template-columns: max-content auto;
-    overflow-wrap: anywhere;
-}
-
-dl.field-list > * {
-    margin: 0;
-}
-
-dl.field-list > dt {
-    grid-column-start: 1;
-    margin-right: 1em;
-    text-align: right;
-}
-
-dl.field-list > dt::after {
-    content: ":";
-}
-
-dl.field-list > dd {
-    grid-column-start: 2;
-}
-
-.inline-icon {
-    display: inline-block;
-}
-
-.inline-icon > * {
-    vertical-align: middle;
-}
-
-body {
-    font-family: "Noto Sans", sans-serif;
-}
-
 .thread-title {
-    font-size: 2.2em;
+    font-size: 2.2rem;
     text-align: center;
     color: var(--color-fg-default);
     margin-top: 1em;
@@ -151,169 +10,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.message-search {
-    --suggestion-added-width: 9rem;
-}
-
-@media (max-width: 992px) {
-    .message-search {
-        --suggestion-added-width: 6rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .message-search {
-        --suggestion-added-width: 3rem;
-    }
-}
-
-.message-search {
-    --search-base-width: 26rem;
-    --suggestion-text-max-lines: 6;
-    --suggestion-title-max-lines: 3;
-    --suggestion-text-line-height: 1.5em;
-    --suggestion-title-line-height: 1.5em;
-    --suggestion-total-width: calc(var(--search-base-width) + (var(--suggestion-added-width) * 2));
-}
-
-.message-search {
-    max-width: var(--search-base-width);
-    margin-left: 24px;
-    margin-right: 24px;
-}
-
-.message-search .search-input {
-    padding-right: 2.5em;
-    color: var(--color-fg-default);
-    background-color: var(--color-canvas-subtle);
-    border-color: var(--color-border-default);
-}
-
-.message-search::after {
-    position: absolute;
-    top: 0.4625rem;
-    right: 0.5375rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 1.5rem;
-    width: 1.5rem;
-    padding-right: 0.3125rem;
-    padding-left: 0.3125rem;
-    color: var(--color-fg-default);
-    content: "/";
-    border: 1px solid var(--color-border-default);
-    border-radius: 0.25rem;
-    font-size: 0.8em;
-}
-
-.message-search .search-suggestions {
-    position: absolute;
-    margin-top: 0.5rem;
-    z-index: 1;
-    background-color: var(--color-canvas-popover);
-    left: calc(var(--suggestion-added-width) * -1);
-    width: var(--suggestion-total-width);
-}
-
-.message-search .search-suggestions > * {
-    display: flex;
-}
-
-.message-search .search-suggestions a {
-    display: flex;
-    flex: 1;
-    text-decoration: none;
-    padding: 0.75rem 1.25rem;
-}
-
-@media (max-width: 576px) {
-    .message-search .search-suggestions a {
-        display: block;
-    }
-}
-
-.message-search .search-suggestions a:focus {
-    background: var(--color-canvas-selected-popover);
-    outline: 0;
-}
-
-.message-search .search-suggestions a:hover {
-    background: var(--color-canvas-selected-popover);
-}
-
-.message-search .search-suggestions > *:not(:first-child) {
-    border-top: 1px dashed var(--color-border-popover);
-}
-
-.message-search .search-suggestions > *:first-child {
-    margin-top: 0.5rem;
-}
-
-.message-search .search-suggestions > *:last-child {
-    margin-bottom: 0.5rem;
-}
-
-.message-search .search-suggestions .suggestion-header {
-    display: inline-block;
-    border-right: 1px solid var(--color-border-popover);
-    padding-right: 1rem;
-    width: calc(var(--suggestion-total-width) / 3);
-    color: var(--color-fg-popover);
-}
-
-.message-search .search-suggestions .suggestion-header > * {
-    display: block;
-}
-
-.message-search .search-suggestions .suggestion-timestamp {
-    color: var(--color-fg-muted);
-    font-size: 0.9em;
-}
-
-.message-search .search-suggestions .suggestion-title {
-    font-weight: bold;
-    overflow-wrap: anywhere;
-    max-height: calc(var(--suggestion-title-line-height) * var(--suggestion-title-max-lines));
-    overflow: hidden;
-}
-
-.message-search .search-suggestions .suggestion-text {
-    flex: 1;
-    display: block;
-    padding-left: 1rem;
-    line-height: var(--suggestion-text-line-height);
-    color: var(--color-fg-muted-popover);
-    max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
-    overflow: hidden;
-    overflow-wrap: anywhere;
-}
-
-@media (max-width: 576px) {
-    .message-search .search-suggestions {
-        left: 0;
-        width: 100%;
-    }
-    .message-search .search-suggestions .suggestion-header {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-
-    .message-search .search-suggestions :is(.suggestion-header, .suggestion-text) {
-        display: block;
-        padding: 0;
-        border: none;
-    }
-
-    .message-search .search-suggestions .suggestion-header :is(.suggestion-user, .suggestion-timestamp) {
-        display: inline;
-    }
-
-    .message-search .search-suggestions .suggestion-header .suggestion-user::after {
-        content: "•"
-    }
 }
 
 .message-thread {
@@ -327,7 +23,7 @@ body {
 
 .message-thread .message {
     margin-bottom: 1.4em;
-    margin-right: var(--message-link-size);
+    margin-right: var(--message-link-width);
 }
 
 .message-thread .message blockquote {
@@ -348,24 +44,24 @@ body {
 .message-thread .message .message-header {
     color: var(--color-fg-muted);
     display: flex;
-    font-size: 0.9em;
+    font-size: var(--font-size-small);
     justify-content: space-between;
-    margin-left: var(--message-link-size);
+    margin-left: var(--message-link-width);
 }
 
 .message-thread .message .message-author {
-    font-size: 1.1em;
-    font-weight: 500;
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-heavier);
 }
 
 .message-thread .message .message-flair {
-    font-size: 0.8em;
+    font-size: var(--font-size-tiny);
     color: var(--color-fg-muted);
 }
 
 .message-thread .message .message-title {
-    font-size: 1.1em;
-    font-weight: 300;
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-lighter);
 }
 
 .message-thread .message .parent-message {
@@ -377,7 +73,7 @@ body {
 }
 
 .message-thread .message .parent-message .parent-name {
-    font-size: 0.9em;
+    font-size: var(--font-size-small);
     color: var(--color-fg-default);
     padding: 0;
     margin-right: 0.4em;
@@ -392,7 +88,7 @@ body {
 }
 
 .message-thread .message .parent-message .parent-quote {
-    font-size: 0.8em;
+    font-size: var(--font-size-tiny);
 }
 
 .message-thread .message .message-body *:last-child {
@@ -400,7 +96,7 @@ body {
 }
 
 .message-thread .message .message-body .inline-message-header {
-    font-size: 0.8em;
+    font-size: var(--font-size-tiny);
     margin-bottom: 0.5em;
 }
 

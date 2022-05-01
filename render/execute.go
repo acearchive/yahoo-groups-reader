@@ -22,9 +22,13 @@ var assets embed.FS
 
 func assetFileNames() []string {
 	return []string{
-		"thread.css",
 		"search.js",
 		"time.js",
+		"variables.css",
+		"global.css",
+		"components.css",
+		"thread.css",
+		"search.css",
 	}
 }
 

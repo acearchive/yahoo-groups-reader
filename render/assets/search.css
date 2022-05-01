@@ -1,0 +1,137 @@
+.message-search {
+    max-width: var(--search-base-width);
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
+.message-search .search-input {
+    padding-right: 2.5em;
+    color: var(--color-fg-default);
+    background-color: var(--color-canvas-subtle);
+    border-color: var(--color-border-default);
+}
+
+.message-search::after {
+    position: absolute;
+    top: 0.4625rem;
+    right: 0.5375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
+    padding-right: 0.3125rem;
+    padding-left: 0.3125rem;
+    color: var(--color-fg-default);
+    content: "/";
+    border: 1px solid var(--color-border-default);
+    border-radius: 0.25rem;
+    font-size: var(--font-size-tiny);
+}
+
+.message-search .search-suggestions {
+    position: absolute;
+    margin-top: 0.5rem;
+    z-index: 1;
+    background-color: var(--color-canvas-popover);
+    left: calc(var(--suggestion-added-width) * -1);
+    width: var(--suggestion-total-width);
+}
+
+.message-search .search-suggestions > * {
+    display: flex;
+}
+
+.message-search .search-suggestions a {
+    display: flex;
+    flex: 1;
+    text-decoration: none;
+    padding: 0.75rem 1.25rem;
+}
+
+@media (max-width: 576px) {
+    .message-search .search-suggestions a {
+        display: block;
+    }
+}
+
+.message-search .search-suggestions a:focus {
+    background: var(--color-canvas-selected-popover);
+    outline: 0;
+}
+
+.message-search .search-suggestions a:hover {
+    background: var(--color-canvas-selected-popover);
+}
+
+.message-search .search-suggestions > *:not(:first-child) {
+    border-top: 1px dashed var(--color-border-popover);
+}
+
+.message-search .search-suggestions > *:first-child {
+    margin-top: 0.5rem;
+}
+
+.message-search .search-suggestions > *:last-child {
+    margin-bottom: 0.5rem;
+}
+
+.message-search .search-suggestions .suggestion-header {
+    display: inline-block;
+    border-right: 1px solid var(--color-border-popover);
+    padding-right: 1rem;
+    width: calc(var(--suggestion-total-width) / 3);
+    color: var(--color-fg-popover);
+}
+
+.message-search .search-suggestions .suggestion-header > * {
+    display: block;
+}
+
+.message-search .search-suggestions .suggestion-timestamp {
+    color: var(--color-fg-muted);
+    font-size: var(--font-size-small);
+}
+
+.message-search .search-suggestions .suggestion-title {
+    font-weight: bold;
+    overflow-wrap: anywhere;
+    max-height: calc(var(--suggestion-title-line-height) * var(--suggestion-title-max-lines));
+    overflow: hidden;
+}
+
+.message-search .search-suggestions .suggestion-text {
+    flex: 1;
+    display: block;
+    padding-left: 1rem;
+    line-height: var(--suggestion-text-line-height);
+    color: var(--color-fg-muted-popover);
+    max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 576px) {
+    .message-search .search-suggestions {
+        left: 0;
+        width: 100%;
+    }
+    .message-search .search-suggestions .suggestion-header {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .message-search .search-suggestions :is(.suggestion-header, .suggestion-text) {
+        display: block;
+        padding: 0;
+        border: none;
+    }
+
+    .message-search .search-suggestions .suggestion-header :is(.suggestion-user, .suggestion-timestamp) {
+        display: inline;
+    }
+
+    .message-search .search-suggestions .suggestion-header .suggestion-user::after {
+        content: "•"
+    }
+}
