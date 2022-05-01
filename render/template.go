@@ -132,9 +132,9 @@ const templateString = `
               <div class="card-text">
 				{{ if $message.Parent -}}
                 <div class="parent-message">
-                  <div class="parent-banner">
-                    <button class="btn btn-toggle d-inline-block parent-name" data-bs-toggle="collapse" data-bs-target="{{ printf "#parent-quote-%d" $message.Index }}" aria-expanded="false" aria-controls="{{ printf "parent-quote-%d" $message.Index }}">
-                      <span class="collapse-arrow" aria-hidden="true">
+                  <div class="parent-banner d-flex text-nowrap">
+                    <button class="btn btn-toggle d-inline-block text-wrap text-start parent-name" data-bs-toggle="collapse" data-bs-target="{{ printf "#parent-quote-%d" $message.Index }}" aria-expanded="false" aria-controls="{{ printf "parent-quote-%d" $message.Index }}">
+                      <span class="collapse-arrow me-1" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
                           <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
                         </svg>
