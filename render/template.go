@@ -31,7 +31,10 @@ const templateString = `
       <div class="d-flex justify-content-center align-items-center">
         <ul class="pagination">
           <li class="page-item">
-            <a class="page-link" href="{{ .Pagination.First }}">«</a>
+            <a class="page-link" href="{{ .Pagination.First }}">
+              <span aria-hidden="true">«</span>
+              <span class="visually-hidden">First</span>
+            </a>
           </li>
 	  	{{ if .Pagination.Prev -}}
           <li class="page-item">
@@ -57,7 +60,10 @@ const templateString = `
           </li>
 	  	{{- end }}
           <li class="page-item">
-            <a class="page-link" href="{{ .Pagination.Last }}">»</a>
+            <a class="page-link" href="{{ .Pagination.Last }}">
+              <span aria-hidden="true">»</span>
+              <span class="visually-hidden">Last</span>
+            </a>
           </li>
         </ul>
       </div>
@@ -154,7 +160,10 @@ const templateString = `
     <nav class="page-list" aria-label="Message thread pages">
       <ul class="pagination">
         <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.First }}">«</a>
+          <a class="page-link" href="{{ .Pagination.First }}">
+            <span aria-hidden="true">«</span>
+            <span class="visually-hidden">First</span>
+          </a>
         </li>
 		{{ if .Pagination.Prev -}}
         <li class="page-item">
@@ -180,7 +189,10 @@ const templateString = `
         </li>
 		{{- end }}
         <li class="page-item">
-          <a class="page-link" href="{{ .Pagination.Last }}">»</a>
+          <a class="page-link" href="{{ .Pagination.Last }}">
+            <span aria-hidden="true">»</span>
+            <span class="visually-hidden">Last</span>
+          </a>
         </li>
       </ul>
 	</nav>
