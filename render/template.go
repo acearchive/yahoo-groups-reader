@@ -10,7 +10,8 @@ const templateString = `
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Haven for the Human Amoeba</title>
+    <meta name="description" content="An archive of the Yahoo Groups community &quot;{{ .Title }}&quot;">
+    <title>{{ .Title }}</title>
     <link rel="canonical" href="{{ .Pagination.Current }}">
     {{ if .Pagination.Next }}<link rel="next" href="{{ .Pagination.Next }}">{{ end }}
     {{ if .Pagination.Prev }}<link rel="prev" href="{{ .Pagination.Prev }}">{{ end }}
