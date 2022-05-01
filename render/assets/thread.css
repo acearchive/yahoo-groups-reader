@@ -2,15 +2,14 @@
     font-size: 2.2rem;
     text-align: center;
     color: var(--color-fg-default);
-    margin-top: 1rem;
-    margin-bottom: 2rem;
+    margin: 1rem var(--body-horizontal-padding) 2rem var(--body-horizontal-padding)
 }
 
 .message-thread {
     min-width: 200px;
     max-width: 1000px;
     margin: 0 auto;
-    padding: 25px;
+    padding: 24px var(--body-horizontal-padding);
     color: var(--color-fg-default);
     background-color: var(--color-canvas-default);
 }

@@ -12,6 +12,8 @@ body {
     --color-canvas-selected-popover: #f6f8fa;
     --color-fg-popover: #24292f;
     --color-fg-muted-popover: #57606a;
+
+    --body-horizontal-padding: 24px;
 }
 
 @media (prefers-color-scheme: dark) {

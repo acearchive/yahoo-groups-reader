@@ -1,7 +1,7 @@
 .message-search {
     max-width: var(--search-base-width);
-    margin-left: 24px;
-    margin-right: 24px;
+    margin-left: var(--body-horizontal-padding);
+    margin-right: var(--body-horizontal-padding);
 }
 
 .message-search .search-input {
