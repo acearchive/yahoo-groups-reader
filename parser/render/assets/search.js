@@ -103,12 +103,15 @@ function indexSearch(search, suggestions) {
             store: ["id", "page", "timestamp", "user", "title", "body"],
             index: ["user", "flair", "title", "body"],
         },
-        worker: true,
     });
 
-    fetch("/search.json")
+    fetch("/index-keys.json")
         .then(response => response.json())
-        .then(searchData => Promise.all(searchData.map(fields => index.addAsync(fields))));
+        .then((keys) => Promise.all(keys.map(
+            async (key) => fetch(`/search-index/${key}`)
+                .then(response => response.text())
+                .then((part) => index.import(key, part))
+        )))
 
     search.addEventListener("input", async () => await showResults(index, search, suggestions), true);
     suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
