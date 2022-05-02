@@ -147,10 +147,12 @@ function indexSearch(search, suggestions) {
     suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
 }
 
-const searchInput = document.querySelector("#search-input");
-const searchSuggestions = document.querySelector("#search-suggestions");
+const searchForm = document.querySelector("#message-search");
+const searchInput = searchForm?.querySelector("#search-input");
+const searchSuggestions = searchForm?.querySelector("#search-suggestions");
 
 if (searchInput && searchSuggestions) {
+    searchForm.addEventListener("submit", (e) => e.preventDefault());
     document.addEventListener("keydown", (e) => inputFocus(e, searchInput, searchSuggestions));
     document.addEventListener("keydown", (e) => suggestionFocus(e, searchInput, searchSuggestions));
     document.addEventListener("click", (event) => {
