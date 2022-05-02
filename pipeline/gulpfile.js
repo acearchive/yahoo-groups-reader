@@ -8,11 +8,10 @@ const del = require("delete");
 const createIndex = require("./search.js");
 const { series, parallel, src, dest } = require("gulp");
 
-const destPath = "../public/"
-const jsDest = "../public/js/"
-const cssDest = "../public/css/"
-const fontCssDest = "../public/font/"
-const fontDest = "../public/font/files"
+const destPath = "../public"
+const jsDest = "../public/js"
+const cssDest = "../public/css"
+const fontDest = "../public/font"
 
 function bootstrapCSS() {
     return src("node_modules/bootstrap/dist/css/bootstrap.css")
@@ -75,14 +74,14 @@ const fontWeights = ["300", "400", "500"];
 function fontCss() {
     return src(
         fontWeights.map(weight => `node_modules/@fontsource/noto-sans/${weight}.css`)
-    ).pipe(dest(fontCssDest));
+    ).pipe(dest(`${fontDest}/noto-sans`));
 }
 
 function fontFiles() {
     return src([
         ...fontWeights.map(weight => `node_modules/@fontsource/noto-sans/files/noto-sans-*-${weight}-normal.woff`),
         ...fontWeights.map(weight => `node_modules/@fontsource/noto-sans/files/noto-sans-*-${weight}-normal.woff2`),
-    ]).pipe(dest(fontDest));
+    ]).pipe(dest(`${fontDest}/noto-sans/files`));
 }
 
 const font = parallel(fontCss, fontFiles);
