@@ -11,7 +11,8 @@ const { series, parallel, src, dest } = require("gulp");
 const destPath = "../public/"
 const jsDest = "../public/js/"
 const cssDest = "../public/css/"
-const fontDest = "../public/font/"
+const fontCssDest = "../public/font/"
+const fontDest = "../public/font/files"
 
 function bootstrapCSS() {
     return src("node_modules/bootstrap/dist/css/bootstrap.css")
@@ -69,9 +70,22 @@ function html() {
         .pipe(dest(destPath));
 }
 
-function font() {
-    return src("node_modules/@fontsource/**").pipe(dest(fontDest));
+const fontWeights = ["300", "400", "500"];
+
+function fontCss() {
+    return src(
+        fontWeights.map(weight => `node_modules/@fontsource/noto-sans/${weight}.css`)
+    ).pipe(dest(fontCssDest));
 }
+
+function fontFiles() {
+    return src([
+        ...fontWeights.map(weight => `node_modules/@fontsource/noto-sans/files/noto-sans-*-${weight}-normal.woff`),
+        ...fontWeights.map(weight => `node_modules/@fontsource/noto-sans/files/noto-sans-*-${weight}-normal.woff2`),
+    ]).pipe(dest(fontDest));
+}
+
+const font = parallel(fontCss, fontFiles);
 
 function cleanOutput() {
     return del("../output", { force: true });
