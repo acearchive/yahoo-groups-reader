@@ -4,6 +4,7 @@ const rename = require("gulp-rename");
 const uglify = require("gulp-uglify");
 const htmlmin = require("gulp-htmlmin");
 const del = require("delete");
+const createIndex = require("./search.js");
 const { series, parallel, src, dest } = require("gulp");
 
 const destPath = "../public/"
@@ -60,10 +61,6 @@ function font() {
     return src("node_modules/@fontsource/**").pipe(dest(fontDest));
 }
 
-function searchIndex() {
-    return src("../output/search.json").pipe(dest(destPath));
-}
-
 function flexsearch() {
     return src("node_modules/flexsearch/dist/flexsearch.bundle.js")
         .pipe(uglify())
@@ -79,10 +76,14 @@ function cleanPublic() {
     return del(destPath, { force: true });
 }
 
+function buildSearchIndex() {
+    return createIndex("../output", destPath);
+}
+
 exports.clean = parallel(cleanOutput, cleanPublic);
 
 exports.default = series(
     cleanPublic,
-    parallel(bootstrapCSS, bootstrapJS, searchIndex, flexsearch, css, js, html, font),
+    parallel(bootstrapCSS, bootstrapJS, flexsearch, css, js, html, font, buildSearchIndex),
     cleanOutput,
 );

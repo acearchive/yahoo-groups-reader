@@ -94,6 +94,23 @@ function suggestionFocus(e, suggestions) {
     }
 }
 
+const indexFileNames = [
+    "reg",
+    "store",
+    "body.cfg",
+    "body.ctx",
+    "body.map",
+    "flair.cfg",
+    "flair.ctx",
+    "flair.map",
+    "title.cfg",
+    "title.ctx",
+    "title.map",
+    "user.cfg",
+    "user.ctx",
+    "user.map",
+]
+
 function indexSearch(search, suggestions) {
     const index = new FlexSearch.Document({
         tokenize: "forward",
@@ -103,12 +120,13 @@ function indexSearch(search, suggestions) {
             store: ["id", "page", "timestamp", "user", "title", "body"],
             index: ["user", "flair", "title", "body"],
         },
-        worker: true,
     });
 
-    fetch("/search.json")
-        .then(response => response.json())
-        .then(searchData => Promise.all(searchData.map(fields => index.addAsync(fields))));
+    for (const fileName of indexFileNames) {
+        fetch(`/search/${fileName}`)
+            .then(response => response.text())
+            .then(indexData => index.import(fileName, indexData))
+    }
 
     search.addEventListener("input", async () => await showResults(index, search, suggestions), true);
     suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
