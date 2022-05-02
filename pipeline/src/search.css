@@ -15,7 +15,7 @@
         padding-right: 2.5rem;
     }
 
-    #message-search::after {
+    #message-search .keyboard-hint {
         position: absolute;
         top: 0.4625rem;
         right: 0.5375rem;
@@ -27,7 +27,6 @@
         padding-right: 0.3125rem;
         padding-left: 0.3125rem;
         color: var(--color-fg-default);
-        content: "/";
         border: 1px solid var(--color-border-default);
         border-radius: 0.25rem;
         font-size: var(--font-size-tiny);

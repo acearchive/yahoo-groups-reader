@@ -77,6 +77,7 @@ const templateString = `
       <div class="d-flex justify-content-center align-items-center my-3">
         <form id="message-search" class="flex-grow-1 position-relative">
           <input id="search-input" class="form-control" type="search" placeholder="Search messages..." aria-label="Search messages" aria-controls="search-suggestions" aria-haspopup="true" aria-autocomplete="list" aria-keyshortcuts="/" aria-expanded="false" autocomplete="off">
+          <span class="keyboard-hint" aria-hidden="true">/</span>
           <div id="search-suggestions" class="shadow rounded"></div>
         </form>
       </div>
