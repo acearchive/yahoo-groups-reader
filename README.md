@@ -19,7 +19,8 @@ yahoo-group-archiver and builds a static site for browsing the archive.
 - Client-side full-text search of the archive. This can be disabled at build
   time.
 - Supports both a light and dark theme based on your browser preferences.
-- Supports minifying the generated HTML/CSS/JS.
+- All CSS, JavaScript, and fonts are downloaded, minified, optimized, and
+  bundled with the site instead of relying in third-party CDNs.
 - Dates and times are localized automatically on the client, with a fallback
   option for clients with scripts disabled.
 
@@ -28,12 +29,49 @@ yahoo-group-archiver and builds a static site for browsing the archive.
 This tool has two components:
 
 1. A Go program in `parser/` which parses the archive and builds the HTML.
-2. A [Gulp](https://gulpjs.com/) pipeline in `pipeline/` which builds,
+2. A [gulp](https://gulpjs.com/) pipeline in `pipeline/` which builds,
    minifies, and optimizes all the necessary CSS, JavaScript, and fonts.
 
 ### Run the parser
 
+To run the parser, you must first install [Go](https://go.dev/).
+
+To run the parser:
+
+```
+cd ./parser
+go run . ~/your-yahoo-group/email -t "Your Yahoo Group"
+```
+
+To see additional options for the parser:
+
+```
+go run . --help
+```
+
+This will produce a directory `../output` containing the generated HTML, but
+you still need to run the asset pipeline to build the full site.
+
 ### Run the asset pipeline
+
+To run the asset pipeline, you must first install
+[npm](https://www.npmjs.com/).
+
+To install gulp:
+
+```
+npm install --global gulp-cli
+```
+
+To run the asset pipeline:
+
+```
+cd ./pipeline
+npm install
+gulp
+```
+
+This will produce a directory `../public` containing the generated static site.
 
 ## Gotchas
 
