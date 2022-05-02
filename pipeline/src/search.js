@@ -113,8 +113,7 @@ const indexFileNames = [
 
 function indexSearch(search, suggestions) {
     const index = new FlexSearch.Document({
-        tokenize: "forward",
-        cache: 100,
+        preset: "memory",
         document: {
             id: "id",
             store: ["id", "page", "timestamp", "user", "title", "body"],

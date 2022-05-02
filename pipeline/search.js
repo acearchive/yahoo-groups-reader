@@ -9,8 +9,7 @@ async function createIndex(inputDir, outputDir) {
     const searchData = JSON.parse(await fs.readFile(path.join(inputDir, searchFileName)));
 
     const index = new FlexSearch.Document({
-        tokenize: "forward",
-        cache: 100,
+        preset: "memory",
         document: {
             id: "id",
             store: ["id", "page", "timestamp", "user", "title", "body"],
