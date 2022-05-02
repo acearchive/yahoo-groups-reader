@@ -111,7 +111,7 @@ const templateString = `
                 <span class="message-author">{{ $message.User }}</span>
                 <span class="message-flair ms-1">{{ $message.Flair }}</span>
               </div>
-              <div class="flex-grow-1 d-sm-none">
+              <div class="flex-grow-1 d-sm-none me-2">
                 <div class="message-author">{{ $message.User }}</div>
                 <div class="message-flair">{{ $message.Flair }}</div>
               </div>
