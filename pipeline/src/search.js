@@ -14,7 +14,8 @@ function inputFocus(e, search, suggestions) {
 
     if (e.key === "Escape") {
         search.blur();
-        suggestions.classList.add("d-none");
+        search.ariaExpanded = "false";
+        suggestions.innerHTML = "";
     }
 }
 
@@ -40,7 +41,7 @@ async function showResults(index, search, suggestions) {
     const value = search.value;
     const results = await index.searchAsync(value, {limit: maxResult, enrich: true});
 
-    suggestions.classList.remove("d-none");
+    search.ariaExpanded = "true";
     suggestions.innerHTML = "";
 
     const flatResults = {};
@@ -78,22 +79,22 @@ async function showResults(index, search, suggestions) {
     }
 }
 
-function suggestionFocus(e, suggestions) {
+function suggestionFocus(e, search, suggestions) {
     const focusableSuggestions = suggestions.querySelectorAll("a");
     const focusable = [...focusableSuggestions];
     const index = focusable.indexOf(document.activeElement);
 
-    const keyDefault = suggestions.classList.contains("d-none");
+    const hasSuggestions = search.ariaExpanded === "true";
 
     let nextIndex = 0;
 
-    if (e.code === "ArrowUp" && !keyDefault) {
+    if (hasSuggestions && e.code === "ArrowUp") {
         e.preventDefault();
-        nextIndex= index > 0 ? index-1 : 0;
+        nextIndex = index > 0 ? index-1 : 0;
         focusableSuggestions[nextIndex].focus();
-    } else if (e.code === "ArrowDown" && !keyDefault) {
+    } else if (hasSuggestions && e.code === "ArrowDown") {
         e.preventDefault();
-        nextIndex= index+1 < focusable.length ? index+1 : index;
+        nextIndex = index+1 < focusable.length ? index+1 : index;
         focusableSuggestions[nextIndex].focus();
     }
 }
@@ -131,7 +132,7 @@ const importIndexOnce = (() => {
     }
 })()
 
-async function indexSearch(search, suggestions) {
+function indexSearch(search, suggestions) {
     const index = new FlexSearch.Document({
         preset: "memory",
         document: {
@@ -146,15 +147,16 @@ async function indexSearch(search, suggestions) {
     suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
 }
 
-const searchInput = document.querySelector("#message-search > .search-input");
-const searchSuggestions = document.querySelector("#message-search > .search-suggestions");
+const searchInput = document.querySelector("#search-input");
+const searchSuggestions = document.querySelector("#search-suggestions");
 
 if (searchInput && searchSuggestions) {
     document.addEventListener("keydown", (e) => inputFocus(e, searchInput, searchSuggestions));
-    document.addEventListener("keydown", (e) => suggestionFocus(e, searchSuggestions));
-    document.addEventListener("click", function(event) {
+    document.addEventListener("keydown", (e) => suggestionFocus(e, searchInput, searchSuggestions));
+    document.addEventListener("click", (event) => {
         if (!searchSuggestions.contains(event.target)) {
-            searchSuggestions.classList.add("d-none");
+            searchInput.ariaExpanded = "false";
+            searchSuggestions.innerHTML = "";
         }
     });
 

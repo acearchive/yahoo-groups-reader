@@ -75,9 +75,9 @@ const templateString = `
       </div>
       {{ if .IncludeSearch -}}
       <div class="d-flex justify-content-center align-items-center my-3">
-        <form id="message-search" class="message-search flex-grow-1 position-relative">
-          <input class="search-input form-control" type="search" placeholder="Search messages..." aria-label="Search messages" autocomplete="off">
-          <div class="search-suggestions shadow rounded d-none"></div>
+        <form id="message-search" class="flex-grow-1 position-relative">
+          <input id="search-input" class="form-control" type="search" placeholder="Search messages..." aria-label="Search messages" aria-controls="search-suggestions" aria-haspopup="true" aria-autocomplete="list" aria-keyshortcuts="/" aria-expanded="false" autocomplete="off">
+          <div id="search-suggestions" class="shadow rounded"></div>
         </form>
       </div>
       {{- end }}

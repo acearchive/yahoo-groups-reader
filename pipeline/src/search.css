@@ -1,21 +1,21 @@
-.message-search {
+#message-search {
     max-width: var(--search-base-width);
     margin-left: var(--body-horizontal-padding);
     margin-right: var(--body-horizontal-padding);
 }
 
-.message-search .search-input {
+#search-input {
     color: var(--color-fg-default);
     background-color: var(--color-canvas-subtle);
     border-color: var(--color-border-default);
 }
 
 @media (min-width: 576px) {
-    .message-search .search-input {
+    #search-input {
         padding-right: 2.5rem;
     }
 
-    .message-search::after {
+    #message-search::after {
         position: absolute;
         top: 0.4625rem;
         right: 0.5375rem;
@@ -34,7 +34,7 @@
     }
 }
 
-.message-search .search-suggestions {
+#search-suggestions {
     position: absolute;
     margin-top: 0.5rem;
     z-index: 1;
@@ -43,11 +43,11 @@
     width: var(--suggestion-total-width);
 }
 
-.message-search .search-suggestions > * {
+#search-suggestions > * {
     display: flex;
 }
 
-.message-search .search-suggestions a {
+#search-suggestions a {
     display: flex;
     flex: 1;
     text-decoration: none;
@@ -55,33 +55,33 @@
 }
 
 @media (max-width: 576px) {
-    .message-search .search-suggestions a {
+    #search-suggestions a {
         display: block;
     }
 }
 
-.message-search .search-suggestions a:focus {
+#search-suggestions a:focus {
     background: var(--color-canvas-selected-popover);
     outline: 0;
 }
 
-.message-search .search-suggestions a:hover {
+#search-suggestions a:hover {
     background: var(--color-canvas-selected-popover);
 }
 
-.message-search .search-suggestions > *:not(:first-child) {
+#search-suggestions > *:not(:first-child) {
     border-top: 1px dashed var(--color-border-popover);
 }
 
-.message-search .search-suggestions > *:first-child {
+#search-suggestions > *:first-child {
     margin-top: 0.5rem;
 }
 
-.message-search .search-suggestions > *:last-child {
+#search-suggestions > *:last-child {
     margin-bottom: 0.5rem;
 }
 
-.message-search .search-suggestions .suggestion-header {
+#search-suggestions .suggestion-header {
     display: inline-block;
     border-right: 1px solid var(--color-border-popover);
     padding-right: 1rem;
@@ -89,31 +89,31 @@
     color: var(--color-fg-popover);
 }
 
-.message-search .search-suggestions .suggestion-header {
+#search-suggestions .suggestion-header {
     overflow-wrap: anywhere;
 }
 
-.message-search .search-suggestions .suggestion-header > * {
+#search-suggestions .suggestion-header > * {
     display: block;
 }
 
-.message-search .search-suggestions .suggestion-user {
+#search-suggestions .suggestion-user {
     font-weight: var(--font-weight-heavier);
     font-size: var(--font-size-small);
 }
 
-.message-search .search-suggestions .suggestion-timestamp {
+#search-suggestions .suggestion-timestamp {
     color: var(--color-fg-muted-popover);
     font-size: var(--font-size-tiny);
 }
 
-.message-search .search-suggestions .suggestion-title {
+#search-suggestions .suggestion-title {
     font-weight: var(--font-weight-lighter);
     max-height: calc(var(--suggestion-title-line-height) * var(--suggestion-title-max-lines));
     overflow: hidden;
 }
 
-.message-search .search-suggestions .suggestion-text {
+#search-suggestions .suggestion-text {
     flex: 1;
     display: block;
     padding-left: 1rem;
@@ -126,26 +126,26 @@
 }
 
 @media (max-width: 576px) {
-    .message-search .search-suggestions {
+    #search-suggestions {
         left: 0;
         width: 100%;
     }
-    .message-search .search-suggestions .suggestion-header {
+    #search-suggestions .suggestion-header {
         width: 100%;
         margin-bottom: 0.5rem;
     }
 
-    .message-search .search-suggestions :is(.suggestion-header, .suggestion-text) {
+    #search-suggestions :is(.suggestion-header, .suggestion-text) {
         display: block;
         padding: 0;
         border: none;
     }
 
-    .message-search .search-suggestions .suggestion-header :is(.suggestion-user, .suggestion-timestamp) {
+    #search-suggestions .suggestion-header :is(.suggestion-user, .suggestion-timestamp) {
         display: inline;
     }
 
-    .message-search .search-suggestions .suggestion-header .suggestion-user::after {
+    #search-suggestions .suggestion-header .suggestion-user::after {
         content: "•"
     }
 }
