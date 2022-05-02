@@ -31,7 +31,7 @@
     display: list-item;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     .pagination .page-item.number-page-item:not(.active) {
         display: none;
     }
