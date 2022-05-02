@@ -67,7 +67,7 @@ func formatTimestamp(input time.Time) string {
 }
 
 func formatDatetime(input time.Time) string {
-	return input.UTC().Format("2 January 2006 15:04 MST")
+	return input.Format("2 Jan 2006, 15:04 -07:00")
 }
 
 func formatHumanReadableNumber(number int) string {

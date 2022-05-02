@@ -35,6 +35,18 @@ function hrefForMessage(id, page) {
     }
 }
 
+function formatTimestamp(date) {
+    return new Intl.DateTimeFormat("en-UK", {
+        timeZone: "UTC",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        timeZoneName: "short",
+    }).format(date)
+}
+
 async function showResults(index, search, suggestions) {
     const maxResult = 5;
 
@@ -69,7 +81,7 @@ async function showResults(index, search, suggestions) {
 
         entry.querySelector(".suggestion-user").appendChild(document.createTextNode(doc.user));
         entry.querySelector(".suggestion-timestamp").appendChild(document.createTextNode(
-            new Intl.DateTimeFormat([], { dateStyle: "medium", timeStyle: "short" }).format(new Date(doc.timestamp))
+            formatTimestamp(new Date(doc.timestamp))
         ));
         entry.querySelector(".suggestion-title").appendChild(document.createTextNode(doc.title));
         entry.querySelector(".suggestion-text").appendChild(document.createTextNode(doc.body));

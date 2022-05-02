@@ -21,8 +21,6 @@ yahoo-group-archiver and builds a static site for browsing the archive.
 - Supports both a light and dark theme based on your browser preferences.
 - All CSS, JavaScript, and fonts are downloaded, minified, optimized, and
   bundled with the site instead of relying in third-party CDNs.
-- Dates and times are localized automatically on the client, with a fallback
-  option for clients with scripts disabled.
 
 ## Usage
 

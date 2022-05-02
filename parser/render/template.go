@@ -29,7 +29,6 @@ const templateString = `
 	<script src="/js/flexsearch.bundle.min.js" defer></script>
     <script src="/js/search.min.js" defer></script>
     {{- end }}
-    <script src="/js/time.min.js" defer></script>
   </head>
   <body>
 	<h1 class="thread-title">{{ .Title }}</h1>

@@ -69,9 +69,9 @@ func (b *AttributionBlock) ToHtml() string {
 		params.Timestamp = b.Time.Format(time.RFC3339)
 
 		if b.HasTime {
-			params.FormattedDatetime = b.Time.UTC().Format("2 January 2006 15:04 MST")
+			params.FormattedDatetime = b.Time.Format("2 Jan 2006, 15:04 -07:00")
 		} else {
-			params.FormattedDatetime = b.Time.UTC().Format("2 January 2006")
+			params.FormattedDatetime = b.Time.Format("2 Jan 2006")
 		}
 	}
 
