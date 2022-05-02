@@ -2,6 +2,7 @@ const cleanCSS = require("gulp-clean-css");
 const purgeCSS = require("gulp-purgecss")
 const rename = require("gulp-rename");
 const uglify = require("gulp-uglify");
+var sourcemaps = require('gulp-sourcemaps');
 const htmlmin = require("gulp-htmlmin");
 const del = require("delete");
 const createIndex = require("./search.js");
@@ -23,7 +24,10 @@ function bootstrapCSS() {
 }
 
 function bootstrapJS() {
-   return src("node_modules/bootstrap/dist/js/bootstrap.min.js").pipe(dest(jsDest));
+   return src([
+       "node_modules/bootstrap/dist/js/bootstrap.min.js",
+       "node_modules/bootstrap/dist/js/bootstrap.min.js.map"
+   ]).pipe(dest(jsDest));
 }
 
 function css() {
@@ -35,8 +39,10 @@ function css() {
 
 function js() {
     return src("src/*.js")
-        .pipe(uglify())
         .pipe(rename({ extname: ".min.js" }))
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(sourcemaps.write("."))
         .pipe(dest(jsDest));
 }
 
@@ -63,7 +69,6 @@ function font() {
 
 function flexsearch() {
     return src("node_modules/flexsearch/dist/flexsearch.bundle.js")
-        .pipe(uglify())
         .pipe(rename({ extname: ".min.js" }))
         .pipe(dest(jsDest))
 }
