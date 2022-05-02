@@ -89,6 +89,10 @@
     color: var(--color-fg-popover);
 }
 
+.message-search .search-suggestions .suggestion-header {
+    overflow-wrap: anywhere;
+}
+
 .message-search .search-suggestions .suggestion-header > * {
     display: block;
 }
@@ -106,7 +110,6 @@
 .message-search .search-suggestions .suggestion-title {
     font-weight: var(--font-weight-lighter);
     max-height: calc(var(--suggestion-title-line-height) * var(--suggestion-title-max-lines));
-    overflow-wrap: anywhere;
     overflow: hidden;
 }
 
