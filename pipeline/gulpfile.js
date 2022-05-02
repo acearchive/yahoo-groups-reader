@@ -30,6 +30,12 @@ function bootstrapJS() {
    ]).pipe(dest(jsDest));
 }
 
+function flexsearch() {
+    return src("node_modules/flexsearch/dist/flexsearch.bundle.js")
+        .pipe(rename({ extname: ".min.js" }))
+        .pipe(dest(jsDest))
+}
+
 function css() {
     return src("src/*.css")
         .pipe(cleanCSS())
@@ -67,12 +73,6 @@ function font() {
     return src("node_modules/@fontsource/**").pipe(dest(fontDest));
 }
 
-function flexsearch() {
-    return src("node_modules/flexsearch/dist/flexsearch.bundle.js")
-        .pipe(rename({ extname: ".min.js" }))
-        .pipe(dest(jsDest))
-}
-
 function cleanOutput() {
     return del("../output", { force: true });
 }
@@ -85,10 +85,12 @@ function buildSearchIndex() {
     return createIndex("../output", destPath);
 }
 
+const dependencies = parallel(bootstrapCSS, bootstrapJS, flexsearch);
+
 exports.clean = parallel(cleanOutput, cleanPublic);
 
 exports.default = series(
     cleanPublic,
-    parallel(bootstrapCSS, bootstrapJS, flexsearch, css, js, html, font, buildSearchIndex),
+    parallel(dependencies, css, js, html, font, buildSearchIndex),
     cleanOutput,
 );

@@ -59,15 +59,19 @@ async function showResults(index, search, suggestions) {
             <span class="suggestion-header">
               <span class="suggestion-user">
                 <span class="inline-icon me-1" aria-hidden="true">${userIcon}</span>
-                ${doc.user}
               </span>
-              <time class="suggestion-timestamp" datetime="${doc.timestamp}">
-                ${new Intl.DateTimeFormat([], { dateStyle: "medium", timeStyle: "short" }).format(new Date(doc.timestamp))}
-              </time>
-              <span class="suggestion-title">${doc.title}</span>
+              <time class="suggestion-timestamp" datetime="${doc.timestamp}"></time>
+              <span class="suggestion-title"></span>
             </span>
-            <span class="suggestion-text">${doc.body}</span>
+            <span class="suggestion-text"></span>
           </a>`;
+
+        entry.querySelector(".suggestion-user").appendChild(document.createTextNode(doc.user));
+        entry.querySelector(".suggestion-timestamp").innerText = new Intl.DateTimeFormat(
+            [], { dateStyle: "medium", timeStyle: "short" }
+        ).format(new Date(doc.timestamp));
+        entry.querySelector(".suggestion-title").innerText = doc.title
+        entry.querySelector(".suggestion-text").innerText = doc.body
 
         suggestions.appendChild(entry);
         if (suggestions.childElementCount === maxResult) break;
