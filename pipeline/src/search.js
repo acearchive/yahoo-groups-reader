@@ -67,11 +67,11 @@ async function showResults(index, search, suggestions) {
           </a>`;
 
         entry.querySelector(".suggestion-user").appendChild(document.createTextNode(doc.user));
-        entry.querySelector(".suggestion-timestamp").innerText = new Intl.DateTimeFormat(
-            [], { dateStyle: "medium", timeStyle: "short" }
-        ).format(new Date(doc.timestamp));
-        entry.querySelector(".suggestion-title").innerText = doc.title
-        entry.querySelector(".suggestion-text").innerText = doc.body
+        entry.querySelector(".suggestion-timestamp").appendChild(document.createTextNode(
+            new Intl.DateTimeFormat([], { dateStyle: "medium", timeStyle: "short" }).format(new Date(doc.timestamp))
+        ));
+        entry.querySelector(".suggestion-title").appendChild(document.createTextNode(doc.title));
+        entry.querySelector(".suggestion-text").appendChild(document.createTextNode(doc.body));
 
         suggestions.appendChild(entry);
         if (suggestions.childElementCount === maxResult) break;
