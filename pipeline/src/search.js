@@ -35,8 +35,6 @@ function hrefForMessage(id, page) {
 }
 
 async function showResults(index, search, suggestions) {
-    await importIndexOnce(index);
-
     const maxResult = 5;
 
     const value = search.value;
@@ -125,13 +123,11 @@ function importIndex(index) {
 
 const importIndexOnce = (() => {
     let isIndexed = false;
-    return (index) => {
+    return async (index) => {
         if (!isIndexed) {
             isIndexed = true;
-            return importIndex(index);
+            await importIndex(index);
         }
-
-        return Promise.resolve();
     }
 })()
 
@@ -145,6 +141,7 @@ async function indexSearch(search, suggestions) {
         },
     });
 
+    search.addEventListener("focus", async () => await importIndexOnce(index), true);
     search.addEventListener("input", async () => await showResults(index, search, suggestions), true);
     suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
 }
