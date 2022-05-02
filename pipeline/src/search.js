@@ -35,6 +35,8 @@ function hrefForMessage(id, page) {
 }
 
 async function showResults(index, search, suggestions) {
+    await importIndexOnce(index);
+
     const maxResult = 5;
 
     const value = search.value;
@@ -115,7 +117,25 @@ const indexFileNames = [
     "user.map",
 ]
 
-function indexSearch(search, suggestions) {
+function importIndex(index) {
+    return Promise.all(indexFileNames.map(fileName => fetch(`/search/${fileName}`)
+        .then(response => response.text())
+        .then(indexData => index.import(fileName, indexData))));
+}
+
+const importIndexOnce = (() => {
+    let isIndexed = false;
+    return (index) => {
+        if (!isIndexed) {
+            isIndexed = true;
+            return importIndex(index);
+        }
+
+        return Promise.resolve();
+    }
+})()
+
+async function indexSearch(search, suggestions) {
     const index = new FlexSearch.Document({
         preset: "memory",
         document: {
@@ -124,12 +144,6 @@ function indexSearch(search, suggestions) {
             index: ["user", "flair", "title", "body"],
         },
     });
-
-    for (const fileName of indexFileNames) {
-        fetch(`/search/${fileName}`)
-            .then(response => response.text())
-            .then(indexData => index.import(fileName, indexData))
-    }
 
     search.addEventListener("input", async () => await showResults(index, search, suggestions), true);
     suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
