@@ -6,7 +6,13 @@ const searchFileName = "search.json";
 const indexDirName = "search";
 
 async function createIndex(inputDir, outputDir) {
-    const searchData = JSON.parse(await fs.readFile(path.join(inputDir, searchFileName)));
+    let searchData;
+
+    try {
+        searchData = JSON.parse(await fs.readFile(path.join(inputDir, searchFileName)));
+    } catch {
+        return
+    }
 
     const index = new FlexSearch.Document({
         preset: "memory",

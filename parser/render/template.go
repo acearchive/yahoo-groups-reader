@@ -25,10 +25,7 @@ const templateString = `
     <link href="/css/thread.min.css" rel="stylesheet">
     {{ if .IncludeSearch }}<link href="/css/search.min.css" rel="stylesheet">{{ end }}
 	<script src="/js/bootstrap.min.js" async></script>
-    {{ if .IncludeSearch -}}
-	<script src="/js/flexsearch.bundle.min.js" defer></script>
-    <script src="/js/search.min.js" defer></script>
-    {{- end }}
+    {{ if .IncludeSearch -}}<script src="/js/search.min.js" defer></script>{{- end }}
   </head>
   <body>
 	<h1 class="thread-title">{{ .Title }}</h1>

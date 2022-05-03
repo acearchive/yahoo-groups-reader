@@ -1,11 +1,11 @@
-const cleanCSS = require("gulp-clean-css");
-const purgeCSS = require("gulp-purgecss")
+const cleanCss = require("gulp-clean-css");
+const purgeCss = require("gulp-purgecss")
 const rename = require("gulp-rename");
-const uglify = require("gulp-uglify");
-var sourcemaps = require('gulp-sourcemaps');
 const htmlmin = require("gulp-htmlmin");
 const del = require("delete");
 const createIndex = require("./search.js");
+const webpack = require("webpack-stream");
+
 const { series, parallel, src, dest } = require("gulp");
 
 const destPath = "../public"
@@ -13,43 +13,48 @@ const jsDest = "../public/js"
 const cssDest = "../public/css"
 const fontDest = "../public/font"
 
-function bootstrapCSS() {
+function bootstrapCss() {
     return src("node_modules/bootstrap/dist/css/bootstrap.css")
-        .pipe(purgeCSS({
-            content: ["../output/**/*.html"],
+        .pipe(purgeCss({
+            content: [
+                "../output/**/*.html",
+                "./node_modules/bootstrap/js/src/collapse.js",
+            ],
         }))
-        .pipe(cleanCSS())
+        .pipe(cleanCss())
         .pipe(rename({ extname: ".min.css" }))
         .pipe(dest(cssDest));
-}
-
-function bootstrapJS() {
-   return src([
-       "node_modules/bootstrap/dist/js/bootstrap.min.js",
-       "node_modules/bootstrap/dist/js/bootstrap.min.js.map"
-   ]).pipe(dest(jsDest));
-}
-
-function flexsearch() {
-    return src("node_modules/flexsearch/dist/flexsearch.bundle.js")
-        .pipe(rename({ extname: ".min.js" }))
-        .pipe(dest(jsDest))
 }
 
 function css() {
     return src("src/*.css")
-        .pipe(cleanCSS())
+        .pipe(cleanCss())
         .pipe(rename({ extname: ".min.css" }))
         .pipe(dest(cssDest));
 }
 
-function js() {
-    return src("src/*.js")
-        .pipe(rename({ extname: ".min.js" }))
-        .pipe(sourcemaps.init())
-        .pipe(uglify())
-        .pipe(sourcemaps.write("."))
+function bootstrapJs() {
+    return src("src/bootstrap.js")
+        .pipe(webpack({
+            mode: "production",
+            devtool: "source-map",
+            output: {
+                filename: "bootstrap.min.js"
+            },
+        }))
         .pipe(dest(jsDest));
+}
+
+function searchJs() {
+    return src("src/search.js")
+        .pipe(webpack({
+            mode: "production",
+            devtool: "source-map",
+            output: {
+                filename: "search.min.js"
+            }
+        }))
+        .pipe(dest(jsDest))
 }
 
 function html() {
@@ -84,8 +89,6 @@ function fontFiles() {
     ]).pipe(dest(`${fontDest}/noto-sans/files`));
 }
 
-const font = parallel(fontCss, fontFiles);
-
 function cleanOutput() {
     return del("../output", { force: true });
 }
@@ -98,12 +101,14 @@ function buildSearchIndex() {
     return createIndex("../output", destPath);
 }
 
-const dependencies = parallel(bootstrapCSS, bootstrapJS, flexsearch);
+const font = parallel(fontCss, fontFiles);
+
+const bootstrap = parallel(bootstrapCss, bootstrapJs);
 
 exports.clean = parallel(cleanOutput, cleanPublic);
 
 exports.default = series(
     cleanPublic,
-    parallel(dependencies, css, js, html, font, buildSearchIndex),
+    parallel(bootstrap, searchJs, css, html, font, buildSearchIndex),
     cleanOutput,
 );
