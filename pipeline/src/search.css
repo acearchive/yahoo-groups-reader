@@ -145,6 +145,10 @@
     }
 
     #search-suggestions .suggestion-header .suggestion-user::after {
-        content: "•"
+        content: " •"
+    }
+
+    #message-search .keyboard-hint {
+        display: none;
     }
 }
