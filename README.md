@@ -55,18 +55,12 @@ you still need to run the asset pipeline to build the full site.
 To run the asset pipeline, you must first install
 [npm](https://www.npmjs.com/).
 
-To install gulp:
-
-```
-npm install --global gulp-cli
-```
-
 To run the asset pipeline:
 
 ```
 cd ./pipeline
 npm install
-gulp
+npx gulp
 ```
 
 This will produce a directory `../public` containing the generated static site.
