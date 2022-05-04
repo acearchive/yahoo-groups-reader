@@ -5,19 +5,22 @@ const htmlmin = require("gulp-htmlmin");
 const del = require("delete");
 const createIndex = require("./search.js");
 const webpack = require("webpack-stream");
+const path = require("path");
 
 const { series, parallel, src, dest } = require("gulp");
 
-const destPath = "../public"
-const jsDest = "../public/js"
-const cssDest = "../public/css"
-const fontDest = "../public/font"
+const outputDir = process.env.OUTPUT_DIR ?? "../output"
+const publicDir = process.env.PUBLIC_DIR ?? "../public"
+
+const jsDest = path.join(publicDir, "s")
+const cssDest = path.join(publicDir, "css")
+const fontDest = path.join(publicDir, "font")
 
 function bootstrapCss() {
     return src("node_modules/bootstrap/dist/css/bootstrap.css")
         .pipe(purgeCss({
             content: [
-                "../output/**/*.html",
+                path.join(outputDir, "**/*.html"),
                 "./node_modules/bootstrap/js/src/collapse.js",
             ],
         }))
@@ -69,9 +72,9 @@ function html() {
         sortClassName: true,
     };
 
-    return src("../output/**/*.html")
+    return src(path.join(outputDir, "**/*.html"))
         .pipe(htmlmin(options))
-        .pipe(dest(destPath));
+        .pipe(dest(publicDir));
 }
 
 const fontWeights = ["300", "400", "500"];
@@ -90,15 +93,15 @@ function fontFiles() {
 }
 
 function cleanOutput() {
-    return del("../output", { force: true });
+    return del(outputDir, { force: true });
 }
 
 function cleanPublic() {
-    return del(destPath, { force: true });
+    return del(publicDir, { force: true });
 }
 
 function buildSearchIndex() {
-    return createIndex("../output", destPath);
+    return createIndex(outputDir, publicDir);
 }
 
 const font = parallel(fontCss, fontFiles);
