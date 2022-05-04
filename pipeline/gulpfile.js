@@ -12,7 +12,7 @@ const { series, parallel, src, dest } = require("gulp");
 const outputDir = process.env.OUTPUT_DIR ?? "../output"
 const publicDir = process.env.PUBLIC_DIR ?? "../public"
 
-const jsDest = path.join(publicDir, "s")
+const jsDest = path.join(publicDir, "js")
 const cssDest = path.join(publicDir, "css")
 const fontDest = path.join(publicDir, "font")
 
