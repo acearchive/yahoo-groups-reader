@@ -6,7 +6,9 @@ This is a CLI tool for rendering Yahoo Groups archives exported using
 This tool accepts a directory of RFC 822 `.eml` files as exported by
 yahoo-group-archiver and builds a static site for browsing the archive.
 
-![Screenshot of an example of the generated site](./docs/hha-screenshot.png)
+![Screenshot of the generated site on desktop](./docs/example-desktop.png)
+![Screenshot of searching on the generated site](./docs/example-search.png)
+![Screenshot of the generated site on mobile](./docs/example-mobile.png)
 
 ## Features
 
@@ -76,9 +78,16 @@ This will produce a directory `../public` containing the generated static site.
   prefer false negatives (ignoring syntax constructs and leaving them as
   literal text) over false positives (potentially mangling text by treating it
   as markup).
+- Some messages in Yahoo Groups archives are multipart messages containing both
+  plain-text markup and HTML. However, given the long lifespan of Yahoo Groups,
+  messages in older groups may use long-deprecated HTML features. For this
+  reason, along with the security implications of rendering untrusted HTML and
+  accessibility concerns, this tool ignores HTML messages and always attempts
+  to parse the plain-text markup instead. Embedded HTML in plain-text markup is
+  printed as literal text.
 - This tool doesn't attempt to handle attachments in messages.
-- If a timestamp in the archive is missing a time zone offset, it is treated as
-  UTC.
+- If a timestamp in a message is missing a time zone offset, it is assumed to
+  be UTC.
 - The way the full-text search is implemented currently may not scale well to
   large archives. If performance is a problem, you can disable the search
   functionality at build time.
