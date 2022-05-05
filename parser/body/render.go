@@ -5,22 +5,39 @@ import (
 	"strings"
 )
 
-const IndentPrefix = "  "
+const IndentLen = 2
+
+func IndentMultilineString(text string, indent int) string {
+	var output strings.Builder
+
+	lines := strings.Split(text, "\n")
+
+	for _, line := range lines {
+		for indentIndex := 0; indentIndex < indent; indentIndex++ {
+			output.WriteString(" ")
+		}
+
+		output.WriteString(line)
+		output.WriteString("\n")
+	}
+
+	return output.String()
+}
 
 func (StartParagraphToken) ToHtml() string {
-	return "<p>\n"
+	return "<p>"
 }
 
 func (EndParagraphToken) ToHtml() string {
-	return "</p>\n"
+	return "</p>"
 }
 
 func (StartQuoteToken) ToHtml() string {
-	return "<blockquote>\n"
+	return "<blockquote>"
 }
 
 func (EndQuoteToken) ToHtml() string {
-	return "</blockquote>\n"
+	return "</blockquote>"
 }
 
 func (b BlockToken) ToHtml() string {
@@ -28,7 +45,7 @@ func (b BlockToken) ToHtml() string {
 }
 
 func (t TextToken) ToHtml() string {
-	return html.EscapeString(string(t))
+	return html.EscapeString(strings.TrimSpace(string(t)))
 }
 
 func Render(tokens []Token) string {
@@ -37,10 +54,7 @@ func Render(tokens []Token) string {
 	indentLevel := 0
 
 	writeToken := func(token Token) {
-		for space := indentLevel; space > 0; space-- {
-			output.WriteString(IndentPrefix)
-		}
-		output.WriteString(token.ToHtml())
+		output.WriteString(IndentMultilineString(token.ToHtml(), indentLevel*IndentLen))
 	}
 
 	for _, token := range tokens {

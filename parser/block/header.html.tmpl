@@ -1,0 +1,8 @@
+<div class="inline-message-header">
+  <dl class="field-list">
+    {{ range .Fields -}}
+    <dt>{{ .Name }}</dt>
+    <dd>{{ .Value }}</dd>
+    {{ end }}
+  </dl>
+</div>

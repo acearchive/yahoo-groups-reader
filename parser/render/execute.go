@@ -2,23 +2,15 @@ package render
 
 import (
 	"github.com/acearchive/yg-render/parse"
-	"github.com/yosssi/gohtml"
-	"io"
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 const (
 	outputFileMode = 0o644
 	outputDirMode  = 0o755
 )
-
-func formatHtml(input string, output io.Writer) error {
-	_, err := io.WriteString(output, gohtml.Format(input))
-	return err
-}
 
 func Execute(path string, config OutputConfig, thread parse.MessageThread) error {
 	if err := os.Mkdir(path, outputDirMode); err != nil {
@@ -44,13 +36,7 @@ func Execute(path string, config OutputConfig, thread parse.MessageThread) error
 			return err
 		}
 
-		var outputHtml strings.Builder
-
-		if err := Template.Execute(&outputHtml, args); err != nil {
-			return err
-		}
-
-		if err := formatHtml(outputHtml.String(), file); err != nil {
+		if err := Template.Execute(file, args); err != nil {
 			return err
 		}
 

@@ -3,6 +3,7 @@ package block
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 const fieldNameRegexPart = `From|Reply-To|To|Subject|Date|Sent|Message`
@@ -80,19 +81,21 @@ func (b *MessageHeaderBlock) FromText(text string) (ok bool, before, after strin
 	}
 
 	for i, position := range fieldPositions {
+		var nextField Field
 		if i+1 < len(fieldPositions) {
 			nextPosition := fieldPositions[i+1]
 
-			*b = append(*b, Field{
-				Name:  text[position.LabelStartIndex:position.LabelEndIndex],
-				Value: text[position.ValueStartIndex:nextPosition.LabelStartIndex],
-			})
+			nextField.Name = text[position.LabelStartIndex:position.LabelEndIndex]
+			nextField.Value = text[position.ValueStartIndex:nextPosition.LabelStartIndex]
 		} else {
-			*b = append(*b, Field{
-				Name:  text[position.LabelStartIndex:position.LabelEndIndex],
-				Value: text[position.ValueStartIndex:absoluteFieldListEndIndex],
-			})
+			nextField.Name = text[position.LabelStartIndex:position.LabelEndIndex]
+			nextField.Value = text[position.ValueStartIndex:absoluteFieldListEndIndex]
 		}
+
+		nextField.Name = strings.TrimSpace(nextField.Name)
+		nextField.Value = strings.TrimSpace(nextField.Value)
+
+		*b = append(*b, nextField)
 	}
 
 	return true, before, after

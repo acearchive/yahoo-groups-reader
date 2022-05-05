@@ -2,6 +2,7 @@ package render
 
 import (
 	"fmt"
+	"github.com/acearchive/yg-render/body"
 	"github.com/acearchive/yg-render/parse"
 	"golang.org/x/text/language"
 	textmessage "golang.org/x/text/message"
@@ -97,7 +98,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 				parentArgs = &ParentArgs{
 					Index:             parentIndex + 1,
 					User:              parent.User,
-					Body:              template.HTML(parent.Body.Html),
+					Body:              template.HTML(body.IndentMultilineString(parent.Body.Html, messageParentBodyIndent)),
 					Timestamp:         formatTimestamp(parent.Date),
 					FormattedDatetime: formatDatetime(parent.Date),
 				}
@@ -114,7 +115,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 			User:              message.User,
 			Flair:             message.Flair,
 			Title:             messageTitle,
-			Body:              template.HTML(message.Body.Html),
+			Body:              template.HTML(body.IndentMultilineString(message.Body.Html, messageBodyIndent)),
 		}
 	}
 
