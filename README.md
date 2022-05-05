@@ -6,7 +6,7 @@ This is a CLI tool for rendering Yahoo Groups archives exported using
 This tool accepts a directory of RFC 822 `.eml` files as exported by
 yahoo-group-archiver and builds a static site for browsing the archive.
 
-[You can see example screenshots of the generated site here.](./docs/screnshots.md)
+[You can see example screenshots of the generated site here.](./docs/screenshots.md)
 
 ## Features
 
