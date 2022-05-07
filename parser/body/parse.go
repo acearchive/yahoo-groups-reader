@@ -2,7 +2,7 @@ package body
 
 import (
 	"bufio"
-	block2 "github.com/acearchive/yg-render/block"
+	"github.com/acearchive/yg-render/block"
 	"io"
 	"strings"
 )
@@ -45,7 +45,7 @@ func (EndQuoteToken) TagType() TagType {
 }
 
 type BlockToken struct {
-	block2.Block
+	block.Block
 }
 
 func (BlockToken) TagType() TagType {
@@ -118,6 +118,19 @@ func ParseLines(text io.Reader) ([]Line, error) {
 type Tokenizer struct {
 	previousLine      Line
 	currentQuoteDepth int
+	blockFactory      func() []block.Block
+}
+
+func NewTokenizer(blockFactory func() []block.Block) Tokenizer {
+	tokenizer := Tokenizer{blockFactory: blockFactory}
+
+	tokenizer.reset()
+
+	return tokenizer
+}
+
+func NewDefaultTokenizer() Tokenizer {
+	return NewTokenizer(block.AllBlocks)
 }
 
 func (t *Tokenizer) reset() {
@@ -125,7 +138,7 @@ func (t *Tokenizer) reset() {
 	t.currentQuoteDepth = 0
 }
 
-func (t *Tokenizer) tokenizeLineWithoutBlocks(line Line) []Token {
+func (t *Tokenizer) rawTokenizeLine(line Line) []Token {
 	var tokens []Token
 
 	switch {
@@ -174,10 +187,10 @@ func (t *Tokenizer) TokenizeLines(lines []Line) []Token {
 	var tokens []Token
 
 	for _, line := range lines {
-		tokens = append(tokens, t.tokenizeLineWithoutBlocks(line)...)
+		tokens = append(tokens, t.rawTokenizeLine(line)...)
 	}
 
-	return parseBlocks(tokens)
+	return t.parseBlocks(tokens)
 }
 
 func (t *Tokenizer) Tokenize(body io.Reader) ([]Token, error) {
@@ -189,20 +202,11 @@ func (t *Tokenizer) Tokenize(body io.Reader) ([]Token, error) {
 	return t.TokenizeLines(lines), nil
 }
 
-func createEmptyBlocks() []block2.Block {
-	return []block2.Block{
-		&block2.HardBreakBlock{},
-		&block2.DividerBlock{},
-		&block2.MessageHeaderBlock{},
-		&block2.AttributionBlock{},
-	}
-}
-
-func findBlocksInParagraph(text string) []Token {
-	for _, newBlock := range createEmptyBlocks() {
+func (t Tokenizer) findBlocksInParagraph(text string) []Token {
+	for _, newBlock := range t.blockFactory() {
 		if ok, before, after := newBlock.FromText(text); ok {
-			beforeBlocks := findBlocksInParagraph(before)
-			afterBlocks := findBlocksInParagraph(after)
+			beforeBlocks := t.findBlocksInParagraph(before)
+			afterBlocks := t.findBlocksInParagraph(after)
 
 			output := make([]Token, 0, len(beforeBlocks)+len(afterBlocks)+1)
 			output = append(output, beforeBlocks...)
@@ -224,7 +228,7 @@ func findBlocksInParagraph(text string) []Token {
 	}
 }
 
-func parseBlocks(tokens []Token) []Token {
+func (t Tokenizer) parseBlocks(tokens []Token) []Token {
 	output := make([]Token, 0, len(tokens))
 
 	var currentParagraph strings.Builder
@@ -234,7 +238,7 @@ func parseBlocks(tokens []Token) []Token {
 		case StartParagraphToken:
 			currentParagraph.Reset()
 		case EndParagraphToken:
-			output = append(output, findBlocksInParagraph(currentParagraph.String())...)
+			output = append(output, t.findBlocksInParagraph(currentParagraph.String())...)
 		case TextToken:
 			currentParagraph.WriteString(string(concrete))
 			currentParagraph.WriteString("\n")

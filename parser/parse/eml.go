@@ -82,10 +82,9 @@ func bodyFromEmail(email *mail.Message) (MessageBody, error) {
 		return MessageBody{}, err
 	}
 
-	var (
-		tokenizer   body.Tokenizer
-		messageBody MessageBody
-	)
+	var messageBody MessageBody
+
+	tokenizer := body.NewDefaultTokenizer()
 
 	messageBody.Tokens, err = tokenizer.Tokenize(rawTextBody)
 	if err != nil {
