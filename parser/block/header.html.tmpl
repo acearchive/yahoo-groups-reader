@@ -1,8 +1,11 @@
 <div class="inline-message-header">
   <dl class="field-list">
-    {{ range .Fields -}}
+    {{ $fieldsLen := len .Fields -}}
+    {{ range $index, $field := .Fields -}}
     <dt>{{ .Name }}</dt>
     <dd>{{ .Value }}</dd>
+    {{- if ne (add $index 1) $fieldsLen }}
+    {{ end -}}
     {{ end }}
   </dl>
 </div>

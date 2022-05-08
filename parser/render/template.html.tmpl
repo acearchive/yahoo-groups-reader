@@ -141,12 +141,12 @@
                     </a>
                   </div>
                   <blockquote id="{{ printf "parent-quote-%d" $message.Index }}" class="collapse parent-quote">
-{{ $message.Parent.Body }}
+                    {{ $message.Parent.Body }}
                   </blockquote>
                 </div>
                 {{ end -}}
                 <div class="message-body">
-{{ $message.Body }}
+                  {{ $message.Body }}
                 </div>
               </div>
             </div>

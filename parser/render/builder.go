@@ -7,6 +7,7 @@ import (
 	"golang.org/x/text/language"
 	textmessage "golang.org/x/text/message"
 	"html/template"
+	"strings"
 	"time"
 )
 
@@ -98,7 +99,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 				parentArgs = &ParentArgs{
 					Index:             parentIndex + 1,
 					User:              parent.User,
-					Body:              template.HTML(body.IndentMultilineString(parent.Body.Html, messageParentBodyIndent)),
+					Body:              template.HTML(strings.TrimSpace(body.IndentMultilineString(parent.Body.Html, messageParentBodyIndent))),
 					Timestamp:         formatTimestamp(parent.Date),
 					FormattedDatetime: formatDatetime(parent.Date),
 				}
@@ -115,7 +116,7 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 			User:              message.User,
 			Flair:             message.Flair,
 			Title:             messageTitle,
-			Body:              template.HTML(body.IndentMultilineString(message.Body.Html, messageBodyIndent)),
+			Body:              template.HTML(strings.TrimSpace(body.IndentMultilineString(message.Body.Html, messageBodyIndent))),
 		}
 	}
 

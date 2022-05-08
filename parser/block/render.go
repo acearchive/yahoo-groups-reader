@@ -2,6 +2,7 @@ package block
 
 import (
 	_ "embed"
+	"github.com/Masterminds/sprig/v3"
 	"html/template"
 	"strings"
 	"time"
@@ -10,12 +11,12 @@ import (
 //go:embed header.html.tmpl
 var messageHeaderTemplateString string
 
-var messageHeaderTemplate = template.Must(template.New("header-block").Parse(messageHeaderTemplateString))
+var messageHeaderTemplate = template.Must(template.New("header-block").Funcs(sprig.FuncMap()).Parse(messageHeaderTemplateString))
 
 //go:embed attribution.html.tmpl
 var attributionTemplateString string
 
-var attributionTemplate = template.Must(template.New("attribution-block").Parse(attributionTemplateString))
+var attributionTemplate = template.Must(template.New("attribution-block").Funcs(sprig.FuncMap()).Parse(attributionTemplateString))
 
 type messageHeaderTemplateParams struct {
 	Fields []Field
@@ -36,11 +37,11 @@ func (b *MessageHeaderBlock) ToHtml() string {
 		panic(err)
 	}
 
-	return output.String()
+	return strings.TrimSpace(output.String())
 }
 
 func (b *DividerBlock) ToHtml() string {
-	return "<hr>\n"
+	return "<hr>"
 }
 
 func (b *AttributionBlock) ToHtml() string {
@@ -62,7 +63,7 @@ func (b *AttributionBlock) ToHtml() string {
 		panic(err)
 	}
 
-	return output.String()
+	return strings.TrimSpace(output.String())
 }
 
 func (b *HardBreakBlock) ToHtml() string {
