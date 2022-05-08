@@ -64,7 +64,6 @@ function html() {
     const options = {
         collapseBooleanAttributes: true,
         collapseWhitespace: true,
-        conservativeCollapse: true,
         removeComments: true,
         removeEmptyAttributes: true,
         removeRedundantAttributes: true,
