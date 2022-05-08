@@ -76,6 +76,12 @@ function html() {
         .pipe(dest(publicDir));
 }
 
+function headers() {
+    return src("src/index.headers")
+        .pipe(rename("_headers"))
+        .pipe(dest(publicDir));
+}
+
 const fontWeights = ["300", "400", "500"];
 
 function fontCss() {
@@ -111,6 +117,6 @@ exports.clean = parallel(cleanOutput, cleanPublic);
 
 exports.default = series(
     cleanPublic,
-    parallel(bootstrap, searchJs, css, html, font, buildSearchIndex),
+    parallel(bootstrap, searchJs, css, html, font, headers, buildSearchIndex),
     cleanOutput,
 );
