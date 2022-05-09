@@ -51,6 +51,8 @@ function formatTimestamp(date) {
 async function showResults(index, search, suggestions) {
     const maxResult = 5;
 
+    await importIndexOnce();
+
     const value = search.value;
     const results = await index.searchAsync(value, {limit: maxResult, enrich: true});
 
@@ -128,19 +130,19 @@ const indexFileNames = [
     "user.map",
 ]
 
-function importIndex(index) {
-    return Promise.all(indexFileNames.map(fileName => fetch(`/search/${fileName}`)
+async function importIndex(index) {
+    await Promise.all(indexFileNames.map(fileName => fetch(`/search/${fileName}`)
         .then(response => response.text())
         .then(indexData => index.import(fileName, indexData))));
 }
 
 const importIndexOnce = (() => {
-    let isIndexed = false;
+    let importIndexPromise;
     return async (index) => {
-        if (!isIndexed) {
-            isIndexed = true;
-            await importIndex(index);
+        if (importIndexPromise === undefined) {
+            importIndexPromise = importIndex(index);
         }
+        await importIndexPromise;
     }
 })()
 
