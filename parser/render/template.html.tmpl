@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="An archive of the Yahoo Groups community &quot;{{ .Title }}&quot;">
     <title>{{ .Title }}</title>
+    {{ if ne .BaseUrl "/" }}<base href="{{ .BaseUrl }}">{{ end }}
     <link rel="canonical" href="{{ .Pagination.CurrentCanonical }}">
-    {{ if .Pagination.NextCanonical }}<link rel="next" href="{{ .Pagination.NextCanonical }}">{{ end }}
-    {{ if .Pagination.PrevCanonical }}<link rel="prev" href="{{ .Pagination.PrevCanonical }}">{{ end }}
+    {{ if .Pagination.Next }}<link rel="next" href="{{ .Pagination.Next }}">{{ end }}
+    {{ if .Pagination.Prev }}<link rel="prev" href="{{ .Pagination.Prev }}">{{ end }}
     <link rel="preload" as="font" href="/font/noto-sans-latin-300-normal.woff2" type="font/woff2" crossorigin>
     <link rel="preload" as="font" href="/font/noto-sans-latin-400-normal.woff2" type="font/woff2" crossorigin>
     <link rel="preload" as="font" href="/font/noto-sans-latin-500-normal.woff2" type="font/woff2" crossorigin>

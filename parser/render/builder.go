@@ -53,15 +53,14 @@ type PaginationArgs struct {
 	Current          PagePath
 	CurrentCanonical PagePath
 	Next             *PagePath
-	NextCanonical    *PagePath
 	Prev             *PagePath
-	PrevCanonical    *PagePath
 	First            PagePath
 	Last             PagePath
 }
 
 type TemplateArgs struct {
 	Title         string
+	BaseUrl       string
 	IncludeSearch bool
 	Messages      []MessageArgs
 	Pagination    PaginationArgs
@@ -204,16 +203,12 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 
 		if pageNumber > firstPageNumber {
 			prevPath := pagePath(pageNumber - 1)
-			canonicalPrevPath := canonicalPagePath(config.BaseUrl, pageNumber-1)
 			paginationArgs.Prev = &prevPath
-			paginationArgs.PrevCanonical = &canonicalPrevPath
 		}
 
 		if pageNumber < totalPages {
 			nextPath := pagePath(pageNumber + 1)
-			canonicalNextPath := canonicalPagePath(config.BaseUrl, pageNumber+1)
 			paginationArgs.Next = &nextPath
-			paginationArgs.NextCanonical = &canonicalNextPath
 		}
 
 		messageStartIndex := (pageNumber - 1) * config.PageSize
@@ -233,6 +228,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 
 		args = append(args, TemplateArgs{
 			Title:         config.Title,
+			BaseUrl:       config.BaseUrl,
 			IncludeSearch: config.IncludeSearch,
 			Messages:      messagesInPage,
 			Pagination:    paginationArgs,
