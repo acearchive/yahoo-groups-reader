@@ -2,6 +2,7 @@ package render
 
 import (
 	_ "embed"
+	"github.com/Masterminds/sprig/v3"
 	"html/template"
 )
 
@@ -13,4 +14,4 @@ const (
 //go:embed template.html.tmpl
 var templateString string
 
-var Template = template.Must(template.New("yg-render").Parse(templateString))
+var Template = template.Must(template.New("yg-render").Funcs(sprig.FuncMap()).Parse(templateString))

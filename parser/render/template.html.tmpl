@@ -36,11 +36,14 @@
             <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Prev</a>
           </li>
           {{- end }}
-          {{ range .Pagination.Pages -}}
-          <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
-            <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
+          {{ $pagesLen := len .Pagination.Pages -}}
+          {{ range $index, $page := .Pagination.Pages -}}
+          <li class="number-page-item page-item{{ if $page.IsCurrent }} active{{ end }}"{{ if $page.IsCurrent }} aria-current="page"{{ end }}>
+            <a class="page-link" href="{{ $page.Path }}">{{ $page.Number }}</a>
           </li>
-          {{- end }}
+          {{- if ne (add $index 1) $pagesLen }}
+          {{ end -}}
+          {{ end }}
           {{ if .Pagination.Next -}}
           <li class="page-item">
             <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
@@ -160,29 +163,32 @@
               <span class="visually-hidden">First</span>
             </a>
           </li>
-        {{ if .Pagination.Prev -}}
+          {{ if .Pagination.Prev -}}
           <li class="page-item">
             <a class="page-link" href="{{ .Pagination.Prev }}">Prev</a>
           </li>
-        {{- else -}}
+          {{- else -}}
           <li class="page-item disabled">
             <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Prev</a>
           </li>
-        {{- end }}
-          {{ range .Pagination.Pages -}}
-          <li class="number-page-item page-item{{ if .IsCurrent }} active{{ end }}"{{ if .IsCurrent }} aria-current="page"{{ end }}>
-            <a class="page-link" href="{{ .Path }}">{{ .Number }}</a>
-          </li>
           {{- end }}
-        {{ if .Pagination.Next -}}
+          {{ $pagesLen := len .Pagination.Pages -}}
+          {{ range $index, $page := .Pagination.Pages -}}
+          <li class="number-page-item page-item{{ if $page.IsCurrent }} active{{ end }}"{{ if $page.IsCurrent }} aria-current="page"{{ end }}>
+            <a class="page-link" href="{{ $page.Path }}">{{ $page.Number }}</a>
+          </li>
+          {{- if ne (add $index 1) $pagesLen }}
+          {{ end -}}
+          {{ end }}
+          {{ if .Pagination.Next -}}
           <li class="page-item">
             <a class="page-link" href="{{ .Pagination.Next }}">Next</a>
           </li>
-        {{- else -}}
+          {{- else -}}
           <li class="page-item disabled">
             <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
           </li>
-        {{- end }}
+          {{- end }}
           <li class="page-item">
             <a class="page-link" href="{{ .Pagination.Last }}">
               <span aria-hidden="true">»</span>
