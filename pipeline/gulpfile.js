@@ -38,6 +38,7 @@ function html() {
 function css() {
     return src([
         "node_modules/bootstrap/dist/css/bootstrap.css",
+        "src/font.css",
         "src/variables.css",
         "src/*.css",
     ])
@@ -77,19 +78,15 @@ function headers() {
         .pipe(dest(publicDir));
 }
 
-const fontWeights = ["300", "400", "500"];
-
-function fontCss() {
-    return src(
-        fontWeights.map(weight => `node_modules/@fontsource/noto-sans/${weight}.css`)
-    ).pipe(dest(path.join(fontDest, "noto-sans")));
-}
-
-function fontFiles() {
+function font() {
     return src([
-        ...fontWeights.map(weight => `node_modules/@fontsource/noto-sans/files/noto-sans-*-${weight}-normal.woff`),
-        ...fontWeights.map(weight => `node_modules/@fontsource/noto-sans/files/noto-sans-*-${weight}-normal.woff2`),
-    ]).pipe(dest(path.join(fontDest, "noto-sans", "files")));
+        "node_modules/@fontsource/noto-sans/files/noto-sans-latin-300-normal.woff2",
+        "node_modules/@fontsource/noto-sans/files/noto-sans-all-300-normal.woff",
+        "node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff2",
+        "node_modules/@fontsource/noto-sans/files/noto-sans-all-400-normal.woff",
+        "node_modules/@fontsource/noto-sans/files/noto-sans-latin-500-normal.woff2",
+        "node_modules/@fontsource/noto-sans/files/noto-sans-all-500-normal.woff",
+    ]).pipe(dest(fontDest));
 }
 
 function cleanOutput() {
@@ -103,8 +100,6 @@ function cleanPublic() {
 function buildSearchIndex() {
     return createIndex(outputDir, publicDir);
 }
-
-const font = parallel(fontCss, fontFiles);
 
 exports.clean = parallel(cleanOutput, cleanPublic);
 
