@@ -48,13 +48,16 @@ type PageRef struct {
 }
 
 type PaginationArgs struct {
-	Pages      []PageRef
-	PageNumber int
-	Current    PagePath
-	Next       *PagePath
-	Prev       *PagePath
-	First      PagePath
-	Last       PagePath
+	Pages            []PageRef
+	PageNumber       int
+	Current          PagePath
+	CurrentCanonical PagePath
+	Next             *PagePath
+	NextCanonical    *PagePath
+	Prev             *PagePath
+	PrevCanonical    *PagePath
+	First            PagePath
+	Last             PagePath
 }
 
 type TemplateArgs struct {
@@ -127,6 +130,7 @@ type OutputConfig struct {
 	PageSize      int
 	Title         string
 	IncludeSearch bool
+	BaseUrl       string
 }
 
 func pagePath(pageNumber int) PagePath {
@@ -135,6 +139,10 @@ func pagePath(pageNumber int) PagePath {
 	} else {
 		return PagePath(fmt.Sprintf("/%d/", pageNumber))
 	}
+}
+
+func canonicalPagePath(baseUrl string, pageNumber int) PagePath {
+	return PagePath(strings.TrimSuffix(baseUrl, "/")) + pagePath(pageNumber)
 }
 
 func navPagesRange(pageNumber, totalPages int) (first, last int) {
@@ -186,21 +194,26 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 		}
 
 		paginationArgs := PaginationArgs{
-			Pages:      pageRefs,
-			PageNumber: pageNumber,
-			Current:    pagePath(pageNumber),
-			First:      pagePath(firstPageNumber),
-			Last:       pagePath(totalPages),
+			Pages:            pageRefs,
+			PageNumber:       pageNumber,
+			Current:          pagePath(pageNumber),
+			CurrentCanonical: canonicalPagePath(config.BaseUrl, pageNumber),
+			First:            pagePath(firstPageNumber),
+			Last:             pagePath(totalPages),
 		}
 
 		if pageNumber > firstPageNumber {
 			prevPath := pagePath(pageNumber - 1)
+			canonicalPrevPath := canonicalPagePath(config.BaseUrl, pageNumber-1)
 			paginationArgs.Prev = &prevPath
+			paginationArgs.PrevCanonical = &canonicalPrevPath
 		}
 
 		if pageNumber < totalPages {
 			nextPath := pagePath(pageNumber + 1)
+			canonicalNextPath := canonicalPagePath(config.BaseUrl, pageNumber+1)
 			paginationArgs.Next = &nextPath
+			paginationArgs.NextCanonical = &canonicalNextPath
 		}
 
 		messageStartIndex := (pageNumber - 1) * config.PageSize

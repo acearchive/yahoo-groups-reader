@@ -15,11 +15,13 @@ var (
 	flagVerbose  bool
 	flagNoSearch bool
 	flagOutput   string
+	flagBase     string
 )
 
 const (
 	DefaultPageSize   = 25
 	DefaultOutputPath = "../output"
+	DefaultBasePath   = "/"
 	DefaultGroupName  = "Yahoo Group"
 )
 
@@ -28,6 +30,7 @@ func init() {
 	rootCmd.Flags().IntVar(&flagPageSize, "page-size", DefaultPageSize, "The maximum number of messages per page")
 	rootCmd.Flags().BoolVar(&flagNoSearch, "no-search", false, "Disable the search functionality in the generated site")
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", DefaultOutputPath, "The directory to write the generated HTML to")
+	rootCmd.Flags().StringVarP(&flagBase, "base", "b", DefaultBasePath, "The base URL for the generated site")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
 }
 
@@ -52,6 +55,7 @@ var rootCmd = &cobra.Command{
 			Title:         flagTitle,
 			PageSize:      flagPageSize,
 			IncludeSearch: !flagNoSearch,
+			BaseUrl:       flagBase,
 		}
 
 		if err := render.Execute(flagOutput, config, thread); err != nil {
