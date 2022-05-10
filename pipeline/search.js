@@ -19,7 +19,7 @@ async function createIndex(inputDir, outputDir) {
         document: {
             id: "id",
             store: ["id", "page", "timestamp", "user", "title", "body"],
-            index: ["user", "flair", "title", "body"],
+            index: ["user", "flair", "year", "title", "body"],
         },
     });
 

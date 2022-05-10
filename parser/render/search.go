@@ -6,6 +6,7 @@ import (
 	"github.com/acearchive/yg-render/parse"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,6 +19,7 @@ type MessageSearchFields struct {
 	Timestamp  string `json:"timestamp"`
 	User       string `json:"user"`
 	Flair      string `json:"flair"`
+	Year       string `json:"year"`
 	Title      string `json:"title"`
 	Body       string `json:"body"`
 }
@@ -63,6 +65,7 @@ func buildSearchFields(thread parse.MessageThread, config OutputConfig) []Messag
 			Timestamp:  message.Date.Format(time.RFC3339),
 			User:       message.User,
 			Flair:      message.Flair,
+			Year:       strconv.Itoa(message.Date.Year()),
 			Body:       tokensToSearchText(message.Body.Tokens),
 		}
 
