@@ -74,9 +74,10 @@ The asset pipeline accepts the following environment variables:
 
 ## Gotchas
 
-- This tool was written specifically for the Yahoo Group *Haven for the Human
-  Amoeba*. While the tool was designed to be generalizable to other Yahoo
-  Groups, it hasn't been tested with other data sets.
+- This tool was written specifically for the Yahoo Group [Haven for the Human
+  Amoeba](https://acearchive.lgbt/artifact/haven-for-the-human-amoeba/). While
+  the tool was designed to be generalizable to other Yahoo Groups, it hasn't
+  been tested with other data sets.
 - The way this tool parses plain-text email markup is best-effort and often
   breaks. The markup used by Yahoo Groups is inconsistent and appears to have
   changed many times over the course of its history. This tool is designed to
