@@ -26,8 +26,10 @@ yahoo-group-archiver and builds a static site for browsing the archive.
 - Uses [Open Graph metadata](https://ogp.me/) for SEO and social media
   previews. Generates a screenshot of the site at build time to show in media
   previews.
-- Customize the generated site with external links you can add at build time
-  via CLI flags. Supports [Feather icons](https://feathericons.com/).
+- Scores 100/100 in Performance, Accessibility, Best Practices, and SEO on
+  [Google Lighthouse](https://developers.google.com/web/tools/lighthouse).
+- You can customize the generated site with external links at build time via
+  CLI flags. Supports [Feather icons](https://feathericons.com/).
 
 ## Usage
 
