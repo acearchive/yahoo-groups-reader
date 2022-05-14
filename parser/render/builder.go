@@ -137,20 +137,25 @@ type ExternalLinkConfig struct {
 }
 
 type OutputConfig struct {
-	PageSize      int
-	Title         string
-	IncludeSearch bool
-	BaseUrl       string
-	AddRepoLink   bool
-	Links         []ExternalLinkConfig
-	Locale        string
+	PageSize          int
+	Title             string
+	CustomDescription string
+	IncludeSearch     bool
+	BaseUrl           string
+	AddRepoLink       bool
+	Links             []ExternalLinkConfig
+	Locale            string
 }
 
 func (c OutputConfig) Lang() string {
 	return strings.SplitN(c.Locale, "_", 2)[0]
 }
 func (c OutputConfig) Description() string {
-	return fmt.Sprintf("An archive of the Yahoo Groups community \"%s\"", c.Title)
+	if c.CustomDescription == "" {
+		return fmt.Sprintf("An archive of the Yahoo Groups community \"%s\"", c.Title)
+	}
+
+	return c.CustomDescription
 }
 
 func pagePath(pageNumber int) PagePath {

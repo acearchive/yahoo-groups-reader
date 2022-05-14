@@ -15,15 +15,16 @@ import (
 var ErrInvalidLinkInput = errors.New("malformed --link input")
 
 var (
-	flagPageSize int
-	flagTitle    string
-	flagVerbose  bool
-	flagNoSearch bool
-	flagOutput   string
-	flagBase     string
-	flagNoRepo   bool
-	flagLinks    []string
-	flagLocale   string
+	flagPageSize    int
+	flagTitle       string
+	flagVerbose     bool
+	flagNoSearch    bool
+	flagOutput      string
+	flagBase        string
+	flagNoRepo      bool
+	flagLinks       []string
+	flagLocale      string
+	flagDescription string
 )
 
 const (
@@ -40,6 +41,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&flagNoRepo, "no-repo", false, "Don't add a link to the GitHub repo in the generated site")
 	rootCmd.Flags().StringArrayVar(&flagLinks, "link", nil, "Add a link to the top of the page in the generated site")
 	rootCmd.Flags().StringVar(&flagLocale, "locale", "en_US", "The locale of the generated site")
+	rootCmd.Flags().StringVar(&flagDescription, "description", "", "Override the default site description for search results and social previews")
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", DefaultOutputPath, "The directory to write the generated HTML to")
 	rootCmd.Flags().StringVarP(&flagBase, "base", "b", DefaultBasePath, "The base URL for the generated site")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
@@ -87,13 +89,14 @@ var rootCmd = &cobra.Command{
 		}
 
 		config := render.OutputConfig{
-			Title:         flagTitle,
-			PageSize:      flagPageSize,
-			IncludeSearch: !flagNoSearch,
-			BaseUrl:       flagBase,
-			AddRepoLink:   !flagNoRepo,
-			Links:         linkConfigs,
-			Locale:        flagLocale,
+			Title:             flagTitle,
+			CustomDescription: flagDescription,
+			PageSize:          flagPageSize,
+			IncludeSearch:     !flagNoSearch,
+			BaseUrl:           flagBase,
+			AddRepoLink:       !flagNoRepo,
+			Links:             linkConfigs,
+			Locale:            flagLocale,
 		}
 
 		if err := render.Execute(flagOutput, config, thread); err != nil {
