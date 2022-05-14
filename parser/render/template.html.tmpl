@@ -33,7 +33,7 @@
       {{- range $index, $link := .Links }}
         <a href="{{ $link.Url }}">
           <span class="visually-hidden">{{ $link.Label }}</span>
-          <i data-feather="{{ $link.IconName }}" width="30" height="30" class="nav-icon"></i>
+          <i data-feather="{{ $link.IconName }}" width="30" height="30" aria-hidden="true" class="nav-icon"></i>
         </a>
       {{- end }}
       </div>
