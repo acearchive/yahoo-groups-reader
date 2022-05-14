@@ -63,6 +63,7 @@ type TemplateArgs struct {
 	Title         string
 	Description   string
 	BaseUrl       string
+	Lang          string
 	Locale        string
 	IncludeSearch bool
 	Links         []ExternalLinkConfig
@@ -145,6 +146,9 @@ type OutputConfig struct {
 	Locale        string
 }
 
+func (c OutputConfig) Lang() string {
+	return strings.SplitN(c.Locale, "_", 2)[0]
+}
 func (c OutputConfig) Description() string {
 	return fmt.Sprintf("An archive of the Yahoo Groups community \"%s\"", c.Title)
 }
@@ -259,6 +263,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 			Description:   config.Description(),
 			BaseUrl:       config.BaseUrl,
 			Locale:        config.Locale,
+			Lang:          config.Lang(),
 			IncludeSearch: config.IncludeSearch,
 			Links:         linkArgs,
 			Messages:      messagesInPage,
