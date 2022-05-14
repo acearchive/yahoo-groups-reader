@@ -105,7 +105,7 @@
     margin-bottom: 0;
 }
 
-.message-thread .message .message-body .inline-message-header {
+.message-thread .message .inline-message-header {
     font-size: var(--font-size-tiny);
     margin-bottom: 0.5rem;
 }
@@ -114,6 +114,10 @@
     color: var(--color-fg-muted);
 }
 
-.message-thread .message .message-body .inline-quote-attribution {
+.message-thread .message .inline-quote-attribution {
     margin-bottom: 0.5rem;
+}
+
+.message-thread .message .inline-quote-attribution .inline-icon {
+    margin-right: 0.25rem;
 }
