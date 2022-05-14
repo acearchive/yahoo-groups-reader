@@ -12,6 +12,8 @@
 }
 
 .external-links-header .nav-icon {
+    /* Prevent layout shift when the icons load. */
+    min-height: 30px;
     color: var(--color-fg-muted);
 }
 
