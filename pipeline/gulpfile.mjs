@@ -16,6 +16,7 @@ const { series, parallel, src, dest } = gulp;
 
 const outputDir = process.env.OUTPUT_DIR ?? "../output"
 const publicDir = process.env.PUBLIC_DIR ?? "../public"
+const disallowRobots = process.env.DISALLOW_ROBOTS
 
 const jsDest = path.join(publicDir, "js")
 const cssDest = path.join(publicDir, "css")
@@ -81,7 +82,15 @@ function headers() {
 }
 
 function robots() {
-    return src("src/robots.txt").pipe(dest(publicDir));
+    if (disallowRobots === undefined) {
+        return src("src/allow.robots.txt")
+            .pipe(rename("robots.txt"))
+            .pipe(dest(publicDir));
+    } else {
+        return src("src/deny.robots.txt")
+            .pipe(rename("robots.txt"))
+            .pipe(dest(publicDir));
+    }
 }
 
 function font() {
