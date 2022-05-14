@@ -121,14 +121,16 @@ func (f nameFormat) Regex() *regexp.Regexp {
 type dateFormat string
 
 const (
-	dateFormatShort                   = "Short"
-	dateFormatShortWeekday            = "ShortWeekday"
-	dateFormatShortPadded             = "ShortPadded"
-	dateFormatShortPaddedWeekday      = "ShortPaddedWeekday"
-	dateFormatLongDayMonthYear        = "LongDayMonthYear"
-	dateFormatLongMonthDayYear        = "LongMonthDayYear"
-	dateFormatLongDayMonthYearWeekday = "LongDayMonthYearWeekday"
-	dateFormatLongMonthDayYearWeekday = "LongMonthDayYearWeekday"
+	dateFormatShort                    = "Short"
+	dateFormatShortWeekday             = "ShortWeekday"
+	dateFormatShortPadded              = "ShortPadded"
+	dateFormatShortPaddedWeekday       = "ShortPaddedWeekday"
+	dateFormatShortYearMonthDay        = "ShortYearMonthDay"
+	dateFormatShortYearMonthDayWeekday = "ShortYearMonthDayWeekday"
+	dateFormatLongDayMonthYear         = "LongDayMonthYear"
+	dateFormatLongMonthDayYear         = "LongMonthDayYear"
+	dateFormatLongDayMonthYearWeekday  = "LongDayMonthYearWeekday"
+	dateFormatLongMonthDayYearWeekday  = "LongMonthDayYearWeekday"
 )
 
 func allDateFormats() []dateFormat {
@@ -137,6 +139,8 @@ func allDateFormats() []dateFormat {
 		dateFormatLongMonthDayYearWeekday,
 		dateFormatLongDayMonthYear,
 		dateFormatLongMonthDayYear,
+		dateFormatShortYearMonthDayWeekday,
+		dateFormatShortYearMonthDay,
 		dateFormatShortPaddedWeekday,
 		dateFormatShortWeekday,
 		dateFormatShortPadded,
@@ -154,6 +158,10 @@ func (f dateFormat) FormatString() string {
 		return "01/02/06"
 	case dateFormatShortPaddedWeekday:
 		return "Mon, 01/02/06"
+	case dateFormatShortYearMonthDay:
+		return "2006-01-02"
+	case dateFormatShortYearMonthDayWeekday:
+		return "Mon, 2006-01-02"
 	case dateFormatLongDayMonthYear:
 		return "2 Jan 2006"
 	case dateFormatLongMonthDayYear:
@@ -177,6 +185,10 @@ func (f dateFormat) Regex() *regexp.Regexp {
 		return regexp.MustCompile(`(\d{2}/\d{2}/\d{2})`)
 	case dateFormatShortPaddedWeekday:
 		return regexp.MustCompile(fmt.Sprintf(`(%s, \d{2}/\d{2}/\d{2})`, shortWeekdayRegexPart))
+	case dateFormatShortYearMonthDay:
+		return regexp.MustCompile(`(\d{4}-\d{2}-\d{2})`)
+	case dateFormatShortYearMonthDayWeekday:
+		return regexp.MustCompile(fmt.Sprintf(`(%s, \d{4}-\d{2}-\d{2})`, shortWeekdayRegexPart))
 	case dateFormatLongDayMonthYear:
 		return regexp.MustCompile(fmt.Sprintf(`(\d{1,2} %s \d{4})`, shortMonthRegexPart))
 	case dateFormatLongMonthDayYear:
