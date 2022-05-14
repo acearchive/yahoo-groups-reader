@@ -3,7 +3,7 @@ import purgeCss from "gulp-purgecss";
 import rename from "gulp-rename";
 import htmlmin from "gulp-htmlmin";
 import del from "delete";
-import createIndex from "./search.js";
+import buildSearchIndex from "./search.js";
 import webpack from "webpack-stream";
 import concat from "gulp-concat";
 import named from "vinyl-named";
@@ -80,6 +80,10 @@ function headers() {
         .pipe(dest(publicDir));
 }
 
+function robots() {
+    return src("src/robots.txt").pipe(dest(publicDir));
+}
+
 function font() {
     return src([
         "node_modules/@fontsource/noto-sans/files/noto-sans-latin-300-normal.woff2",
@@ -99,8 +103,8 @@ function cleanPublic() {
     return del(publicDir, { force: true });
 }
 
-function buildSearchIndex() {
-    return createIndex(outputDir, publicDir);
+function searchIndex() {
+    return buildSearchIndex(outputDir, publicDir);
 }
 
 function captureScreenshot() {
@@ -115,7 +119,7 @@ export const clean = parallel(cleanOutput, cleanPublic);
 
 const main = series(
     cleanPublic,
-    parallel(html, css, js, font, headers, buildSearchIndex),
+    parallel(html, css, js, font, headers, robots, searchIndex),
     captureScreenshot,
     cleanOutput,
 );
