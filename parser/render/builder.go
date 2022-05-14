@@ -61,6 +61,7 @@ type PaginationArgs struct {
 
 type TemplateArgs struct {
 	Title         string
+	Description   string
 	BaseUrl       string
 	Locale        string
 	IncludeSearch bool
@@ -142,6 +143,10 @@ type OutputConfig struct {
 	AddRepoLink   bool
 	Links         []ExternalLinkConfig
 	Locale        string
+}
+
+func (c OutputConfig) Description() string {
+	return fmt.Sprintf("An archive of the Yahoo Groups community \"%s\"", c.Title)
 }
 
 func pagePath(pageNumber int) PagePath {
@@ -251,6 +256,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 
 		args = append(args, TemplateArgs{
 			Title:         config.Title,
+			Description:   config.Description(),
 			BaseUrl:       config.BaseUrl,
 			Locale:        config.Locale,
 			IncludeSearch: config.IncludeSearch,
