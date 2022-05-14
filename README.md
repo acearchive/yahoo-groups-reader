@@ -24,6 +24,7 @@ yahoo-group-archiver and builds a static site for browsing the archive.
   Observatory](https://observatory.mozilla.org/analyze/hha.acearchive.lgbt)
   when your hosting provider uses the `_headers` file.
 - Uses [Open Graph metadata](https://ogp.me/) for SEO and social media
+  previews. Generates a screenshot of the site at build time to show in media
   previews.
 - Customize the generated site with external links you can add at build time
   via CLI flags. Supports [Feather icons](https://feathericons.com/).
