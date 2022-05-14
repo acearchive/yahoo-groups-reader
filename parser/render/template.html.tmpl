@@ -1,4 +1,4 @@
-{{- $page := . -}}
+{{- $root := . -}}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -16,10 +16,24 @@
     <link href="/css/bundle.min.css" rel="stylesheet">
     <script src="/js/instantpage.min.js" defer></script>
     <script src="/js/bootstrap.min.js" defer></script>
+    {{ if gt (len .Links) 0 }}<script src="/js/feather.min.js" defer></script>{{ end }}
     {{ if .IncludeSearch }}<script src="/js/search.min.js" defer></script>{{ end }}
   </head>
   <body>
     <h1 class="thread-title">{{ .Title }}</h1>
+    <nav class="external-links-header" aria-label="External links">
+      <div class="d-flex justify-content-center align-items-center">
+      {{- $linksLen := len .Links -}}
+      {{- range $index, $link := .Links }}
+        <a href="{{ $link.Url }}">
+          <span class="visually-hidden">{{ $link.Label }}</span>
+          <i data-feather="{{ $link.IconName }}" width="30" height="30" class="nav-icon"></i>
+        </a>
+      {{- if ne (add $index 1) $linksLen }}
+      {{ end -}}
+      {{ end }}
+      </div>
+    </nav>
     <nav aria-label="Message thread pages">
       <div class="d-flex justify-content-center align-items-center">
         <ul class="pagination">
@@ -81,7 +95,7 @@
           <span class="message-count">{{ $message.Number }} / {{ $message.TotalCount }}</span>
         </div>
         <div class="d-flex align-items-start">
-          <a class="message-link d-none d-sm-inline" href="{{ printf "%s#message-%d" $page.Pagination.Current $message.Index }}">
+          <a class="message-link d-none d-sm-inline" href="{{ printf "%s#message-%d" $root.Pagination.Current $message.Index }}">
             <span class="visually-hidden">Permalink</span>
             <div aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
@@ -106,7 +120,7 @@
                 <div class="message-author">{{ $message.User }}</div>
                 <div class="message-flair">{{ $message.Flair }}</div>
               </div>
-              <a class="message-link d-inline d-sm-none" href="{{ printf "%s#message-%d" $page.Pagination.Current $message.Index }}">
+              <a class="message-link d-inline d-sm-none" href="{{ printf "%s#message-%d" $root.Pagination.Current $message.Index }}">
                 <span class="visually-hidden">Permalink</span>
                 <div aria-hidden="true">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">

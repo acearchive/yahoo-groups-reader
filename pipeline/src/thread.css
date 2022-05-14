@@ -5,6 +5,19 @@
     margin: 1rem var(--body-horizontal-padding) 2rem var(--body-horizontal-padding)
 }
 
+.external-links-header {
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+.external-links-header .nav-icon {
+    color: var(--color-fg-muted);
+}
+
+.external-links-header .nav-icon:hover {
+    color: var(--color-fg-default);
+}
+
 .message-thread {
     min-width: 200px;
     max-width: 1000px;

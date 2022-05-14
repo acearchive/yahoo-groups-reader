@@ -15,6 +15,7 @@ const (
 	pagesToDisplayInNavigation = 9
 	pagesToDisplayOnEitherSide = pagesToDisplayInNavigation / 2
 	firstPageNumber            = 1
+	repoUrl                    = "https://github.com/acearchive/yg-render"
 )
 
 type ParentArgs struct {
@@ -58,10 +59,17 @@ type PaginationArgs struct {
 	Last             PagePath
 }
 
+type ExternalLinkArgs struct {
+	IconName string
+	Label    string
+	Url      string
+}
+
 type TemplateArgs struct {
 	Title         string
 	BaseUrl       string
 	IncludeSearch bool
+	Links         []ExternalLinkArgs
 	Messages      []MessageArgs
 	Pagination    PaginationArgs
 }
@@ -130,6 +138,7 @@ type OutputConfig struct {
 	Title         string
 	IncludeSearch bool
 	BaseUrl       string
+	AddRepoLink   bool
 }
 
 func pagePath(pageNumber int) PagePath {
@@ -226,10 +235,21 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 			}
 		}
 
+		var linkArgs []ExternalLinkArgs
+
+		if config.AddRepoLink {
+			linkArgs = append(linkArgs, ExternalLinkArgs{
+				IconName: "github",
+				Label:    "Source Code",
+				Url:      repoUrl,
+			})
+		}
+
 		args = append(args, TemplateArgs{
 			Title:         config.Title,
 			BaseUrl:       config.BaseUrl,
 			IncludeSearch: config.IncludeSearch,
+			Links:         linkArgs,
 			Messages:      messagesInPage,
 			Pagination:    paginationArgs,
 		})

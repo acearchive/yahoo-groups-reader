@@ -16,6 +16,7 @@ var (
 	flagNoSearch bool
 	flagOutput   string
 	flagBase     string
+	flagNoRepo   bool
 )
 
 const (
@@ -29,6 +30,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&flagTitle, "title", "t", DefaultGroupName, "The title of the group")
 	rootCmd.Flags().IntVar(&flagPageSize, "page-size", DefaultPageSize, "The maximum number of messages per page")
 	rootCmd.Flags().BoolVar(&flagNoSearch, "no-search", false, "Disable the search functionality in the generated site")
+	rootCmd.Flags().BoolVar(&flagNoRepo, "no-repo", false, "Don't add a link to the GitHub repo in the generated site")
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", DefaultOutputPath, "The directory to write the generated HTML to")
 	rootCmd.Flags().StringVarP(&flagBase, "base", "b", DefaultBasePath, "The base URL for the generated site")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
@@ -56,6 +58,7 @@ var rootCmd = &cobra.Command{
 			PageSize:      flagPageSize,
 			IncludeSearch: !flagNoSearch,
 			BaseUrl:       flagBase,
+			AddRepoLink:   !flagNoRepo,
 		}
 
 		if err := render.Execute(flagOutput, config, thread); err != nil {
