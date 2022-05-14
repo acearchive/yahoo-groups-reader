@@ -1,6 +1,6 @@
-const fs = require("fs/promises");
-const path = require("path");
-const FlexSearch = require("flexsearch");
+import fs from"fs/promises";
+import path from "path";
+import FlexSearch from "flexsearch";
 
 const searchFileName = "search.json";
 const indexDirName = "search";
@@ -35,4 +35,4 @@ async function createIndex(inputDir, outputDir) {
     })
 }
 
-module.exports = createIndex;
+export default createIndex;

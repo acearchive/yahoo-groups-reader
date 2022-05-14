@@ -1,16 +1,18 @@
-const cleanCss = require("gulp-clean-css");
-const purgeCss = require("gulp-purgecss")
-const rename = require("gulp-rename");
-const htmlmin = require("gulp-htmlmin");
-const del = require("delete");
-const createIndex = require("./search.js");
-const webpack = require("webpack-stream");
-const concat = require("gulp-concat");
-const named = require("vinyl-named");
-const whitelister = require("purgecss-whitelister");
-const path = require("path");
+import cleanCss from "gulp-clean-css";
+import purgeCss from "gulp-purgecss";
+import rename from "gulp-rename";
+import htmlmin from "gulp-htmlmin";
+import del from "delete";
+import createIndex from "./search.js";
+import webpack from "webpack-stream";
+import concat from "gulp-concat";
+import named from "vinyl-named";
+import whitelister from "purgecss-whitelister";
+import path from "path";
+import captureWebsite from "capture-website";
+import gulp from "gulp";
 
-const { series, parallel, src, dest } = require("gulp");
+const { series, parallel, src, dest } = gulp;
 
 const outputDir = process.env.OUTPUT_DIR ?? "../output"
 const publicDir = process.env.PUBLIC_DIR ?? "../public"
@@ -101,10 +103,21 @@ function buildSearchIndex() {
     return createIndex(outputDir, publicDir);
 }
 
-exports.clean = parallel(cleanOutput, cleanPublic);
+function captureScreenshot() {
+    return captureWebsite.file(path.join(publicDir, "index.html"), path.join(publicDir, "screenshot.png"), {
+        delay: 1,
+        styles: [path.join(publicDir, "css/bundle.min.css")],
+        scripts: [path.join(publicDir, "js/feather.min.js")],
+    })
+}
 
-exports.default = series(
+export const clean = parallel(cleanOutput, cleanPublic);
+
+const main = series(
     cleanPublic,
     parallel(html, css, js, font, headers, buildSearchIndex),
+    captureScreenshot,
     cleanOutput,
 );
+
+export default main;
