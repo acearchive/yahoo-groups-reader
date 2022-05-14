@@ -21,7 +21,10 @@ yahoo-group-archiver and builds a static site for browsing the archive.
   using [instant.page](https://instant.page/), and lazily loads the search
   index on the first search.
 - Follows best security practices. [Scores 120/100 on Mozilla
-  Observatory](https://observatory.mozilla.org/analyze/hha.acearchive.lgbt).
+  Observatory](https://observatory.mozilla.org/analyze/hha.acearchive.lgbt)
+  when your hosting provider uses the `_headers` file.
+- Customize the generated site with external links you can add at build time
+  via CLI flags. Supports [Feather icons](https://feathericons.com/).
 
 ## Usage
 

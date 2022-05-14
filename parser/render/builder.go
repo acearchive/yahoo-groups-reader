@@ -59,17 +59,11 @@ type PaginationArgs struct {
 	Last             PagePath
 }
 
-type ExternalLinkArgs struct {
-	IconName string
-	Label    string
-	Url      string
-}
-
 type TemplateArgs struct {
 	Title         string
 	BaseUrl       string
 	IncludeSearch bool
-	Links         []ExternalLinkArgs
+	Links         []ExternalLinkConfig
 	Messages      []MessageArgs
 	Pagination    PaginationArgs
 }
@@ -133,12 +127,19 @@ func messageThreadToArgs(thread parse.MessageThread) []MessageArgs {
 	return argsList
 }
 
+type ExternalLinkConfig struct {
+	IconName string
+	Label    string
+	Url      string
+}
+
 type OutputConfig struct {
 	PageSize      int
 	Title         string
 	IncludeSearch bool
 	BaseUrl       string
 	AddRepoLink   bool
+	Links         []ExternalLinkConfig
 }
 
 func pagePath(pageNumber int) PagePath {
@@ -235,10 +236,11 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 			}
 		}
 
-		var linkArgs []ExternalLinkArgs
+		linkArgs := make([]ExternalLinkConfig, len(config.Links))
+		copy(linkArgs, config.Links)
 
 		if config.AddRepoLink {
-			linkArgs = append(linkArgs, ExternalLinkArgs{
+			linkArgs = append(linkArgs, ExternalLinkConfig{
 				IconName: "github",
 				Label:    "Source Code",
 				Url:      repoUrl,

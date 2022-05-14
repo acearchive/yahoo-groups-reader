@@ -8,6 +8,7 @@
 .external-links-header {
     margin-top: 1rem;
     margin-bottom: 2rem;
+    gap: 1.5rem;
 }
 
 .external-links-header .nav-icon {

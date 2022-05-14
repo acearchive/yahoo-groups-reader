@@ -21,19 +21,19 @@
   </head>
   <body>
     <h1 class="thread-title">{{ .Title }}</h1>
-    <nav class="external-links-header" aria-label="External links">
-      <div class="d-flex justify-content-center align-items-center">
+    {{ if gt (len .Links) 0 -}}
+    <nav aria-label="External links">
+      <div class="d-flex justify-content-center align-items-center external-links-header">
       {{- $linksLen := len .Links -}}
       {{- range $index, $link := .Links }}
         <a href="{{ $link.Url }}">
           <span class="visually-hidden">{{ $link.Label }}</span>
           <i data-feather="{{ $link.IconName }}" width="30" height="30" class="nav-icon"></i>
         </a>
-      {{- if ne (add $index 1) $linksLen }}
-      {{ end -}}
-      {{ end }}
+      {{- end }}
       </div>
     </nav>
+    {{- end }}
     <nav aria-label="Message thread pages">
       <div class="d-flex justify-content-center align-items-center">
         <ul class="pagination">
