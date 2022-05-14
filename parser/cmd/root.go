@@ -23,6 +23,7 @@ var (
 	flagBase     string
 	flagNoRepo   bool
 	flagLinks    []string
+	flagLocale   string
 )
 
 const (
@@ -38,6 +39,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&flagNoSearch, "no-search", false, "Disable the search functionality in the generated site")
 	rootCmd.Flags().BoolVar(&flagNoRepo, "no-repo", false, "Don't add a link to the GitHub repo in the generated site")
 	rootCmd.Flags().StringArrayVar(&flagLinks, "link", nil, "Add a link to the top of the page in the generated site")
+	rootCmd.Flags().StringVar(&flagLocale, "locale", "en_US", "The locale of the generated site")
 	rootCmd.Flags().StringVarP(&flagOutput, "output", "o", DefaultOutputPath, "The directory to write the generated HTML to")
 	rootCmd.Flags().StringVarP(&flagBase, "base", "b", DefaultBasePath, "The base URL for the generated site")
 	rootCmd.Flags().BoolVarP(&flagVerbose, "verbose", "v", false, "Print verbose output.")
@@ -91,6 +93,7 @@ var rootCmd = &cobra.Command{
 			BaseUrl:       flagBase,
 			AddRepoLink:   !flagNoRepo,
 			Links:         linkConfigs,
+			Locale:        flagLocale,
 		}
 
 		if err := render.Execute(flagOutput, config, thread); err != nil {

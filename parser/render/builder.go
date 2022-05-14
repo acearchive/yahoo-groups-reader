@@ -62,6 +62,7 @@ type PaginationArgs struct {
 type TemplateArgs struct {
 	Title         string
 	BaseUrl       string
+	Locale        string
 	IncludeSearch bool
 	Links         []ExternalLinkConfig
 	Messages      []MessageArgs
@@ -140,6 +141,7 @@ type OutputConfig struct {
 	BaseUrl       string
 	AddRepoLink   bool
 	Links         []ExternalLinkConfig
+	Locale        string
 }
 
 func pagePath(pageNumber int) PagePath {
@@ -250,6 +252,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 		args = append(args, TemplateArgs{
 			Title:         config.Title,
 			BaseUrl:       config.BaseUrl,
+			Locale:        config.Locale,
 			IncludeSearch: config.IncludeSearch,
 			Links:         linkArgs,
 			Messages:      messagesInPage,
