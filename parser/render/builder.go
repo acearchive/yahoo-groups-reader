@@ -258,7 +258,7 @@ func BuildArgs(thread parse.MessageThread, config OutputConfig) []TemplateArgs {
 		if config.AddRepoLink {
 			linkArgs = append(linkArgs, ExternalLinkConfig{
 				IconName: "github",
-				Label:    "Source Code",
+				Label:    "GitHub",
 				Url:      repoUrl,
 			})
 		}

@@ -44,12 +44,14 @@
     <h1 class="thread-title">{{ .Title }}</h1>
     {{ if gt (len .Links) 0 -}}
     <nav aria-label="External links">
-      <div class="d-flex justify-content-center align-items-center external-links-header">
+      <div class="d-flex justify-content-center align-items-start external-links-nav">
       {{- $linksLen := len .Links -}}
       {{- range $index, $link := .Links }}
-        <a href="{{ $link.Url }}">
-          <span class="visually-hidden">{{ $link.Label }}</span>
-          <div data-feather="{{ $link.IconName }}" width="30" height="30" aria-hidden="true" class="nav-icon"></div>
+        <a class="nav-link" href="{{ $link.Url }}">
+          <div class="nav-icon" aria-hidden="true">
+            <i data-feather="{{ $link.IconName }}" width="30" height="30"></i>
+          </div>
+          <div class="nav-label">{{ $link.Label }}</div>
         </a>
       {{- end }}
       </div>

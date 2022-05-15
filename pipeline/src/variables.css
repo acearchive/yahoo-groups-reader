@@ -78,3 +78,7 @@ body {
         --message-link-width: 0;
     }
 }
+
+.external-links-nav {
+    --nav-icon-size: 30px;
+}

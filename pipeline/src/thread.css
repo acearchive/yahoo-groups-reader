@@ -2,23 +2,31 @@
     font-size: 2.2rem;
     text-align: center;
     color: var(--color-fg-default);
-    margin: 1rem var(--body-horizontal-padding) 2rem var(--body-horizontal-padding)
+    margin: 1rem var(--body-horizontal-padding) 1.5rem var(--body-horizontal-padding)
 }
 
-.external-links-header {
-    margin-top: 1rem;
-    margin-bottom: 2rem;
+.external-links-nav {
+    margin-bottom: 1.5rem;
     gap: 1.5rem;
 }
 
-.external-links-header .nav-icon {
+.external-links-nav .nav-link .nav-icon {
     /* Prevent layout shift when the icons load. */
-    min-height: 30px;
+    min-height: var(--nav-icon-size);
     color: var(--color-fg-muted);
+    display: flex;
+    justify-content: center;
 }
 
-.external-links-header .nav-icon:hover {
+.external-links-nav .nav-link:hover .nav-icon {
     color: var(--color-fg-default);
+}
+
+.external-links-nav .nav-link .nav-label {
+    font-size: var(--font-size-tiny);
+    text-align: center;
+    color: var(--color-fg-muted);
+    max-width: calc(var(--nav-icon-size) * 4)
 }
 
 .message-thread {
