@@ -86,7 +86,9 @@ function html() {
     };
 
     return src(path.join(outputDir, "**/*.html"))
-        .pipe(inject(src(cssSources).pipe(cssPipeline())))
+        .pipe(inject(src(cssSources).pipe(cssPipeline()), {
+            removeTags: true,
+        }))
         .pipe(inject(src([...jsSources, "!src/search.js", "!src/feather.js"]).pipe(jsPipeline()), {
             transform: injectJsTransform,
             removeTags: true,
