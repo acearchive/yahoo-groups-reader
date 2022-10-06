@@ -1,5 +1,5 @@
 {
-  "name": "yg-render",
+  "name": "yahoo-groups-reader",
   "version": "0.1.0",
   "description": "A CLI tool for rendering exported Yahoo Groups archives as a static site",
   "type": "module",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/acearchive/yg-render.git"
+    "url": "git+https://github.com/acearchive/yahoo-groups-reader.git"
   },
   "author": "Frawley <frawleyskid@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/acearchive/yg-render/issues"
+    "url": "https://github.com/acearchive/yahoo-groups-reader/issues"
   },
-  "homepage": "https://github.com/acearchive/yg-render#readme",
+  "homepage": "https://github.com/acearchive/yahoo-groups-reader#readme",
   "devDependencies": {
     "@fontsource/noto-sans": "^4.5.9",
     "bootstrap": "^5.1.3",

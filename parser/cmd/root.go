@@ -3,9 +3,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/acearchive/yg-render/logger"
-	"github.com/acearchive/yg-render/parse"
-	"github.com/acearchive/yg-render/render"
+	"github.com/acearchive/yahoo-groups-reader/logger"
+	"github.com/acearchive/yahoo-groups-reader/parse"
+	"github.com/acearchive/yahoo-groups-reader/render"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
@@ -67,7 +67,7 @@ func parseLinkInputs(inputs []string) ([]render.ExternalLinkConfig, error) {
 }
 
 var rootCmd = &cobra.Command{
-	Use:                   "yg-render [options] archive-path",
+	Use:                   "yahoo-groups-reader [options] archive-path",
 	Short:                 "Render an exported Yahoo Groups archive as HTML",
 	Long:                  "Render an exported Yahoo Groups archive as HTML.\n\nThis accepts the path of the directory containing the `.eml` files.\n\nYou can add external links at the top of the page with --link. It accepts the\nname of a Feather icon, a label, and a target URL in the form `icon,label,url`.\nYou can add more than one by passing --link multiple times.\n\nExample: `mail,Contact Us,https://example.com/contact`",
 	Args:                  cobra.ExactArgs(1),

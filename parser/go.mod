@@ -1,4 +1,4 @@
-module github.com/acearchive/yg-render
+module github.com/acearchive/yahoo-groups-reader
 
 go 1.17
 

@@ -3,8 +3,8 @@ package parse
 import (
 	"errors"
 	"fmt"
-	"github.com/acearchive/yg-render/body"
-	"github.com/acearchive/yg-render/logger"
+	"github.com/acearchive/yahoo-groups-reader/body"
+	"github.com/acearchive/yahoo-groups-reader/logger"
 	"io"
 	"net/mail"
 	"regexp"

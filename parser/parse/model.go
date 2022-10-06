@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"github.com/acearchive/yg-render/body"
+	"github.com/acearchive/yahoo-groups-reader/body"
 	"sort"
 	"time"
 )

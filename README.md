@@ -1,4 +1,4 @@
-# yg-render
+# yahoo-groups-reader
 
 This is a CLI tool for rendering Yahoo Groups archives exported using
 [yahoo-group-archiver](https://github.com/IgnoredAmbience/yahoo-group-archiver).

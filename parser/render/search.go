@@ -2,8 +2,8 @@ package render
 
 import (
 	"encoding/json"
-	"github.com/acearchive/yg-render/body"
-	"github.com/acearchive/yg-render/parse"
+	"github.com/acearchive/yahoo-groups-reader/body"
+	"github.com/acearchive/yahoo-groups-reader/parse"
 	"os"
 	"path/filepath"
 	"strconv"

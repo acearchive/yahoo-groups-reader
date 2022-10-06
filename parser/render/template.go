@@ -24,5 +24,5 @@ func init() {
 		return template.HTML(fmt.Sprintf("<!-- %s -->", text))
 	}
 
-	Template = template.Must(template.New("yg-render").Funcs(templateFunctions).Parse(templateString))
+	Template = template.Must(template.New("yahoo-groups-reader").Funcs(templateFunctions).Parse(templateString))
 }

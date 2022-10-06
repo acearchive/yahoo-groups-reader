@@ -3,7 +3,7 @@ package parse
 import (
 	"errors"
 	"fmt"
-	"github.com/acearchive/yg-render/logger"
+	"github.com/acearchive/yahoo-groups-reader/logger"
 	"os"
 	"path/filepath"
 )

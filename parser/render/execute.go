@@ -1,7 +1,7 @@
 package render
 
 import (
-	"github.com/acearchive/yg-render/parse"
+	"github.com/acearchive/yahoo-groups-reader/parse"
 	"os"
 	"path/filepath"
 	"strconv"

@@ -2,7 +2,7 @@ package body
 
 import (
 	"bufio"
-	"github.com/acearchive/yg-render/block"
+	"github.com/acearchive/yahoo-groups-reader/block"
 	"io"
 	"strings"
 )

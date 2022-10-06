@@ -2,8 +2,8 @@ package render
 
 import (
 	"fmt"
-	"github.com/acearchive/yg-render/body"
-	"github.com/acearchive/yg-render/parse"
+	"github.com/acearchive/yahoo-groups-reader/body"
+	"github.com/acearchive/yahoo-groups-reader/parse"
 	"golang.org/x/text/language"
 	textmessage "golang.org/x/text/message"
 	"html/template"
@@ -15,7 +15,7 @@ const (
 	pagesToDisplayInNavigation = 9
 	pagesToDisplayOnEitherSide = pagesToDisplayInNavigation / 2
 	firstPageNumber            = 1
-	repoUrl                    = "https://github.com/acearchive/yg-render"
+	repoUrl                    = "https://github.com/acearchive/yahoo-groups-reader"
 )
 
 type ParentArgs struct {
