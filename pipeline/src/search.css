@@ -1,154 +1,161 @@
 #message-search {
-    max-width: var(--search-base-width);
-    margin-left: var(--body-horizontal-padding);
-    margin-right: var(--body-horizontal-padding);
+  max-width: var(--search-base-width);
+  margin-left: var(--body-horizontal-padding);
+  margin-right: var(--body-horizontal-padding);
 }
 
 #search-input {
-    color: var(--color-fg-default);
-    background-color: var(--color-canvas-subtle);
-    border-color: var(--color-border-default);
+  color: var(--color-fg-default);
+  background-color: var(--color-canvas-subtle);
+  border-color: var(--color-border-default);
 }
 
 @media (min-width: 576px) {
-    #search-input {
-        padding-right: 2.5rem;
-    }
+  #search-input {
+    padding-right: 2.5rem;
+  }
 
-    #message-search .keyboard-hint {
-        position: absolute;
-        top: 0.4625rem;
-        right: 0.5375rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 1.5rem;
-        width: 1.5rem;
-        padding-right: 0.3125rem;
-        padding-left: 0.3125rem;
-        color: var(--color-fg-default);
-        border: 1px solid var(--color-border-default);
-        border-radius: 0.25rem;
-        font-size: var(--font-size-tiny);
-    }
+  #message-search .keyboard-hint {
+    position: absolute;
+    top: 0.4625rem;
+    right: 0.5375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
+    padding-right: 0.3125rem;
+    padding-left: 0.3125rem;
+    color: var(--color-fg-default);
+    border: 1px solid var(--color-border-default);
+    border-radius: 0.25rem;
+    font-size: var(--font-size-tiny);
+  }
 }
 
 #search-suggestions {
-    position: absolute;
-    margin-top: 0.5rem;
-    z-index: 1;
-    background-color: var(--color-canvas-popover);
-    left: calc(var(--suggestion-added-width) * -1);
-    width: var(--suggestion-total-width);
+  position: absolute;
+  margin-top: 0.5rem;
+  z-index: 1;
+  background-color: var(--color-canvas-popover);
+  left: calc(var(--suggestion-added-width) * -1);
+  width: var(--suggestion-total-width);
 }
 
 #search-suggestions > * {
-    display: flex;
+  display: flex;
 }
 
 #search-suggestions a {
-    display: flex;
-    flex: 1;
-    text-decoration: none;
-    padding: 0.75rem 1.25rem;
+  display: flex;
+  flex: 1;
+  text-decoration: none;
+  padding: 0.75rem 1.25rem;
 }
 
 @media (max-width: 576px) {
-    #search-suggestions a {
-        display: block;
-    }
+  #search-suggestions a {
+    display: block;
+  }
 }
 
 #search-suggestions a:focus {
-    background: var(--color-canvas-selected-popover);
-    outline: 0;
+  background: var(--color-canvas-selected-popover);
+  outline: 0;
 }
 
 #search-suggestions a:hover {
-    background: var(--color-canvas-selected-popover);
+  background: var(--color-canvas-selected-popover);
 }
 
 #search-suggestions > *:not(:first-child) {
-    border-top: 1px dashed var(--color-border-popover);
+  border-top: 1px dashed var(--color-border-popover);
 }
 
 #search-suggestions > *:first-child {
-    margin-top: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 #search-suggestions > *:last-child {
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 #search-suggestions .suggestion-header {
-    display: inline-block;
-    border-right: 1px solid var(--color-border-popover);
-    padding-right: 1rem;
-    width: calc(var(--suggestion-total-width) / 3);
-    color: var(--color-fg-popover);
+  display: inline-block;
+  border-right: 1px solid var(--color-border-popover);
+  padding-right: 1rem;
+  width: calc(var(--suggestion-total-width) / 3);
+  color: var(--color-fg-popover);
 }
 
 #search-suggestions .suggestion-header {
-    overflow-wrap: anywhere;
+  overflow-wrap: anywhere;
 }
 
 #search-suggestions .suggestion-header > * {
-    display: block;
+  display: block;
 }
 
 #search-suggestions .suggestion-user {
-    font-weight: var(--font-weight-heavier);
-    font-size: var(--font-size-small);
+  font-weight: var(--font-weight-heavier);
+  font-size: var(--font-size-small);
 }
 
 #search-suggestions .suggestion-timestamp {
-    color: var(--color-fg-muted-popover);
-    font-size: var(--font-size-tiny);
+  color: var(--color-fg-muted-popover);
+  font-size: var(--font-size-tiny);
 }
 
 #search-suggestions .suggestion-title {
-    font-weight: var(--font-weight-lighter);
-    max-height: calc(var(--suggestion-title-line-height) * var(--suggestion-title-max-lines));
-    overflow: hidden;
+  font-weight: var(--font-weight-lighter);
+  max-height: calc(
+    var(--suggestion-title-line-height) * var(--suggestion-title-max-lines)
+  );
+  overflow: hidden;
 }
 
 #search-suggestions .suggestion-text {
-    flex: 1;
-    display: block;
-    padding-left: 1rem;
-    line-height: var(--suggestion-text-line-height);
-    color: var(--color-fg-muted-popover);
-    max-height: calc(var(--suggestion-text-line-height) * var(--suggestion-text-max-lines));
-    overflow: hidden;
-    overflow-wrap: anywhere;
-    font-size: var(--font-size-small);
+  flex: 1;
+  display: block;
+  padding-left: 1rem;
+  line-height: var(--suggestion-text-line-height);
+  color: var(--color-fg-muted-popover);
+  max-height: calc(
+    var(--suggestion-text-line-height) * var(--suggestion-text-max-lines)
+  );
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-small);
 }
 
 @media (max-width: 576px) {
-    #search-suggestions {
-        left: 0;
-        width: 100%;
-    }
-    #search-suggestions .suggestion-header {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
+  #search-suggestions {
+    left: 0;
+    width: 100%;
+  }
+  #search-suggestions .suggestion-header {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
 
-    #search-suggestions :is(.suggestion-header, .suggestion-text) {
-        display: block;
-        padding: 0;
-        border: none;
-    }
+  #search-suggestions :is(.suggestion-header, .suggestion-text) {
+    display: block;
+    padding: 0;
+    border: none;
+  }
 
-    #search-suggestions .suggestion-header :is(.suggestion-user, .suggestion-timestamp) {
-        display: inline;
-    }
+  #search-suggestions
+    .suggestion-header
+    :is(.suggestion-user, .suggestion-timestamp) {
+    display: inline;
+  }
 
-    #search-suggestions .suggestion-header .suggestion-user::after {
-        content: " •"
-    }
+  #search-suggestions .suggestion-header .suggestion-user::after {
+    content: " •";
+  }
 
-    #message-search .keyboard-hint {
-        display: none;
-    }
+  #message-search .keyboard-hint {
+    display: none;
+  }
 }
+

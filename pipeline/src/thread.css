@@ -1,135 +1,136 @@
 .thread-title {
-    font-size: 2.2rem;
-    text-align: center;
-    color: var(--color-fg-default);
-    margin: 1rem var(--body-horizontal-padding) 1.5rem var(--body-horizontal-padding)
+  font-size: 2.2rem;
+  text-align: center;
+  color: var(--color-fg-default);
+  margin: 1rem var(--body-horizontal-padding) 1.5rem
+    var(--body-horizontal-padding);
 }
 
 .thread-title a {
-    color: var(--color-fg-default);
+  color: var(--color-fg-default);
 }
 
 .external-links-nav {
-    margin-bottom: 1.5rem;
-    gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  gap: 1.5rem;
 }
 
 .external-links-nav .nav-link .nav-icon {
-    /* Prevent layout shift when the icons load. */
-    min-height: var(--nav-icon-size);
-    color: var(--color-fg-muted);
-    display: flex;
-    justify-content: center;
+  /* Prevent layout shift when the icons load. */
+  min-height: var(--nav-icon-size);
+  color: var(--color-fg-muted);
+  display: flex;
+  justify-content: center;
 }
 
 .external-links-nav .nav-link:hover .nav-icon {
-    color: var(--color-fg-default);
+  color: var(--color-fg-default);
 }
 
 .external-links-nav .nav-link .nav-label {
-    font-size: var(--font-size-tiny);
-    text-align: center;
-    color: var(--color-fg-muted);
-    max-width: calc(var(--nav-icon-size) * 4)
+  font-size: var(--font-size-tiny);
+  text-align: center;
+  color: var(--color-fg-muted);
+  max-width: calc(var(--nav-icon-size) * 4);
 }
 
 .message-thread {
-    min-width: 200px;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 24px var(--body-horizontal-padding);
-    color: var(--color-fg-default);
-    background-color: var(--color-canvas-default);
+  min-width: 200px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px var(--body-horizontal-padding);
+  color: var(--color-fg-default);
+  background-color: var(--color-canvas-default);
 }
 
 .message-thread .message {
-    margin-bottom: 1.4rem;
-    margin-right: var(--message-link-width);
+  margin-bottom: 1.4rem;
+  margin-right: var(--message-link-width);
 }
 
 .message-thread .message blockquote {
-    border-left: .25rem solid var(--color-border-default);
-    padding-left: 1rem;
+  border-left: 0.25rem solid var(--color-border-default);
+  padding-left: 1rem;
 }
 
 .message-thread .message .message-link {
-    margin-right: var(--message-link-margin);
-    display: inline-block;
-    color: var(--color-fg-muted);
+  margin-right: var(--message-link-margin);
+  display: inline-block;
+  color: var(--color-fg-muted);
 }
 
 .message-thread .message .message-link:hover {
-    color: var(--color-fg-default);
+  color: var(--color-fg-default);
 }
 
 .message-thread .message .message-header {
-    color: var(--color-fg-muted);
-    display: flex;
-    font-size: var(--font-size-small);
-    justify-content: space-between;
-    margin-left: var(--message-link-width);
+  color: var(--color-fg-muted);
+  display: flex;
+  font-size: var(--font-size-small);
+  justify-content: space-between;
+  margin-left: var(--message-link-width);
 }
 
 .message-thread .message .message-author {
-    font-size: var(--font-size-large);
-    font-weight: var(--font-weight-heavier);
-    overflow-wrap: anywhere;
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-heavier);
+  overflow-wrap: anywhere;
 }
 
 .message-thread .message .message-flair {
-    font-size: var(--font-size-tiny);
-    color: var(--color-fg-muted);
+  font-size: var(--font-size-tiny);
+  color: var(--color-fg-muted);
 }
 
 .message-thread .message .message-title {
-    font-size: var(--font-size-large);
-    font-weight: var(--font-weight-lighter);
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-lighter);
 }
 
 .message-thread .message .parent-message {
-    padding-left: 1rem;
+  padding-left: 1rem;
 }
 
 .message-thread .message .parent-message .parent-banner {
-    margin-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
 }
 
 .message-thread .message .parent-message .parent-name {
-    font-size: var(--font-size-small);
-    color: var(--color-fg-default);
-    padding: 0;
-    margin-right: 0.4rem;
+  font-size: var(--font-size-small);
+  color: var(--color-fg-default);
+  padding: 0;
+  margin-right: 0.4rem;
 }
 
 .message-thread .message .parent-message .parent-link {
-    color: var(--color-fg-muted);
+  color: var(--color-fg-muted);
 }
 
 .message-thread .message .parent-message .parent-link:hover {
-    color: var(--color-fg-default);
+  color: var(--color-fg-default);
 }
 
 .message-thread .message .parent-message .parent-quote {
-    font-size: var(--font-size-tiny);
+  font-size: var(--font-size-tiny);
 }
 
 .message-thread .message .message-body *:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .message-thread .message .inline-message-header {
-    font-size: var(--font-size-tiny);
-    margin-bottom: 0.5rem;
+  font-size: var(--font-size-tiny);
+  margin-bottom: 0.5rem;
 }
 
 .message-thread .message .inline-message-header dl.field-list > dd {
-    color: var(--color-fg-muted);
+  color: var(--color-fg-muted);
 }
 
 .message-thread .message .inline-quote-attribution {
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .message-thread .message .inline-quote-attribution .inline-icon {
-    margin-right: 0.25rem;
+  margin-right: 0.25rem;
 }
