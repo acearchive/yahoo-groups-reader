@@ -5,6 +5,10 @@
     margin: 1rem var(--body-horizontal-padding) 1.5rem var(--body-horizontal-padding)
 }
 
+.thread-title a {
+    color: var(--color-fg-default);
+}
+
 .external-links-nav {
     margin-bottom: 1.5rem;
     gap: 1.5rem;
