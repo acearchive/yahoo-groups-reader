@@ -41,7 +41,11 @@
     {{- end }}
   </head>
   <body>
-    <h1 class="thread-title">{{ .Title }}</h1>
+    <h1 class="thread-title">
+      <a href="{{ .BaseUrl }}">
+        {{ .Title }}
+      </a>
+    </h1>
     {{ if gt (len .Links) 0 -}}
     <nav aria-label="External links">
       <div class="d-flex justify-content-center align-items-start external-links-nav">
