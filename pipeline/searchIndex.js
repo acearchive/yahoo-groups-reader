@@ -1,11 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
 import FlexSearch from "flexsearch";
-import { sha256 } from "crypto-hash";
 
 const searchFileName = "search.json";
 
-const indexDirName = (hash) => `search/index/${hash}`;
+const indexDirName = "search/index/";
 
 const flexsearchSettings = {
   preset: "memory",
@@ -15,11 +14,6 @@ const flexsearchSettings = {
     index: ["user", "flair", "year", "title", "body"],
   },
 };
-
-const hashSearchIndex = async (searchSettings, searchData) =>
-  await sha256(JSON.stringify({ settings: searchSettings, data: searchData }), {
-    outputFormat: "hex",
-  });
 
 export const createSearchIndex = async (inputDir, outputDir) => {
   let searchData;
@@ -38,12 +32,7 @@ export const createSearchIndex = async (inputDir, outputDir) => {
     searchData.map((fields) => index.addAsync(fields.id, fields))
   );
 
-  const searchIndexHash = await hashSearchIndex({
-    settings: flexsearchSettings,
-    data: searchData,
-  });
-
-  const indexDir = path.join(outputDir, indexDirName(searchIndexHash));
+  const indexDir = path.join(outputDir, indexDirName);
   await fs.mkdir(indexDir, { recursive: true });
 
   await index.export(async (key, data) => {

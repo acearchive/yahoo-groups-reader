@@ -164,7 +164,7 @@ const indexFileNames = [
 const importIndex = async (index) => {
   await Promise.all(
     indexFileNames.map((fileName) =>
-      fetch(`/search/${fileName}`)
+      fetch(`/search/index/${fileName}`)
         .then((response) => response.text())
         .then((indexData) => index.import(fileName, JSON.parse(indexData)))
     )
