@@ -18,8 +18,10 @@ yahoo-group-archiver and builds a static site for browsing the archive.
   time.
 - Supports both a light and dark theme based on your browser preferences.
 - Fast. Bundles and minifies assets, strips out unused CSS, prefetches links
-  using [instant.page](https://instant.page/), and lazily loads the search
-  index on the first search.
+  using [instant.page](https://instant.page/), serves efficient cache headers,
+  uses etags and cache-busting filenames, and lazily loads the search index on
+  the first search when the browser requests sites to [reduce data
+  usage](https://wicg.github.io/savedata/).
 - Follows best security practices. [Scores 120/100 on Mozilla
   Observatory](https://observatory.mozilla.org/analyze/hha.acearchive.lgbt)
   when your hosting provider uses the `_headers` file.
@@ -73,6 +75,11 @@ npx gulp
 ```
 
 This will produce a directory `../public` containing the generated static site.
+
+This directory will include a `_headers` file which instructs hosting providers
+like [Netlify](https://docs.netlify.com/routing/headers/) and [Cloudflare
+Pages](https://developers.cloudflare.com/pages/platform/headers/) of which HTTP
+response headers to serve for different paths.
 
 The asset pipeline accepts the following environment variables:
 

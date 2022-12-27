@@ -1,11 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
-import { sha256 } from "crypto-hash";
 import FlexSearch from "flexsearch";
 
 const searchFileName = "search.json";
 
-const indexDirName = "search/index/";
+export const indexDirName = "search/index/";
 
 const searchSettings = {
   preset: "memory",
@@ -24,26 +23,6 @@ const readSearchData = async (inputDir) => {
   } catch {
     return undefined;
   }
-};
-
-export const calculateSearchIndexEtag = async (inputDir) => {
-  const searchData = await readSearchData(inputDir);
-
-  if (searchData === undefined) return undefined;
-
-  // The etag should be generated from both the actual data and the settings
-  // used to generate the index.
-  const hashObj = {
-    settings: searchSettings,
-    data: searchData,
-  };
-
-  const hash = await sha256(JSON.stringify(hashObj), { outputFormat: "hex" });
-
-  // This is a weak etag because the combination of the search settings and the
-  // data represents a sort of semantic equality, but is not a byte-for-byte
-  // guarantee.
-  return `W/"${hash}"`;
 };
 
 export const createSearchIndex = async (inputDir, outputDir) => {

@@ -1,3 +1,7 @@
+#
+# Site-wide security and caching headers.
+#
+
 /*
     X-Content-Type-Options: nosniff
     X-Frame-Options: DENY
@@ -8,6 +12,11 @@
     Access-Control-Allow-Origin: *
     Permissions-Policy: camera=(), microphone=(), geolocation=(), display-capture=(), document-domain=()
 
+#
+# JS and CSS files contain their file hash in the filename, so they're
+# immutable.
+#
+
 /js/*
     ! Cache-Control
     Cache-Control: public, immutable, max-age=31536000
@@ -16,11 +25,21 @@
     ! Cache-Control
     Cache-Control: public, immutable, max-age=31536000
 
+#
+# Fonts are unlikely to change and maintain the same filename.
+#
+
 /fonts/*
     ! Cache-Control
     Cache-Control: public, max-age=86400
 
-{{# if etag}}
-/search/index/*
-    ETag: {{{etag}}}
-{{/if}}
+#
+# The search index files can be large, so we serve them with strong etags for
+# efficient caching.
+#
+
+{{# each indexFiles}}
+/search/index/{{{this.name}}}
+    ETag: "{{{this.hash}}}"
+
+{{/each}}

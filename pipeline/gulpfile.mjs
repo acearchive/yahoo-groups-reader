@@ -1,12 +1,18 @@
+import fsSync from "fs";
+import fs from "fs/promises";
 import cleanCss from "gulp-clean-css";
 import purgeCss from "gulp-purgecss";
 import rename from "gulp-rename";
 import htmlmin from "gulp-htmlmin";
-import { createSearchIndex, calculateSearchIndexEtag } from "./searchIndex.js";
+import {
+  createSearchIndex,
+  indexDirName as searchIndexDirName,
+} from "./searchIndex.js";
 import webpack from "webpack-stream";
 import concat from "gulp-concat";
 import { deleteAsync } from "del";
 import named from "vinyl-named";
+import { sha256 } from "crypto-hash";
 import hash from "gulp-hash";
 import path from "path";
 import captureWebsite from "capture-website";
@@ -74,6 +80,32 @@ const injectJsTransform = (filename) => {
   return `<script src="${filename}" defer></script>`;
 };
 
+const calculateSearchIndexHashes = async () => {
+  const searchIndexDir = path.join(publicDir, searchIndexDirName);
+
+  const searchIndexExists = await fs
+    .access(searchIndexDir, fsSync.constants.F_OK)
+    .then(() => true)
+    .catch(() => false);
+
+  if (!searchIndexExists) return [];
+
+  const indexFileNames = await fs.readdir(searchIndexDir);
+
+  return await Promise.all(
+    indexFileNames.map(async (fileName) => {
+      const filePath = path.join(searchIndexDir, fileName);
+
+      return {
+        name: fileName,
+        hash: await sha256(await fs.readFile(filePath), {
+          outputFormat: "hex",
+        }),
+      };
+    })
+  );
+};
+
 function html() {
   const options = {
     collapseBooleanAttributes: true,
@@ -124,7 +156,7 @@ async function headers() {
   return src("src/headers.handlebars")
     .pipe(
       handlebars({
-        etag: await calculateSearchIndexEtag(outputDir),
+        indexFiles: await calculateSearchIndexHashes(),
       })
     )
     .pipe(rename("_headers"))
@@ -182,7 +214,8 @@ export const clean = parallel(cleanOutput, cleanPublic);
 
 const main = series(
   cleanPublic,
-  parallel(html, font, headers, robots, searchIndex),
+  parallel(html, font, robots, searchIndex),
+  headers,
   captureScreenshot,
   cleanOutput
 );
