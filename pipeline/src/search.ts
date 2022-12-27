@@ -1,5 +1,17 @@
 import FlexSearch from "flexsearch";
-import { MessageFields, SearchIndex } from "./searchIndex";
+
+interface MessageFields {
+  id: number;
+  page: number;
+  timestamp: string;
+  user: string;
+  flair: string;
+  year: string;
+  title: string;
+  body: string;
+}
+
+type SearchIndex = FlexSearch.Document<MessageFields, string[]>;
 
 const userIcon = `
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">

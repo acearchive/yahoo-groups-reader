@@ -1,11 +1,11 @@
-import fs from "fs";
 import cleanCss from "gulp-clean-css";
 import purgeCss from "gulp-purgecss";
 import rename from "gulp-rename";
 import htmlmin from "gulp-htmlmin";
-import { createSearchIndex } from "./src/searchIndex";
+import { createSearchIndex } from "./src/searchIndex.js";
 import webpack from "webpack-stream";
 import concat from "gulp-concat";
+import { deleteAsync } from "del";
 import named from "vinyl-named";
 import hash from "gulp-hash";
 import path from "path";
@@ -14,8 +14,6 @@ import inject from "gulp-inject";
 import lazypipe from "lazypipe";
 import tap from "gulp-tap";
 import gulp from "gulp";
-import ts from "gulp-typescript";
-import { VinylFile } from "gulp-typescript/release/types";
 
 const { series, parallel, src, dest } = gulp;
 
@@ -23,10 +21,8 @@ const outputDir = process.env.OUTPUT_DIR ?? "../output";
 const publicDir = process.env.PUBLIC_DIR ?? "../public";
 const disallowRobots = process.env.DISALLOW_ROBOTS;
 
-const tsProject = ts.createProject("tsconfig.json");
-
-const outputCss: Array<string> = [];
-const outputJs: Array<string> = [];
+const outputCss = [];
+const outputJs = [];
 
 const cssSources = [
   "node_modules/bootstrap/dist/css/bootstrap.css",
@@ -37,6 +33,7 @@ const cssSources = [
   "src/thread.css",
   "src/search.css",
 ];
+
 const cssPipeline = lazypipe()
   .pipe(concat, "bundle.css")
   .pipe(purgeCss, {
@@ -51,31 +48,30 @@ const cssPipeline = lazypipe()
     format: "<%= name %>-<%= hash %>.min.css",
   })
   .pipe(dest, "css", { cwd: publicDir })
-  .pipe(tap, (file: VinylFile) => outputCss.push(file.path));
+  .pipe(tap, (file) => outputCss.push(file.path));
 
 const tsSources = ["src/*.ts"];
 
-const tsPipeline = lazypipe()
+const jsPipeline = lazypipe()
   .pipe(named)
-  .pipe(tsProject)
   .pipe(webpack, {
     mode: "production",
     devtool: "source-map",
     output: {
       filename: "[name]-[contenthash].min.js",
     },
+    module: {
+      rules: [{ loader: "ts-loader" }],
+    },
   })
   .pipe(dest, "js", { cwd: publicDir })
-  .pipe(
-    tap,
-    (file: VinylFile) => file.extname === ".js" && outputJs.push(file.path)
-  );
+  .pipe(tap, (file) => file.extname === ".js" && outputJs.push(file.path));
 
-const injectTag = (name: string) => {
+const injectTag = (name) => {
   return `<!-- inject:${name}:{{ext}} -->`;
 };
 
-const injectJsTransform = (filename: string) => {
+const injectJsTransform = (filename) => {
   return `<script src="${filename}" defer></script>`;
 };
 
@@ -99,7 +95,7 @@ function html() {
     .pipe(
       inject(
         src([...tsSources, "!src/search.ts", "!src/feather.ts"]).pipe(
-          tsPipeline()
+          jsPipeline()
         ),
         {
           transform: injectJsTransform,
@@ -108,14 +104,14 @@ function html() {
       )
     )
     .pipe(
-      inject(src("src/search.ts").pipe(tsPipeline()), {
+      inject(src("src/search.ts").pipe(jsPipeline()), {
         starttag: injectTag("search"),
         removeTags: true,
         transform: injectJsTransform,
       })
     )
     .pipe(
-      inject(src("src/feather.ts").pipe(tsPipeline()), {
+      inject(src("src/feather.ts").pipe(jsPipeline()), {
         starttag: injectTag("feather"),
         removeTags: true,
         transform: injectJsTransform,
@@ -155,11 +151,11 @@ function font() {
 }
 
 function cleanOutput() {
-  fs.rmSync(outputDir, { recursive: true, force: true });
+  return deleteAsync(outputDir, { force: true });
 }
 
 function cleanPublic() {
-  fs.rmSync(publicDir, { recursive: true, force: true });
+  return deleteAsync(publicDir, { force: true });
 }
 
 function searchIndex() {
