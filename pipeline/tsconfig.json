@@ -1,6 +1,11 @@
 {
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es6",
     "strict": true,
     "esModuleInterop": true,
     "sourceMap": true,
