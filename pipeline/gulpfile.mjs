@@ -119,9 +119,7 @@ function html() {
 }
 
 function headers() {
-  return src("src/index.headers")
-    .pipe(rename("_headers"))
-    .pipe(dest(publicDir));
+  return src("src/headers").pipe(rename("_headers")).pipe(dest(publicDir));
 }
 
 function robots() {
