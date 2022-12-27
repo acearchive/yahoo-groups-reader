@@ -8,68 +8,71 @@ const userIcon = `
 `;
 
 function inputFocus(e, search, suggestions) {
-    if (e.key === "/" && search !== document.activeElement) {
-        e.preventDefault();
-        search.focus();
-        search.scrollIntoView();
-    }
+  if (e.key === "/" && search !== document.activeElement) {
+    e.preventDefault();
+    search.focus();
+    search.scrollIntoView();
+  }
 
-    if (e.key === "Escape") {
-        search.blur();
-        suggestions.innerHTML = "";
-    }
+  if (e.key === "Escape") {
+    search.blur();
+    suggestions.innerHTML = "";
+  }
 }
 
 function acceptSuggestion(suggestions) {
-    while (suggestions.lastChild) {
-        suggestions.removeChild(suggestions.lastChild);
-    }
+  while (suggestions.lastChild) {
+    suggestions.removeChild(suggestions.lastChild);
+  }
 
-    return false;
+  return false;
 }
 
 function hrefForMessage(id, page) {
-    if (page === 1) {
-        return `/#message-${id}`
-    } else {
-        return `/${page}/#message-${id}`
-    }
+  if (page === 1) {
+    return `/#message-${id}`;
+  } else {
+    return `/${page}/#message-${id}`;
+  }
 }
 
 function formatTimestamp(date) {
-    return new Intl.DateTimeFormat("en-UK", {
-        timeZone: "UTC",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-        timeZoneName: "short",
-    }).format(date)
+  return new Intl.DateTimeFormat("en-UK", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    timeZoneName: "short",
+  }).format(date);
 }
 
 async function showResults(index, search, suggestions) {
-    const maxResult = 5;
+  const maxResult = 5;
 
-    await importIndexOnce();
+  await importIndexOnce();
 
-    const value = search.value;
-    const results = await index.searchAsync(value, {limit: maxResult, enrich: true});
+  const value = search.value;
+  const results = await index.searchAsync(value, {
+    limit: maxResult,
+    enrich: true,
+  });
 
-    suggestions.innerHTML = "";
+  suggestions.innerHTML = "";
 
-    const flatResults = {};
-    results.forEach(result => {
-        result.result.forEach(r => {
-            flatResults[hrefForMessage(r.doc.id, r.doc.page)] = r.doc;
-        });
+  const flatResults = {};
+  results.forEach((result) => {
+    result.result.forEach((r) => {
+      flatResults[hrefForMessage(r.doc.id, r.doc.page)] = r.doc;
     });
+  });
 
-    for (const href in flatResults) {
-        const doc = flatResults[href];
+  for (const href in flatResults) {
+    const doc = flatResults[href];
 
-        const entry = document.createElement("div");
-        entry.innerHTML = `
+    const entry = document.createElement("div");
+    entry.innerHTML = `
           <a href="${href}">
             <span class="suggestion-header">
               <span class="suggestion-user">
@@ -81,84 +84,108 @@ async function showResults(index, search, suggestions) {
             <span class="suggestion-text"></span>
           </a>`;
 
-        entry.querySelector(".suggestion-user").appendChild(document.createTextNode(doc.user));
-        entry.querySelector(".suggestion-timestamp").appendChild(document.createTextNode(
-            formatTimestamp(new Date(doc.timestamp))
-        ));
-        entry.querySelector(".suggestion-title").appendChild(document.createTextNode(doc.title));
-        entry.querySelector(".suggestion-text").appendChild(document.createTextNode(doc.body));
+    entry
+      .querySelector(".suggestion-user")
+      .appendChild(document.createTextNode(doc.user));
+    entry
+      .querySelector(".suggestion-timestamp")
+      .appendChild(
+        document.createTextNode(formatTimestamp(new Date(doc.timestamp)))
+      );
+    entry
+      .querySelector(".suggestion-title")
+      .appendChild(document.createTextNode(doc.title));
+    entry
+      .querySelector(".suggestion-text")
+      .appendChild(document.createTextNode(doc.body));
 
-        suggestions.appendChild(entry);
-        if (suggestions.childElementCount === maxResult) break;
-    }
+    suggestions.appendChild(entry);
+    if (suggestions.childElementCount === maxResult) break;
+  }
 }
 
 function suggestionFocus(e, suggestions) {
-    const focusableSuggestions = suggestions.querySelectorAll("a");
-    const focusable = [...focusableSuggestions];
-    const index = focusable.indexOf(document.activeElement);
+  const focusableSuggestions = suggestions.querySelectorAll("a");
+  const focusable = [...focusableSuggestions];
+  const index = focusable.indexOf(document.activeElement);
 
-    const hasSuggestions = suggestions.childElementCount > 0;
+  const hasSuggestions = suggestions.childElementCount > 0;
 
-    let nextIndex = 0;
+  let nextIndex = 0;
 
-    if (hasSuggestions && e.code === "ArrowUp") {
-        e.preventDefault();
-        nextIndex = index > 0 ? index-1 : 0;
-        focusableSuggestions[nextIndex].focus();
-    } else if (hasSuggestions && e.code === "ArrowDown") {
-        e.preventDefault();
-        nextIndex = index+1 < focusable.length ? index+1 : index;
-        focusableSuggestions[nextIndex].focus();
-    }
+  if (hasSuggestions && e.code === "ArrowUp") {
+    e.preventDefault();
+    nextIndex = index > 0 ? index - 1 : 0;
+    focusableSuggestions[nextIndex].focus();
+  } else if (hasSuggestions && e.code === "ArrowDown") {
+    e.preventDefault();
+    nextIndex = index + 1 < focusable.length ? index + 1 : index;
+    focusableSuggestions[nextIndex].focus();
+  }
 }
 
 const indexFileNames = [
-    "reg",
-    "store",
-    "body.cfg",
-    "body.ctx",
-    "body.map",
-    "flair.cfg",
-    "flair.ctx",
-    "flair.map",
-    "title.cfg",
-    "title.ctx",
-    "title.map",
-    "user.cfg",
-    "user.ctx",
-    "user.map",
-]
+  "reg",
+  "store",
+  "body.cfg",
+  "body.ctx",
+  "body.map",
+  "flair.cfg",
+  "flair.ctx",
+  "flair.map",
+  "title.cfg",
+  "title.ctx",
+  "title.map",
+  "user.cfg",
+  "user.ctx",
+  "user.map",
+];
 
 async function importIndex(index) {
-    await Promise.all(indexFileNames.map(fileName => fetch(`/search/${fileName}`)
-        .then(response => response.text())
-        .then(indexData => index.import(fileName, indexData))));
+  await Promise.all(
+    indexFileNames.map((fileName) =>
+      fetch(`/search/${fileName}`)
+        .then((response) => response.text())
+        .then((indexData) => index.import(fileName, indexData))
+    )
+  );
 }
 
 const importIndexOnce = (() => {
-    let importIndexPromise;
-    return async (index) => {
-        if (importIndexPromise === undefined) {
-            importIndexPromise = importIndex(index);
-        }
-        await importIndexPromise;
+  let importIndexPromise;
+  return async (index) => {
+    if (importIndexPromise === undefined) {
+      importIndexPromise = importIndex(index);
     }
-})()
+    await importIndexPromise;
+  };
+})();
 
 function indexSearch(search, suggestions) {
-    const index = new FlexSearch.Document({
-        preset: "memory",
-        document: {
-            id: "id",
-            store: ["id", "page", "timestamp", "user", "title", "body"],
-            index: ["user", "flair", "year", "title", "body"],
-        },
-    });
+  const index = new FlexSearch.Document({
+    preset: "memory",
+    document: {
+      id: "id",
+      store: ["id", "page", "timestamp", "user", "title", "body"],
+      index: ["user", "flair", "year", "title", "body"],
+    },
+  });
 
-    search.addEventListener("focus", async () => await importIndexOnce(index), true);
-    search.addEventListener("input", async () => await showResults(index, search, suggestions), true);
-    suggestions.addEventListener("click", () => acceptSuggestion(suggestions), true);
+  search.addEventListener(
+    "focus",
+    async () => await importIndexOnce(index),
+    true
+  );
+  search.addEventListener(
+    "input",
+    async () => await showResults(index, search, suggestions),
+    true
+  );
+  suggestions.addEventListener(
+    "click",
+    () => acceptSuggestion(suggestions),
+    true
+  );
 }
 
 const searchForm = document.querySelector("#message-search");
@@ -166,14 +193,18 @@ const searchInput = searchForm?.querySelector("#search-input");
 const searchSuggestions = searchForm?.querySelector("#search-suggestions");
 
 if (searchInput && searchSuggestions) {
-    searchForm.addEventListener("submit", (e) => e.preventDefault());
-    document.addEventListener("keydown", (e) => inputFocus(e, searchInput, searchSuggestions));
-    document.addEventListener("keydown", (e) => suggestionFocus(e, searchSuggestions));
-    document.addEventListener("click", (event) => {
-        if (!searchSuggestions.contains(event.target)) {
-            searchSuggestions.innerHTML = "";
-        }
-    });
+  searchForm.addEventListener("submit", (e) => e.preventDefault());
+  document.addEventListener("keydown", (e) =>
+    inputFocus(e, searchInput, searchSuggestions)
+  );
+  document.addEventListener("keydown", (e) =>
+    suggestionFocus(e, searchSuggestions)
+  );
+  document.addEventListener("click", (event) => {
+    if (!searchSuggestions.contains(event.target)) {
+      searchSuggestions.innerHTML = "";
+    }
+  });
 
-    indexSearch(searchInput, searchSuggestions);
+  indexSearch(searchInput, searchSuggestions);
 }
