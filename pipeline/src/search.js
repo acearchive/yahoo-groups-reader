@@ -1,28 +1,11 @@
 import FlexSearch from "flexsearch";
 
-interface MessageFields {
-  id: number;
-  page: number;
-  timestamp: string;
-  user: string;
-  flair: string;
-  year: string;
-  title: string;
-  body: string;
-}
-
-type SearchIndex = FlexSearch.Document<MessageFields, string[]>;
-
 const userIcon = `
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
     <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
     <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
   </svg>
 `;
-
-interface NetworkInformation {
-  saveData?: boolean;
-}
 
 // Whether the client prefers reducing data usage. This uses an experimental
 // browser API that is currently only implemented in Chromium browsers, so we
@@ -35,18 +18,12 @@ interface NetworkInformation {
 // Network Information API: https://wicg.github.io/netinfo/
 // Save Data API: https://wicg.github.io/savedata/
 const preferSaveData = () => {
-  const netInfo: NetworkInformation | undefined = (navigator as any).connection;
-
   // To be extra safe, we should default to `true`, when the API isn't
   // implemented.
-  return netInfo?.saveData ?? true;
+  return navigator?.connection?.saveData ?? true;
 };
 
-const inputFocus = (
-  e: KeyboardEvent,
-  search: HTMLInputElement,
-  suggestions: HTMLElement
-) => {
+const inputFocus = (e, search, suggestions) => {
   if (e.key === "/" && search !== document.activeElement) {
     e.preventDefault();
     search.focus();
@@ -59,7 +36,7 @@ const inputFocus = (
   }
 };
 
-const acceptSuggestion = (suggestions: HTMLElement) => {
+const acceptSuggestion = (suggestions) => {
   while (suggestions.lastChild) {
     suggestions.removeChild(suggestions.lastChild);
   }
@@ -67,7 +44,7 @@ const acceptSuggestion = (suggestions: HTMLElement) => {
   return false;
 };
 
-const hrefForMessage = (id: string, page: number) => {
+const hrefForMessage = (id, page) => {
   if (page === 1) {
     return `/#message-${id}`;
   } else {
@@ -75,7 +52,7 @@ const hrefForMessage = (id: string, page: number) => {
   }
 };
 
-const formatTimestamp = (date: Date) => {
+const formatTimestamp = (date) => {
   return new Intl.DateTimeFormat("en-UK", {
     timeZone: "UTC",
     year: "numeric",
@@ -87,11 +64,7 @@ const formatTimestamp = (date: Date) => {
   }).format(date);
 };
 
-const showResults = async (
-  index: SearchIndex,
-  search: HTMLInputElement,
-  suggestions: HTMLElement
-) => {
+const showResults = async (index, search, suggestions) => {
   const maxResult = 10;
 
   await importIndexOnce(index);
@@ -104,7 +77,7 @@ const showResults = async (
 
   suggestions.innerHTML = "";
 
-  const flatResults: Record<string, MessageFields> = {};
+  const flatResults = {};
 
   results.forEach((result) => {
     result.result.forEach((r) => {
@@ -151,10 +124,10 @@ const showResults = async (
   }
 };
 
-const suggestionFocus = (e: KeyboardEvent, suggestions: HTMLElement) => {
+const suggestionFocus = (e, suggestions) => {
   const focusableSuggestions = suggestions.querySelectorAll("a");
   const focusable = [...focusableSuggestions];
-  const index = focusable.indexOf(document.activeElement as HTMLAnchorElement);
+  const index = focusable.indexOf(document.activeElement);
 
   const hasSuggestions = suggestions.childElementCount > 0;
 
@@ -188,7 +161,7 @@ const indexFileNames = [
   "user.map",
 ];
 
-const importIndex = async (index: SearchIndex) => {
+const importIndex = async (index) => {
   await Promise.all(
     indexFileNames.map((fileName) =>
       fetch(`/search/${fileName}`)
@@ -199,9 +172,9 @@ const importIndex = async (index: SearchIndex) => {
 };
 
 const importIndexOnce = (() => {
-  let importIndexPromise: Promise<void>;
+  let importIndexPromise;
 
-  return async (index: SearchIndex): Promise<void> => {
+  return async (index) => {
     if (importIndexPromise === undefined) {
       importIndexPromise = importIndex(index);
     }
@@ -209,11 +182,8 @@ const importIndexOnce = (() => {
   };
 })();
 
-const indexSearch = async (
-  search: HTMLInputElement,
-  suggestions: HTMLElement
-) => {
-  const index: SearchIndex = new FlexSearch.Document({
+const indexSearch = async (search, suggestions) => {
+  const index = new FlexSearch.Document({
     preset: "memory",
     document: {
       id: "id",
@@ -245,13 +215,11 @@ const indexSearch = async (
   );
 };
 
-const searchForm: Element | undefined =
-  document.querySelector("#message-search") ?? undefined;
+const searchForm = document.querySelector("#message-search") ?? undefined;
 
-const searchInput: HTMLInputElement | undefined =
-  searchForm?.querySelector("#search-input") ?? undefined;
+const searchInput = searchForm?.querySelector("#search-input") ?? undefined;
 
-const searchSuggestions: HTMLElement | undefined =
+const searchSuggestions =
   searchForm?.querySelector("#search-suggestions") ?? undefined;
 
 if (searchInput && searchSuggestions) {
@@ -266,7 +234,7 @@ if (searchInput && searchSuggestions) {
   );
 
   document.addEventListener("click", (event) => {
-    if (!searchSuggestions.contains(event.target as Node | null)) {
+    if (!searchSuggestions.contains(event.target)) {
       searchSuggestions.innerHTML = "";
     }
   });

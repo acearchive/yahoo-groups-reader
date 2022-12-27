@@ -2,7 +2,7 @@ import cleanCss from "gulp-clean-css";
 import purgeCss from "gulp-purgecss";
 import rename from "gulp-rename";
 import htmlmin from "gulp-htmlmin";
-import { createSearchIndex } from "./src/searchIndex.js";
+import { createSearchIndex } from "./searchIndex.js";
 import webpack from "webpack-stream";
 import concat from "gulp-concat";
 import { deleteAsync } from "del";
@@ -50,7 +50,7 @@ const cssPipeline = lazypipe()
   .pipe(dest, "css", { cwd: publicDir })
   .pipe(tap, (file) => outputCss.push(file.path));
 
-const tsSources = ["src/*.ts"];
+const jsSources = ["src/*.js"];
 
 const jsPipeline = lazypipe()
   .pipe(named)
@@ -59,9 +59,6 @@ const jsPipeline = lazypipe()
     devtool: "source-map",
     output: {
       filename: "[name]-[contenthash].min.js",
-    },
-    module: {
-      rules: [{ loader: "ts-loader" }],
     },
   })
   .pipe(dest, "js", { cwd: publicDir })
@@ -94,7 +91,7 @@ function html() {
     )
     .pipe(
       inject(
-        src([...tsSources, "!src/search.ts", "!src/feather.ts"]).pipe(
+        src([...jsSources, "!src/search.js", "!src/feather.js"]).pipe(
           jsPipeline()
         ),
         {
@@ -104,14 +101,14 @@ function html() {
       )
     )
     .pipe(
-      inject(src("src/search.ts").pipe(jsPipeline()), {
+      inject(src("src/search.js").pipe(jsPipeline()), {
         starttag: injectTag("search"),
         removeTags: true,
         transform: injectJsTransform,
       })
     )
     .pipe(
-      inject(src("src/feather.ts").pipe(jsPipeline()), {
+      inject(src("src/feather.js").pipe(jsPipeline()), {
         starttag: injectTag("feather"),
         removeTags: true,
         transform: injectJsTransform,

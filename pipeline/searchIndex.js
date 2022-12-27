@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import FlexSearch from "flexsearch";
-import hasha from "hasha";
+import { sha256 } from "crypto-hash";
 
 const searchFileName = "search.json";
 
@@ -16,10 +16,9 @@ const flexsearchSettings = {
   },
 };
 
-const hashSearchIndex = (searchSettings, searchData) =>
-  hasha.async(JSON.stringify({ settings: searchSettings, data: searchData }), {
-    encoding: "hex",
-    algorithm: "sha256",
+const hashSearchIndex = async (searchSettings, searchData) =>
+  await sha256(JSON.stringify({ settings: searchSettings, data: searchData }), {
+    outputFormat: "hex",
   });
 
 export const createSearchIndex = async (inputDir, outputDir) => {
