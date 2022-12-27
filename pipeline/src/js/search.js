@@ -164,7 +164,9 @@ const indexFileNames = [
 const importIndex = async (index) => {
   await Promise.all(
     indexFileNames.map((fileName) =>
-      fetch(`/search/index/${fileName}`)
+      // We want to use `no-cache` for the index, because these files are
+      // served with strong etags.
+      fetch(`/search/index/${fileName}`, { cache: "no-cache" })
         .then((response) => response.text())
         .then((indexData) => index.import(fileName, JSON.parse(indexData)))
     )
