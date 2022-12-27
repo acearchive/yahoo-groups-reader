@@ -26,12 +26,12 @@ const outputJs = [];
 
 const cssSources = [
   "node_modules/bootstrap/dist/css/bootstrap.css",
-  "src/font.css",
-  "src/variables.css",
-  "src/global.css",
-  "src/components.css",
-  "src/thread.css",
-  "src/search.css",
+  "src/css/font.css",
+  "src/css/variables.css",
+  "src/css/global.css",
+  "src/css/components.css",
+  "src/css/thread.css",
+  "src/css/search.css",
 ];
 
 const cssPipeline = lazypipe()
@@ -45,12 +45,13 @@ const cssPipeline = lazypipe()
   .pipe(cleanCss)
   .pipe(hash, {
     algorithm: "sha256",
+    hashLength: 32,
     format: "<%= name %>-<%= hash %>.min.css",
   })
   .pipe(dest, "css", { cwd: publicDir })
   .pipe(tap, (file) => outputCss.push(file.path));
 
-const jsSources = ["src/*.js"];
+const jsSources = ["src/js/*.js"];
 
 const jsPipeline = lazypipe()
   .pipe(named)
@@ -91,7 +92,7 @@ function html() {
     )
     .pipe(
       inject(
-        src([...jsSources, "!src/search.js", "!src/feather.js"]).pipe(
+        src([...jsSources, "!src/js/search.js", "!src/js/feather.js"]).pipe(
           jsPipeline()
         ),
         {
@@ -101,14 +102,14 @@ function html() {
       )
     )
     .pipe(
-      inject(src("src/search.js").pipe(jsPipeline()), {
+      inject(src("src/js/search.js").pipe(jsPipeline()), {
         starttag: injectTag("search"),
         removeTags: true,
         transform: injectJsTransform,
       })
     )
     .pipe(
-      inject(src("src/feather.js").pipe(jsPipeline()), {
+      inject(src("src/js/feather.js").pipe(jsPipeline()), {
         starttag: injectTag("feather"),
         removeTags: true,
         transform: injectJsTransform,
