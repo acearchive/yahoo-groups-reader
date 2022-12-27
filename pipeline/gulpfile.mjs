@@ -2,7 +2,7 @@ import cleanCss from "gulp-clean-css";
 import purgeCss from "gulp-purgecss";
 import rename from "gulp-rename";
 import htmlmin from "gulp-htmlmin";
-import { createSearchIndex } from "./searchIndex.js";
+import { createSearchIndex, calculateSearchIndexEtag } from "./searchIndex.js";
 import webpack from "webpack-stream";
 import concat from "gulp-concat";
 import { deleteAsync } from "del";
@@ -10,6 +10,7 @@ import named from "vinyl-named";
 import hash from "gulp-hash";
 import path from "path";
 import captureWebsite from "capture-website";
+import handlebars from "gulp-compile-handlebars";
 import inject from "gulp-inject";
 import lazypipe from "lazypipe";
 import tap from "gulp-tap";
@@ -119,8 +120,15 @@ function html() {
     .pipe(dest(publicDir));
 }
 
-function headers() {
-  return src("src/headers").pipe(rename("_headers")).pipe(dest(publicDir));
+async function headers() {
+  return src("src/headers.handlebars")
+    .pipe(
+      handlebars({
+        etag: await calculateSearchIndexEtag(outputDir),
+      })
+    )
+    .pipe(rename("_headers"))
+    .pipe(dest(publicDir));
 }
 
 function robots() {

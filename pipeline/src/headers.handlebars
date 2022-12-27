@@ -19,3 +19,8 @@
 /fonts/*
     ! Cache-Control
     Cache-Control: public, max-age=86400
+
+{{# if etag}}
+/search/index/*
+    ETag: {{{etag}}}
+{{/if}}
