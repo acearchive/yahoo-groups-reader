@@ -3,7 +3,7 @@ import purgeCss from "gulp-purgecss";
 import rename from "gulp-rename";
 import htmlmin from "gulp-htmlmin";
 import del from "delete";
-import buildSearchIndex from "./search.js";
+import { createSearchIndex } from "./src/searchIndex.ts";
 import webpack from "webpack-stream";
 import concat from "gulp-concat";
 import named from "vinyl-named";
@@ -15,12 +15,15 @@ import inject from "gulp-inject";
 import lazypipe from "lazypipe";
 import tap from "gulp-tap";
 import gulp from "gulp";
+import ts from "gulp-typescript";
 
 const { series, parallel, src, dest } = gulp;
 
 const outputDir = process.env.OUTPUT_DIR ?? "../output";
 const publicDir = process.env.PUBLIC_DIR ?? "../public";
 const disallowRobots = process.env.DISALLOW_ROBOTS;
+
+const tsProject = ts.createProject("tsconfig.json");
 
 const outputCss = [];
 const outputJs = [];
@@ -48,10 +51,11 @@ const cssPipeline = lazypipe()
   .pipe(dest, "css", { cwd: publicDir })
   .pipe(tap, (file) => outputCss.push(file.path));
 
-const jsSources = ["src/*.js"];
+const tsSources = ["src/*.ts"];
 
-const jsPipeline = lazypipe()
+const tsPipeline = lazypipe()
   .pipe(named)
+  .pipe(tsProject())
   .pipe(webpack, {
     mode: "production",
     devtool: "source-map",
@@ -89,8 +93,8 @@ function html() {
     )
     .pipe(
       inject(
-        src([...jsSources, "!src/search.js", "!src/feather.js"]).pipe(
-          jsPipeline()
+        src([...tsSources, "!src/search.ts", "!src/feather.ts"]).pipe(
+          tsPipeline()
         ),
         {
           transform: injectJsTransform,
@@ -99,14 +103,14 @@ function html() {
       )
     )
     .pipe(
-      inject(src("src/search.js").pipe(jsPipeline()), {
+      inject(src("src/search.ts").pipe(tsPipeline()), {
         starttag: injectTag("search"),
         removeTags: true,
         transform: injectJsTransform,
       })
     )
     .pipe(
-      inject(src("src/feather.js").pipe(jsPipeline()), {
+      inject(src("src/feather.ts").pipe(tsPipeline()), {
         starttag: injectTag("feather"),
         removeTags: true,
         transform: injectJsTransform,
@@ -154,7 +158,7 @@ function cleanPublic() {
 }
 
 function searchIndex() {
-  return buildSearchIndex(outputDir, publicDir);
+  return createSearchIndex(outputDir, publicDir);
 }
 
 function captureScreenshot() {

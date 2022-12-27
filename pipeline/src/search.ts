@@ -1,4 +1,5 @@
 import FlexSearch from "flexsearch";
+import { MessageFields, SearchIndex } from "./searchIndex";
 
 const userIcon = `
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -7,7 +8,33 @@ const userIcon = `
   </svg>
 `;
 
-function inputFocus(e, search, suggestions) {
+interface NetworkInformation {
+  saveData?: boolean;
+}
+
+// Whether the client prefers reducing data usage. This uses an experimental
+// browser API that is currently only implemented in Chromium browsers, so we
+// cannot rely on it always being implemented.
+//
+// The Network Information API as a whole seems to have been largely abandoned,
+// but the `saveData` property in particular seems to be seeing more recent
+// support as part of the Save Data API.
+//
+// Network Information API: https://wicg.github.io/netinfo/
+// Save Data API: https://wicg.github.io/savedata/
+const preferSaveData = () => {
+  const netInfo: NetworkInformation | undefined = (navigator as any).connection;
+
+  // To be extra safe, we should default to `true`, when the API isn't
+  // implemented.
+  return netInfo?.saveData ?? true;
+};
+
+const inputFocus = (
+  e: KeyboardEvent,
+  search: HTMLInputElement,
+  suggestions: HTMLElement
+) => {
   if (e.key === "/" && search !== document.activeElement) {
     e.preventDefault();
     search.focus();
@@ -18,25 +45,25 @@ function inputFocus(e, search, suggestions) {
     search.blur();
     suggestions.innerHTML = "";
   }
-}
+};
 
-function acceptSuggestion(suggestions) {
+const acceptSuggestion = (suggestions: HTMLElement) => {
   while (suggestions.lastChild) {
     suggestions.removeChild(suggestions.lastChild);
   }
 
   return false;
-}
+};
 
-function hrefForMessage(id, page) {
+const hrefForMessage = (id: string, page: number) => {
   if (page === 1) {
     return `/#message-${id}`;
   } else {
     return `/${page}/#message-${id}`;
   }
-}
+};
 
-function formatTimestamp(date) {
+const formatTimestamp = (date: Date) => {
   return new Intl.DateTimeFormat("en-UK", {
     timeZone: "UTC",
     year: "numeric",
@@ -46,12 +73,16 @@ function formatTimestamp(date) {
     minute: "numeric",
     timeZoneName: "short",
   }).format(date);
-}
+};
 
-async function showResults(index, search, suggestions) {
-  const maxResult = 5;
+const showResults = async (
+  index: SearchIndex,
+  search: HTMLInputElement,
+  suggestions: HTMLElement
+) => {
+  const maxResult = 10;
 
-  await importIndexOnce();
+  await importIndexOnce(index);
 
   const value = search.value;
   const results = await index.searchAsync(value, {
@@ -61,10 +92,11 @@ async function showResults(index, search, suggestions) {
 
   suggestions.innerHTML = "";
 
-  const flatResults = {};
+  const flatResults: Record<string, MessageFields> = {};
+
   results.forEach((result) => {
     result.result.forEach((r) => {
-      flatResults[hrefForMessage(r.doc.id, r.doc.page)] = r.doc;
+      flatResults[hrefForMessage(r.doc.id.toString(), r.doc.page)] = r.doc;
     });
   });
 
@@ -86,28 +118,31 @@ async function showResults(index, search, suggestions) {
 
     entry
       .querySelector(".suggestion-user")
-      .appendChild(document.createTextNode(doc.user));
+      ?.appendChild(document.createTextNode(doc.user));
+
     entry
       .querySelector(".suggestion-timestamp")
-      .appendChild(
+      ?.appendChild(
         document.createTextNode(formatTimestamp(new Date(doc.timestamp)))
       );
+
     entry
       .querySelector(".suggestion-title")
-      .appendChild(document.createTextNode(doc.title));
+      ?.appendChild(document.createTextNode(doc.title));
+
     entry
       .querySelector(".suggestion-text")
-      .appendChild(document.createTextNode(doc.body));
+      ?.appendChild(document.createTextNode(doc.body));
 
     suggestions.appendChild(entry);
     if (suggestions.childElementCount === maxResult) break;
   }
-}
+};
 
-function suggestionFocus(e, suggestions) {
+const suggestionFocus = (e: KeyboardEvent, suggestions: HTMLElement) => {
   const focusableSuggestions = suggestions.querySelectorAll("a");
   const focusable = [...focusableSuggestions];
-  const index = focusable.indexOf(document.activeElement);
+  const index = focusable.indexOf(document.activeElement as HTMLAnchorElement);
 
   const hasSuggestions = suggestions.childElementCount > 0;
 
@@ -122,7 +157,7 @@ function suggestionFocus(e, suggestions) {
     nextIndex = index + 1 < focusable.length ? index + 1 : index;
     focusableSuggestions[nextIndex].focus();
   }
-}
+};
 
 const indexFileNames = [
   "reg",
@@ -141,19 +176,20 @@ const indexFileNames = [
   "user.map",
 ];
 
-async function importIndex(index) {
+const importIndex = async (index: SearchIndex) => {
   await Promise.all(
     indexFileNames.map((fileName) =>
       fetch(`/search/${fileName}`)
         .then((response) => response.text())
-        .then((indexData) => index.import(fileName, indexData))
+        .then((indexData) => index.import(fileName, JSON.parse(indexData)))
     )
   );
-}
+};
 
 const importIndexOnce = (() => {
-  let importIndexPromise;
-  return async (index) => {
+  let importIndexPromise: Promise<void>;
+
+  return async (index: SearchIndex): Promise<void> => {
     if (importIndexPromise === undefined) {
       importIndexPromise = importIndex(index);
     }
@@ -161,8 +197,11 @@ const importIndexOnce = (() => {
   };
 })();
 
-function indexSearch(search, suggestions) {
-  const index = new FlexSearch.Document({
+const indexSearch = async (
+  search: HTMLInputElement,
+  suggestions: HTMLElement
+) => {
+  const index: SearchIndex = new FlexSearch.Document({
     preset: "memory",
     document: {
       id: "id",
@@ -170,6 +209,12 @@ function indexSearch(search, suggestions) {
       index: ["user", "flair", "year", "title", "body"],
     },
   });
+
+  // Download and import the search index eagerly instead of lazily for a
+  // better experience when the user isn't trying to save data.
+  if (!preferSaveData()) {
+    await importIndexOnce(index);
+  }
 
   search.addEventListener(
     "focus",
@@ -186,22 +231,30 @@ function indexSearch(search, suggestions) {
     () => acceptSuggestion(suggestions),
     true
   );
-}
+};
 
-const searchForm = document.querySelector("#message-search");
-const searchInput = searchForm?.querySelector("#search-input");
-const searchSuggestions = searchForm?.querySelector("#search-suggestions");
+const searchForm: Element | undefined =
+  document.querySelector("#message-search") ?? undefined;
+
+const searchInput: HTMLInputElement | undefined =
+  searchForm?.querySelector("#search-input") ?? undefined;
+
+const searchSuggestions: HTMLElement | undefined =
+  searchForm?.querySelector("#search-suggestions") ?? undefined;
 
 if (searchInput && searchSuggestions) {
-  searchForm.addEventListener("submit", (e) => e.preventDefault());
+  searchForm?.addEventListener("submit", (e) => e.preventDefault());
+
   document.addEventListener("keydown", (e) =>
     inputFocus(e, searchInput, searchSuggestions)
   );
+
   document.addEventListener("keydown", (e) =>
     suggestionFocus(e, searchSuggestions)
   );
+
   document.addEventListener("click", (event) => {
-    if (!searchSuggestions.contains(event.target)) {
+    if (!searchSuggestions.contains(event.target as Node | null)) {
       searchSuggestions.innerHTML = "";
     }
   });
