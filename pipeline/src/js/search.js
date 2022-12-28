@@ -117,7 +117,7 @@ const showResults = async (index, search, suggestions) => {
 
     entry
       .querySelector(".suggestion-text")
-      ?.appendChild(document.createTextNode(doc.body));
+      ?.appendChild(document.createTextNode(doc.summary));
 
     suggestions.appendChild(entry);
     if (suggestions.childElementCount === maxResult) break;
@@ -159,6 +159,9 @@ const indexFileNames = [
   "user.cfg",
   "user.ctx",
   "user.map",
+  "year.cfg",
+  "year.ctx",
+  "year.map",
 ];
 
 const importIndex = async (index) => {
@@ -189,7 +192,7 @@ const indexSearch = async (search, suggestions) => {
     preset: "memory",
     document: {
       id: "id",
-      store: ["id", "page", "timestamp", "user", "title", "body"],
+      store: ["id", "page", "timestamp", "user", "title", "summary"],
       index: ["user", "flair", "year", "title", "body"],
     },
   });

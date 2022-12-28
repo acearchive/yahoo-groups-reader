@@ -10,7 +10,7 @@ const searchSettings = {
   preset: "memory",
   document: {
     id: "id",
-    store: ["id", "page", "timestamp", "user", "title", "body"],
+    store: ["id", "page", "timestamp", "user", "title", "summary"],
     index: ["user", "flair", "year", "title", "body"],
   },
 };

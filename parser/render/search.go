@@ -13,6 +13,12 @@ import (
 
 const searchFileName = "search.json"
 
+// The number of runes to truncate the message summaries in the search index
+// to. This should roughly correspond to how much of the message we can
+// feasibly display in the UI, but with some buffer room so that the actual
+// truncation happens in CSS.
+const messageSummaryTruncateLen = 400
+
 type MessageSearchFields struct {
 	Index      int    `json:"id"`
 	PageNumber int    `json:"page"`
@@ -22,6 +28,7 @@ type MessageSearchFields struct {
 	Year       string `json:"year"`
 	Title      string `json:"title"`
 	Body       string `json:"body"`
+	Summary    string `json:"summary"`
 }
 
 func pageNumberOfMessage(index, pageSize int) int {
@@ -53,12 +60,31 @@ func tokensToSearchText(tokens []body.Token) string {
 	return builder.String()
 }
 
+func truncateString(text string, length int) string {
+	if length >= len(text) {
+		return text
+	} else {
+		return string([]rune(text)[:length])
+	}
+}
+
+// The reason for truncating the message summary at build time is to reduce the
+// size of the search index we have to send to clients, which can be quite
+// large for large data sets. We truncate it slightly larger than necessary so
+// that the final truncation happens in CSS and we don't have to worry about
+// splitting on word boundaries.
+func truncateMessageSummary(text string) string {
+	return truncateString(text, messageSummaryTruncateLen)
+}
+
 func buildSearchFields(thread parse.MessageThread, config OutputConfig) []MessageSearchFields {
 	fields := make([]MessageSearchFields, 0, len(thread))
 
 	sortedMessages, _ := thread.SortedByDate()
 
 	for i, message := range sortedMessages {
+		messageBody := tokensToSearchText(message.Body.Tokens)
+
 		field := MessageSearchFields{
 			Index:      i + 1,
 			PageNumber: pageNumberOfMessage(i+1, config.PageSize),
@@ -66,7 +92,8 @@ func buildSearchFields(thread parse.MessageThread, config OutputConfig) []Messag
 			User:       message.User,
 			Flair:      message.Flair,
 			Year:       strconv.Itoa(message.Date.Year()),
-			Body:       tokensToSearchText(message.Body.Tokens),
+			Body:       messageBody,
+			Summary:    truncateMessageSummary(messageBody),
 		}
 
 		if message.Title != nil {
