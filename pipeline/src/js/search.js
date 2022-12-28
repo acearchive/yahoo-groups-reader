@@ -18,9 +18,10 @@ const userIcon = `
 // Network Information API: https://wicg.github.io/netinfo/
 // Save Data API: https://wicg.github.io/savedata/
 const preferSaveData = () => {
-  // To be extra safe, we should default to `true`, when the API isn't
-  // implemented.
-  return navigator?.connection?.saveData ?? true;
+  // We need to have a default for when the API isn't implemented. Downloading
+  // the search index eagerly should be a sane default since we serve it with a
+  // strong etag and it should stay in the browser cache for a bit.
+  return navigator?.connection?.saveData ?? false;
 };
 
 const inputFocus = (e, search, suggestions) => {
