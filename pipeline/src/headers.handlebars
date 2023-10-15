@@ -34,6 +34,16 @@
     Cache-Control: public, max-age=86400
 
 #
+# The search index is just JSON files, and serving it with that content type
+# will make CDNs (like Cloudflare) more likely to compress it.
+#
+# https://developers.cloudflare.com/speed/optimization/content/brotli/content-compression/
+#
+
+/search/index/*
+    Content-Type: application/json
+
+#
 # The search index files can be large, so we serve them with strong etags for
 # efficient caching.
 #
